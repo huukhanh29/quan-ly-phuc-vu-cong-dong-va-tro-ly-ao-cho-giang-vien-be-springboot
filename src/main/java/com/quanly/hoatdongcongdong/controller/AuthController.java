@@ -11,6 +11,7 @@ import com.quanly.hoatdongcongdong.payload.response.TokenRefreshResponse;
 import com.quanly.hoatdongcongdong.repository.TaiKhoanRepository;
 import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
 import com.quanly.hoatdongcongdong.sercurity.services.RefreshTokenService;
+import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
 import com.quanly.hoatdongcongdong.sercurity.services.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,47 +31,48 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 
-@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials = "true")
 @RestController
 @RequestMapping("/tai-khoan")
 public class AuthController {
   @Autowired
-  AuthenticationManager authenticationManager;
+  private AuthenticationManager authenticationManager;
 
   @Autowired
-  TaiKhoanRepository taiKhoanRepository;
+  private TaiKhoanService taiKhoanService;
 
   @Autowired
-  PasswordEncoder encoder;
-  @Autowired
-  RefreshTokenService refreshTokenService;
+  private PasswordEncoder encoder;
 
   @Autowired
-  JwtUtils jwtUtils;
+  private RefreshTokenService refreshTokenService;
+
+  @Autowired
+  private JwtUtils jwtUtils;
 
   @PostMapping("/dang-nhap")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-    Optional<TaiKhoan> taiKhoan = taiKhoanRepository.findByTenDangNhap(loginRequest.getTaiKhoan());
-    if (!taiKhoanRepository.existsByTenDangNhap(loginRequest.getTaiKhoan())) {
+    String taiKhoan = loginRequest.getTaiKhoan();
+    if (!taiKhoanService.existsByTenDangNhap(taiKhoan)) {
       return new ResponseEntity<>(new MessageResponse("Sai_ten_tai_khoan"), HttpStatus.BAD_REQUEST);
     }
-    if (taiKhoan.get().getTrangthai().equals(TaiKhoan.TrangThai.Khoa)) {
+    if (taiKhoanService.isTaiKhoanKhoa(taiKhoan)) {
       return new ResponseEntity<>(new MessageResponse("Tai_khoan_bi_khoa"), HttpStatus.BAD_REQUEST);
     }
-    //kiểm tra mật khẩu
-    if (!encoder.matches(loginRequest.getMatKhau(), taiKhoan.get().getMatKhau())) {
+
+    // Kiểm tra mật khẩu
+    Optional<TaiKhoan> taiKhoanInfo = taiKhoanService.findByTenDangNhap(taiKhoan);
+    if (!taiKhoanInfo.isPresent() || !taiKhoanService.isMatKhauHopLe(loginRequest.getMatKhau(), taiKhoanInfo.get().getMatKhau())) {
       return new ResponseEntity<>(new MessageResponse("Sai_mat_khau"), HttpStatus.BAD_REQUEST);
     }
 
     Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(loginRequest.getTaiKhoan(), loginRequest.getMatKhau()));
+            new UsernamePasswordAuthenticationToken(loginRequest.getTaiKhoan(), loginRequest.getMatKhau()));
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtUtils.generateJwtToken(authentication);
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
     RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-//    GrantedAuthority authority = userDetails.getAuthority();
-//    String quyen = authority.getAuthority();
     return ResponseEntity.ok(new JwtResponse(jwt, refreshToken.getToken()));
   }
 

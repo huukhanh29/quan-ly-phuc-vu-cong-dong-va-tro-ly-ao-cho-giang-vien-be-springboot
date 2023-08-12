@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Service
 public class RefreshTokenService {
-    @Value("${khanh.app.jwtRefreshExpirationMs}")
+    @Value(" 604800000")
     private Long refreshTokenDurationMs;
 
     @Autowired

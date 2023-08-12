@@ -27,11 +27,11 @@ public class LichSuController {
     @Autowired
     private LichSuRepository lichSuRepository;
 
-    @GetMapping
+    @GetMapping("/{userId}")
     public Page<LichSuResponse> lichSu(@PathVariable Long userId,
                                                @RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "10") int size,
-                                               @RequestParam(defaultValue = "id") String sortBy,
+                                               @RequestParam(defaultValue = "maLichSu") String sortBy,
                                                @RequestParam(defaultValue = "DESC") String sortDir,
                                                @RequestParam(required = false, defaultValue = "") String searchTerm) {
 
@@ -49,7 +49,7 @@ public class LichSuController {
         }
         if (userId != null) {
             spec = spec.and((root, criteriaQuery, criteriaBuilder) -> {
-                return criteriaBuilder.equal(root.get("taiKhoan").get("maTaiKhoan"), userId);
+                return criteriaBuilder.equal(root.get("sinhVien").get("maTaiKhoan"), userId);
             });
         }
 
@@ -58,17 +58,17 @@ public class LichSuController {
         return lichSuEntities.map(LichSuResponse::fromEntity);
     }
 
-    @PostMapping("/luu-lich-su/{maTk}/cau-hoi/{cauHoiId}")
-    public LichSu createUserCauHoi(@PathVariable Long maTk, @PathVariable Long cauHoiId) {
-        LichSu lichSu = new LichSu();
-        SinhVien sinhVien = new SinhVien();
-        sinhVien.setMaTaiKhoan(maTk);
-        lichSu.setSinhVien(sinhVien);
-        CauHoi cauHoi = new CauHoi();
-        cauHoi.setMaCauHoi(cauHoiId);
-        lichSu.setCauHoi(cauHoi);
-        return lichSuRepository.save(lichSu);
-    }
+//    @PostMapping("/luu-lich-su/{maTk}/cau-hoi/{cauHoiId}")
+//    public LichSu createUserCauHoi(@PathVariable Long maTk, @PathVariable Long cauHoiId) {
+//        LichSu lichSu = new LichSu();
+//        SinhVien sinhVien = new SinhVien();
+//        sinhVien.setMaTaiKhoan(maTk);
+//        lichSu.setSinhVien(sinhVien);
+//        CauHoi cauHoi = new CauHoi();
+//        cauHoi.setMaCauHoi(cauHoiId);
+//        lichSu.setCauHoi(cauHoi);
+//        return lichSuRepository.save(lichSu);
+//    }
 
     @GetMapping("/bieu-do-luot-hoi")
     public ResponseEntity<Map<String, Object>> getChart(@RequestParam("year") int year) {

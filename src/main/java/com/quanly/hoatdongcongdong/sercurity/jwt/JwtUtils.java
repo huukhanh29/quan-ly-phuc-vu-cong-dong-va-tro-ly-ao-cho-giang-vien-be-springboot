@@ -25,8 +25,7 @@ public class JwtUtils {
 
     private static final String jwtSecret = "cogangtienlentungngaydetrothanhmotcoderchuyennghiepnheKhanhPro29012001";
 
-    @Value("${khanh.app.jwtExpirationMs}")
-    private int jwtExpirationMs;
+    private static final int jwtExpirationMs = 86400000;
 
     public String generateJwtToken(Authentication authentication) {
 
@@ -54,7 +53,8 @@ public class JwtUtils {
 
     public Authentication getAuthenticationFromUser(TaiKhoan user) {
         UserDetails userDetails = UserDetailsImpl.build(user);
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(userDetails,
+                null, userDetails.getAuthorities());
     }
 
     public static String resolveToken(HttpServletRequest request) {

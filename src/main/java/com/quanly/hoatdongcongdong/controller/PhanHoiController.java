@@ -106,7 +106,7 @@ public class PhanHoiController {
     @DeleteMapping("/xoa/{id}")
     public ResponseEntity<?> deletePhanHoi(@PathVariable(value = "id") Long phanHoiId) {
         PhanHoi phanHoi = phanHoiRepository.findById(phanHoiId)
-                .orElseThrow(() -> new ResourceNotFoundException("PhanHoi", "id", phanHoiId));
+                .orElseThrow(() -> new ResourceNotFoundException("PhanHoi", "maPhanHoi", phanHoiId));
 
         phanHoiRepository.delete(phanHoi);
 

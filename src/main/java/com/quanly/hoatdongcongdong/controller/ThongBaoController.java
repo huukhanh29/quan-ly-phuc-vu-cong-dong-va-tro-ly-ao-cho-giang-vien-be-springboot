@@ -48,7 +48,7 @@ public class ThongBaoController {
             thongBaoRepository.deleteAllByTaiKhoan_MaTaiKhoanAndTrangThai(maTk, ThongBao.TrangThai.DaDoc);
             return ResponseEntity.ok("Đã xóa các thông báo cho người dùng có mã " + maTk);
         } else {
-            return new ResponseEntity(new MessageResponse("KHÔNG TÌM THẤY"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new MessageResponse("KHÔNG TÌM THẤY"), HttpStatus.BAD_REQUEST);
         }
     }
 }
