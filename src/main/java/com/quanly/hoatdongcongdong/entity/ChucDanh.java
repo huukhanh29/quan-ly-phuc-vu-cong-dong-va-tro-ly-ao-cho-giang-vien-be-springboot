@@ -8,10 +8,8 @@ public class ChucDanh {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long maChucDanh;
 
-    @Column(name = "tenChucDanh")
     private String tenChucDanh;
 
-    @Column(name = "gioBatBuoc")
     private int gioBatBuoc;
 
     public ChucDanh() {

@@ -9,8 +9,9 @@ public class GiangVien {
     @Id
     private Long maTaiKhoan;
 
-    @Column(nullable = false)
-    private String chucDanh;
+    @ManyToOne
+    @JoinColumn(name = "maChucDanh")
+    private ChucDanh chucDanh;
 
     @OneToOne
     @JoinColumn(name = "maTaiKhoan", referencedColumnName = "maTaiKhoan", insertable = false, updatable = false)
@@ -20,7 +21,7 @@ public class GiangVien {
     public GiangVien() {
     }
 
-    public GiangVien(Long maTaiKhoan, String chucDanh, TaiKhoan taiKhoan) {
+    public GiangVien(Long maTaiKhoan, ChucDanh chucDanh, TaiKhoan taiKhoan) {
         this.maTaiKhoan = maTaiKhoan;
         this.chucDanh = chucDanh;
         this.taiKhoan = taiKhoan;
@@ -34,11 +35,11 @@ public class GiangVien {
         this.maTaiKhoan = maTaiKhoan;
     }
 
-    public String getChucDanh() {
+    public ChucDanh getChucDanh() {
         return chucDanh;
     }
 
-    public void setChucDanh(String chucDanh) {
+    public void setChucDanh(ChucDanh chucDanh) {
         this.chucDanh = chucDanh;
     }
 
@@ -49,4 +50,5 @@ public class GiangVien {
     public void setTaiKhoan(TaiKhoan taiKhoan) {
         this.taiKhoan = taiKhoan;
     }
+
 }

@@ -3,29 +3,19 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 
-@Entity(name = "refreshtoken")
+@Entity
 public class RefreshToken {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long maToken;
 
     @ManyToOne
     @JoinColumn(name = "maTaiKhoan", referencedColumnName = "maTaiKhoan")
     private TaiKhoan taiKhoan;
-
-    @Column(nullable = false, unique = true)
+    @Id
+    @Column(nullable = false, unique = true, name = "refreshtoken")
     private String token;
 
     @Column(nullable = false, name = "ngayHetHan")
     private Instant expiryDate;
 
-    public long getMaToken() {
-        return maToken;
-    }
-
-    public void setMaToken(long maToken) {
-        this.maToken = maToken;
-    }
 
     public TaiKhoan getTaiKhoan() {
         return taiKhoan;

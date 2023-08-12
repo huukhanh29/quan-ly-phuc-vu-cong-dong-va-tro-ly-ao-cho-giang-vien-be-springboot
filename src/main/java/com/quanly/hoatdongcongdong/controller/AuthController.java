@@ -54,6 +54,9 @@ public class AuthController {
     if (!taiKhoanRepository.existsByTenDangNhap(loginRequest.getTaiKhoan())) {
       return new ResponseEntity<>(new MessageResponse("Sai_ten_tai_khoan"), HttpStatus.BAD_REQUEST);
     }
+    if (taiKhoan.get().getTrangthai().equals(TaiKhoan.TrangThai.Khoa)) {
+      return new ResponseEntity<>(new MessageResponse("Tai_khoan_bi_khoa"), HttpStatus.BAD_REQUEST);
+    }
     //kiểm tra mật khẩu
     if (!encoder.matches(loginRequest.getMatKhau(), taiKhoan.get().getMatKhau())) {
       return new ResponseEntity<>(new MessageResponse("Sai_mat_khau"), HttpStatus.BAD_REQUEST);

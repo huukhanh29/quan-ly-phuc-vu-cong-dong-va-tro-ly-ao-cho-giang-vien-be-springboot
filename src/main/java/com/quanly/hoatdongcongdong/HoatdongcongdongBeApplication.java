@@ -1,21 +1,30 @@
 package com.quanly.hoatdongcongdong;
 
 import com.quanly.hoatdongcongdong.entity.ChucDanh;
+import com.quanly.hoatdongcongdong.entity.SinhVien;
 import com.quanly.hoatdongcongdong.entity.TaiKhoan;
 import com.quanly.hoatdongcongdong.repository.ChucDanhRepository;
+import com.quanly.hoatdongcongdong.repository.SinhVienRepository;
 import com.quanly.hoatdongcongdong.repository.TaiKhoanRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootApplication
 @EnableScheduling
+@EnableTransactionManagement
 public class HoatdongcongdongBeApplication implements CommandLineRunner {
     @Autowired
     private TaiKhoanRepository taiKhoanRepository;
@@ -23,10 +32,15 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private ChucDanhRepository chucDanhRepository;
+    @Autowired
+    private SinhVienRepository sinhVienRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
     public static void main(String[] args) {
         SpringApplication.run(HoatdongcongdongBeApplication.class, args);
     }
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         if (!taiKhoanRepository.existsByQuyen(TaiKhoan.Quyen.QuanTriVien)) {
             // Tạo tài khoản mới với quyền là ADMIN
@@ -36,8 +50,24 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
             adminAccount.setMatKhau(passwordEncoder.encode("admin123"));
             adminAccount.setEmail("admin@example.com");
             adminAccount.setQuyen(TaiKhoan.Quyen.QuanTriVien);
-            adminAccount.setTrangthai(1);
+            adminAccount.setTrangthai(TaiKhoan.TrangThai.Mo);
             taiKhoanRepository.save(adminAccount);
+        }
+        if (!taiKhoanRepository.existsByQuyen(TaiKhoan.Quyen.SinhVien)) {
+            // Tạo tài khoản mới với quyền là SinhVien
+            TaiKhoan taiKhoan = new TaiKhoan();
+            taiKhoan.setTenDayDu("Hữu Khanh");
+            taiKhoan.setTenDangNhap("khanh");
+            taiKhoan.setMatKhau(passwordEncoder.encode("khanh123"));
+            taiKhoan.setEmail("khanh@example.com");
+            taiKhoan.setQuyen(TaiKhoan.Quyen.SinhVien);
+            taiKhoan.setTrangthai(TaiKhoan.TrangThai.Mo);
+            TaiKhoan mergedTaiKhoan = entityManager.merge(taiKhoan);
+            SinhVien sinhVien = new SinhVien();
+            sinhVien.setChuyenNganh("IT");
+            sinhVien.setNamNhapHoc(Year.of(2019));
+            sinhVien.setTaiKhoan(mergedTaiKhoan);
+            sinhVienRepository.save(sinhVien);
         }
         if (chucDanhRepository.count() == 0) {
             List<ChucDanh> chucDanhs = new ArrayList<>();

@@ -28,7 +28,7 @@ public class TaiKhoan {
     @Column(nullable = false)
     private Quyen quyen;
     @Column(nullable = true)
-    private String anhdaidien ;
+    private String anhdaidien;
     @Column(nullable = false)
     private String tenDayDu;
 
@@ -40,25 +40,22 @@ public class TaiKhoan {
     private GioiTinh gioiTinh;
 
     private String diaChi;
-    @Column(nullable = false)
-    private int trangthai;
+    @Enumerated(EnumType.STRING)
+    private TrangThai trangthai;
     @CreationTimestamp
     @Column()
     private LocalDateTime ngayTao;
     @UpdateTimestamp
     @Column()
     private LocalDateTime ngayCapNhat;
-    @ManyToOne
-    @JoinColumn(name = "maChucDanh")
-    private ChucDanh chucDanh;
+
     public TaiKhoan() {
     }
 
     public TaiKhoan(Long maTaiKhoan, String tenDangNhap, String matKhau,
                     String email, Quyen quyen, String anhdaidien, String tenDayDu,
                     String soDienThoai, Date ngaySinh, GioiTinh gioiTinh, String diaChi,
-                    int trangthai, LocalDateTime ngayTao, LocalDateTime ngayCapNhat,
-                    ChucDanh chucDanh) {
+                    TrangThai trangthai, LocalDateTime ngayTao, LocalDateTime ngayCapNhat) {
         this.maTaiKhoan = maTaiKhoan;
         this.tenDangNhap = tenDangNhap;
         this.matKhau = matKhau;
@@ -73,11 +70,11 @@ public class TaiKhoan {
         this.trangthai = trangthai;
         this.ngayTao = ngayTao;
         this.ngayCapNhat = ngayCapNhat;
-        this.chucDanh =chucDanh;
     }
+
     public TaiKhoan(Long maTaiKhoan, String tenDangNhap, String matKhau,
                     String email, Quyen quyen, String anhdaidien, String tenDayDu,
-                    String soDienThoai, GioiTinh gioiTinh, int trangthai) {
+                    String soDienThoai, GioiTinh gioiTinh, TrangThai trangthai) {
         this.maTaiKhoan = maTaiKhoan;
         this.tenDangNhap = tenDangNhap;
         this.matKhau = matKhau;
@@ -90,14 +87,6 @@ public class TaiKhoan {
         this.trangthai = trangthai;
     }
 
-    public ChucDanh getChucDanh() {
-        return chucDanh;
-    }
-
-    public void setChucDanh(ChucDanh chucDanh) {
-        this.chucDanh = chucDanh;
-    }
-
     public String getAnhdaidien() {
         return anhdaidien;
     }
@@ -106,11 +95,11 @@ public class TaiKhoan {
         this.anhdaidien = anhdaidien;
     }
 
-    public int getTrangthai() {
+    public TrangThai getTrangthai() {
         return trangthai;
     }
 
-    public void setTrangthai(int trangthai) {
+    public void setTrangthai(TrangThai trangthai) {
         this.trangthai = trangthai;
     }
 
@@ -209,10 +198,16 @@ public class TaiKhoan {
     public void setDiaChi(String diaChi) {
         this.diaChi = diaChi;
     }
+
     public enum Quyen {
         QuanTriVien, GiangVien, SinhVien
     }
+
     public enum GioiTinh {
-        Nam, Nữ, Khác
+        Nam, Nu, Khac
+    }
+
+    public enum TrangThai {
+        Mo, Khoa
     }
 }

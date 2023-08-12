@@ -1,5 +1,6 @@
 package com.quanly.hoatdongcongdong.sercurity;
 
+import com.quanly.hoatdongcongdong.entity.TaiKhoan;
 import com.quanly.hoatdongcongdong.sercurity.jwt.AuthEntryPointJwt;
 import com.quanly.hoatdongcongdong.sercurity.jwt.AuthTokenFilter;
 import com.quanly.hoatdongcongdong.sercurity.services.UserDetailsServiceImpl;
@@ -64,7 +65,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/tai-khoan/**").permitAll()
-                                .requestMatchers("/hoso/**").hasAnyAuthority("ADMIN","USER")
+                                .requestMatchers("/cau-hoi/**").hasAnyAuthority("QuanTriVien","SinhVien")
                                 .anyRequest().authenticated()
                 )
                         .cors(Customizer.withDefaults());
