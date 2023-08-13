@@ -1,9 +1,11 @@
 package com.quanly.hoatdongcongdong;
 
 import com.quanly.hoatdongcongdong.entity.ChucDanh;
+import com.quanly.hoatdongcongdong.entity.GiangVien;
 import com.quanly.hoatdongcongdong.entity.SinhVien;
 import com.quanly.hoatdongcongdong.entity.TaiKhoan;
 import com.quanly.hoatdongcongdong.repository.ChucDanhRepository;
+import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
 import com.quanly.hoatdongcongdong.repository.SinhVienRepository;
 import com.quanly.hoatdongcongdong.repository.TaiKhoanRepository;
 import jakarta.persistence.EntityManager;
@@ -34,6 +36,9 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
     private ChucDanhRepository chucDanhRepository;
     @Autowired
     private SinhVienRepository sinhVienRepository;
+    @Autowired
+    private GiangVienRepository giangVienRepository;
+
     @PersistenceContext
     private EntityManager entityManager;
     public static void main(String[] args) {
@@ -42,33 +47,6 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        if (!taiKhoanRepository.existsByQuyen(TaiKhoan.Quyen.QuanTriVien)) {
-            // Tạo tài khoản mới với quyền là ADMIN
-            TaiKhoan adminAccount = new TaiKhoan();
-            adminAccount.setTenDayDu("Admin");
-            adminAccount.setTenDangNhap("admin");
-            adminAccount.setMatKhau(passwordEncoder.encode("admin123"));
-            adminAccount.setEmail("admin@example.com");
-            adminAccount.setQuyen(TaiKhoan.Quyen.QuanTriVien);
-            adminAccount.setTrangthai(TaiKhoan.TrangThai.Mo);
-            taiKhoanRepository.save(adminAccount);
-        }
-        if (!taiKhoanRepository.existsByQuyen(TaiKhoan.Quyen.SinhVien)) {
-            // Tạo tài khoản mới với quyền là SinhVien
-            TaiKhoan taiKhoan = new TaiKhoan();
-            taiKhoan.setTenDayDu("Hữu Khanh");
-            taiKhoan.setTenDangNhap("khanh");
-            taiKhoan.setMatKhau(passwordEncoder.encode("khanh123"));
-            taiKhoan.setEmail("khanh@example.com");
-            taiKhoan.setQuyen(TaiKhoan.Quyen.SinhVien);
-            taiKhoan.setTrangthai(TaiKhoan.TrangThai.Mo);
-            TaiKhoan mergedTaiKhoan = entityManager.merge(taiKhoan);
-            SinhVien sinhVien = new SinhVien();
-            sinhVien.setChuyenNganh("IT");
-            sinhVien.setNamNhapHoc(Year.of(2019));
-            sinhVien.setTaiKhoan(mergedTaiKhoan);
-            sinhVienRepository.save(sinhVien);
-        }
         if (chucDanhRepository.count() == 0) {
             List<ChucDanh> chucDanhs = new ArrayList<>();
 
@@ -85,5 +63,49 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
 
             chucDanhRepository.saveAll(chucDanhs);
         }
+        if (!taiKhoanRepository.existsByQuyen(TaiKhoan.Quyen.QuanTriVien)) {
+            // Tạo tài khoản mới với quyền là ADMIN
+            TaiKhoan adminAccount = new TaiKhoan();
+            adminAccount.setTenDayDu("Admin");
+            adminAccount.setTenDangNhap("admin");
+            adminAccount.setMatKhau(passwordEncoder.encode("admin123"));
+            adminAccount.setEmail("admin@example.com");
+            adminAccount.setQuyen(TaiKhoan.Quyen.QuanTriVien);
+            adminAccount.setTrangthai(TaiKhoan.TrangThai.Mo);
+            taiKhoanRepository.save(adminAccount);
+        }
+        if (!taiKhoanRepository.existsByQuyen(TaiKhoan.Quyen.SinhVien)) {
+            // Tạo tài khoản mới với quyền là SinhVien
+            TaiKhoan taiKhoanSv = new TaiKhoan();
+            taiKhoanSv.setTenDayDu("Hữu Khanh");
+            taiKhoanSv.setTenDangNhap("khanh");
+            taiKhoanSv.setMatKhau(passwordEncoder.encode("khanh123"));
+            taiKhoanSv.setEmail("khanh@example.com");
+            taiKhoanSv.setQuyen(TaiKhoan.Quyen.SinhVien);
+            taiKhoanSv.setTrangthai(TaiKhoan.TrangThai.Mo);
+            TaiKhoan mergedTaiKhoan = entityManager.merge(taiKhoanSv);
+            SinhVien sinhVien = new SinhVien();
+            sinhVien.setChuyenNganh("IT");
+            sinhVien.setNamNhapHoc(Year.of(2019));
+            sinhVien.setTaiKhoan(mergedTaiKhoan);
+            sinhVienRepository.save(sinhVien);
+        }
+        if (!taiKhoanRepository.existsByQuyen(TaiKhoan.Quyen.GiangVien)) {
+            // Tạo tài khoản mới với quyền là GiangVien
+            TaiKhoan taiKhoanGv = new TaiKhoan();
+            taiKhoanGv.setTenDayDu("La Chinh");
+            taiKhoanGv.setTenDangNhap("chinh");
+            taiKhoanGv.setMatKhau(passwordEncoder.encode("chinh123"));
+            taiKhoanGv.setEmail("chinh@example.com");
+            taiKhoanGv.setQuyen(TaiKhoan.Quyen.GiangVien);
+            taiKhoanGv.setTrangthai(TaiKhoan.TrangThai.Mo);
+            TaiKhoan mergedTaiKhoan = entityManager.merge(taiKhoanGv);
+            GiangVien giangVien = new GiangVien();
+            Optional<ChucDanh> chucDanhgv = chucDanhRepository.findById(Long.valueOf(1));
+            giangVien.setChucDanh(chucDanhgv.get());
+            giangVien.setTaiKhoan(mergedTaiKhoan);
+            giangVienRepository.save(giangVien);
+        }
+
     }
 }
