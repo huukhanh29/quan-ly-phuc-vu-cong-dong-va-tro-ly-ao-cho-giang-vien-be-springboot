@@ -1,13 +1,7 @@
 package com.quanly.hoatdongcongdong;
 
-import com.quanly.hoatdongcongdong.entity.ChucDanh;
-import com.quanly.hoatdongcongdong.entity.GiangVien;
-import com.quanly.hoatdongcongdong.entity.SinhVien;
-import com.quanly.hoatdongcongdong.entity.TaiKhoan;
-import com.quanly.hoatdongcongdong.repository.ChucDanhRepository;
-import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
-import com.quanly.hoatdongcongdong.repository.SinhVienRepository;
-import com.quanly.hoatdongcongdong.repository.TaiKhoanRepository;
+import com.quanly.hoatdongcongdong.entity.*;
+import com.quanly.hoatdongcongdong.repository.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +32,8 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
     private SinhVienRepository sinhVienRepository;
     @Autowired
     private GiangVienRepository giangVienRepository;
+    @Autowired
+    private LoaiHoatDongRepository loaiHoatDongRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -63,6 +59,21 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
 
             chucDanhRepository.saveAll(chucDanhs);
         }
+        if (loaiHoatDongRepository.count() == 0) {
+            List<LoaiHoatDong> loaiHoatDongs = new ArrayList<>();
+
+            loaiHoatDongs.add(new LoaiHoatDong("Văn hóa và nghệ thuật", "Triển lãm nghệ thuật, diễn hát, biểu diễn âm nhạc, sự kiện văn hóa dân gian, v.v."));
+            loaiHoatDongs.add(new LoaiHoatDong("Thể thao và giải trí", "Giải bóng đá cộng đồng, cuộc thi thể thao, chương trình thể dục ngoài trời, v.v."));
+            loaiHoatDongs.add(new LoaiHoatDong("Giáo dục và tư vấn", "Buổi thảo luận về các vấn đề xã hội, lớp học hướng nghiệp, tư vấn về sức khỏe tâm thần, v.v."));
+            loaiHoatDongs.add(new LoaiHoatDong("Bảo vệ môi trường", "Dọn dẹp môi trường, thảo luận về biện pháp bảo vệ môi trường, chương trình tái chế, v.v."));
+            loaiHoatDongs.add(new LoaiHoatDong("Xã hội và từ thiện", "Quyên góp thực phẩm cho người nghèo, chăm sóc người cao tuổi, tặng quà cho trẻ em khó khăn, v.v."));
+            loaiHoatDongs.add(new LoaiHoatDong("Kiến thức và kỹ năng", "Khóa học, buổi học chia sẻ kinh nghiệm, hướng dẫn kỹ năng làm việc, v.v."));
+            loaiHoatDongs.add(new LoaiHoatDong("Kết nối cộng đồng", "Hội thảo, họp mặt cộng đồng, cuộc thi giao tiếp, chương trình networking, v.v."));
+            loaiHoatDongs.add(new LoaiHoatDong("Tôn giáo và tâm linh", "Buổi lễ, buổi thảo luận về tôn giáo, chương trình thiền và yoga, v.v."));
+            loaiHoatDongs.add(new LoaiHoatDong("Vui chơi và giải trí", "Cuộc thi trò chơi, chương trình vui nhộn, ngày hội gia đình, v.v."));
+
+            loaiHoatDongRepository.saveAll(loaiHoatDongs);
+        }
         if (!taiKhoanRepository.existsByQuyen(TaiKhoan.Quyen.QuanTriVien)) {
             // Tạo tài khoản mới với quyền là ADMIN
             TaiKhoan adminAccount = new TaiKhoan();
@@ -72,6 +83,7 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
             adminAccount.setEmail("admin@example.com");
             adminAccount.setQuyen(TaiKhoan.Quyen.QuanTriVien);
             adminAccount.setTrangthai(TaiKhoan.TrangThai.Mo);
+            adminAccount.setGioiTinh(TaiKhoan.GioiTinh.Nam);
             taiKhoanRepository.save(adminAccount);
         }
         if (!taiKhoanRepository.existsByQuyen(TaiKhoan.Quyen.SinhVien)) {
@@ -83,9 +95,9 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
             taiKhoanSv.setEmail("khanh@example.com");
             taiKhoanSv.setQuyen(TaiKhoan.Quyen.SinhVien);
             taiKhoanSv.setTrangthai(TaiKhoan.TrangThai.Mo);
+            taiKhoanSv.setGioiTinh(TaiKhoan.GioiTinh.Nam);
             TaiKhoan mergedTaiKhoan = entityManager.merge(taiKhoanSv);
             SinhVien sinhVien = new SinhVien();
-            sinhVien.setChuyenNganh("IT");
             sinhVien.setNamNhapHoc(Year.of(2019));
             sinhVien.setTaiKhoan(mergedTaiKhoan);
             sinhVienRepository.save(sinhVien);
@@ -99,6 +111,7 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
             taiKhoanGv.setEmail("chinh@example.com");
             taiKhoanGv.setQuyen(TaiKhoan.Quyen.GiangVien);
             taiKhoanGv.setTrangthai(TaiKhoan.TrangThai.Mo);
+            taiKhoanGv.setGioiTinh(TaiKhoan.GioiTinh.Nu);
             TaiKhoan mergedTaiKhoan = entityManager.merge(taiKhoanGv);
             GiangVien giangVien = new GiangVien();
             Optional<ChucDanh> chucDanhgv = chucDanhRepository.findById(Long.valueOf(1));
@@ -106,6 +119,5 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
             giangVien.setTaiKhoan(mergedTaiKhoan);
             giangVienRepository.save(giangVien);
         }
-
     }
 }

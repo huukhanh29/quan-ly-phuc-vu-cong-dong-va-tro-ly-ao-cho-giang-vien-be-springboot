@@ -5,6 +5,8 @@ import com.quanly.hoatdongcongdong.entity.SinhVien;
 import com.quanly.hoatdongcongdong.entity.TaiKhoan;
 import com.quanly.hoatdongcongdong.payload.response.LichSuResponse;
 import com.quanly.hoatdongcongdong.repository.LichSuRepository;
+import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,15 +28,16 @@ import java.util.stream.Collectors;
 public class LichSuController {
     @Autowired
     private LichSuRepository lichSuRepository;
-
-    @GetMapping("/{userId}")
-    public Page<LichSuResponse> lichSu(@PathVariable Long userId,
-                                               @RequestParam(defaultValue = "0") int page,
-                                               @RequestParam(defaultValue = "10") int size,
-                                               @RequestParam(defaultValue = "maLichSu") String sortBy,
-                                               @RequestParam(defaultValue = "DESC") String sortDir,
-                                               @RequestParam(required = false, defaultValue = "") String searchTerm) {
-
+    @Autowired
+    private TaiKhoanService taiKhoanService;
+    @GetMapping
+    public Page<LichSuResponse> lichSu(HttpServletRequest httpServletRequest,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "10") int size,
+                                       @RequestParam(defaultValue = "maLichSu") String sortBy,
+                                       @RequestParam(defaultValue = "DESC") String sortDir,
+                                       @RequestParam(required = false, defaultValue = "") String searchTerm) {
+        Long userId =  taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
         Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
         Pageable paging = PageRequest.of(page, size, sort);
         Specification<LichSu> spec = Specification.where(null);

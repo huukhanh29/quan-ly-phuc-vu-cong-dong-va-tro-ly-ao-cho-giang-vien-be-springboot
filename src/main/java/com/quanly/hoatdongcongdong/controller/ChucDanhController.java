@@ -3,6 +3,8 @@ import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.*;
+import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +24,18 @@ public class ChucDanhController {
     private ChucDanhRepository chucDanhRepository;
     @Autowired
     private GioTichLuyRepository gioTichLuyRepository;
+    @Autowired
+    private TaiKhoanService taiKhoanService;
     @GetMapping("/lay-danh-sach")
     public ResponseEntity<?> getAllChucDanhs() {
         List<ChucDanh> chucDanhs = chucDanhRepository.findAll();
         return ResponseEntity.ok(chucDanhs);
     }
 
-    @PutMapping("/cap-nhat/{maTaiKhoan}/{maChucDanh}")
-    public ResponseEntity<?> updateGiangVien(@PathVariable Long maTaiKhoan, @PathVariable Long maChucDanh) {
+    @PutMapping("/cap-nhat/{maChucDanh}")
+    public ResponseEntity<?> updateGiangVien( @PathVariable Long maChucDanh,
+                                              HttpServletRequest httpServletRequest) {
+        Long maTaiKhoan =  taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
         GiangVien giangVien = giangVienRepository.findById(maTaiKhoan)
                 .orElseThrow(() -> new ResourceNotFoundException("GiangVien", "maTaiKhoan", maTaiKhoan));
 

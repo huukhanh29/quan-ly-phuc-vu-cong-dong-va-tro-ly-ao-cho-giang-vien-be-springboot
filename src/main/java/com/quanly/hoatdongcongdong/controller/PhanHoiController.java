@@ -5,6 +5,7 @@ import com.quanly.hoatdongcongdong.payload.request.PhanHoiRequest;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.payload.response.PhanHoiResponse;
 import com.quanly.hoatdongcongdong.repository.*;
+import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -25,7 +26,6 @@ import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
-import static com.quanly.hoatdongcongdong.sercurity.Helpers.getCurrentUser;
 
 @RestController
 @RequestMapping("/phan-hoi")
@@ -33,6 +33,8 @@ import static com.quanly.hoatdongcongdong.sercurity.Helpers.getCurrentUser;
 public class PhanHoiController {
     @Autowired
     private PhanHoiRepository phanHoiRepository;
+    @Autowired
+    private TaiKhoanService taiKhoanService;
     @Autowired
     private TaiKhoanRepository taiKhoanRepository;
     @Autowired
@@ -45,7 +47,7 @@ public class PhanHoiController {
     @PostMapping("/them-moi")
     public ResponseEntity<?> createPhanHoi(@RequestBody PhanHoiRequest phanHoiRequest,
                                                  HttpServletRequest request) {
-        TaiKhoan currentUser = getCurrentUser(request, taiKhoanRepository);
+        TaiKhoan currentUser = taiKhoanService.getCurrentUser(request);
         Optional<SinhVien> sinhVien= sinhVienRepository.findById(currentUser.getMaTaiKhoan());
         PhanHoi phanHoiEntity = new PhanHoi();
         phanHoiEntity.setNoiDung(phanHoiRequest.getNoiDung());

@@ -12,8 +12,6 @@ public class SinhVien {
 
     private Year namNhapHoc;
 
-    @Column(nullable = false)
-    private String chuyenNganh;
 
     @OneToOne
     @JoinColumn(name = "maTaiKhoan", referencedColumnName = "maTaiKhoan", insertable = false, updatable = false)
@@ -22,10 +20,9 @@ public class SinhVien {
 
 
     public SinhVien(Long maTaiKhoan, Year namNhapHoc,
-                    String chuyenNganh, TaiKhoan taiKhoan) {
+                  TaiKhoan taiKhoan) {
         this.maTaiKhoan = maTaiKhoan;
         this.namNhapHoc = namNhapHoc;
-        this.chuyenNganh = chuyenNganh;
         this.taiKhoan = taiKhoan;
     }
 
@@ -46,14 +43,6 @@ public class SinhVien {
 
     public void setNamNhapHoc(Year namNhapHoc) {
         this.namNhapHoc = namNhapHoc;
-    }
-
-    public String getChuyenNganh() {
-        return chuyenNganh;
-    }
-
-    public void setChuyenNganh(String chuyenNganh) {
-        this.chuyenNganh = chuyenNganh;
     }
 
     public TaiKhoan getTaiKhoan() {

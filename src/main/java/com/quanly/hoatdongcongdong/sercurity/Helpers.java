@@ -63,18 +63,5 @@ public class Helpers {
         String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
         return temp.replaceAll("[^\\p{ASCII}]", "");
     }
-    public static TaiKhoan getCurrentUser(HttpServletRequest httpServletRequest, TaiKhoanRepository taiKhoanRepository) {
-        String token = JwtUtils.resolveToken(httpServletRequest);
-        if (token == null || !JwtUtils.validateJwtToken(token)) {
-            // Hoặc bạn có thể trả về null hoặc một giá trị thích hợp khác tùy theo yêu cầu của bạn
-            return null;
-        }
 
-        Claims claims = JwtUtils.getClaimsFromToken(token);
-        Long currentUserId = Long.parseLong(String.valueOf(claims.get("id", Long.class)));
-        TaiKhoan currentUser = taiKhoanRepository.findById(currentUserId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return currentUser;
-    }
 }

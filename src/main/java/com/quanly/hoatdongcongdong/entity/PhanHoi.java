@@ -10,6 +10,7 @@ public class PhanHoi {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long maPhanHoi;
+    @Column(columnDefinition = "TEXT")
     private String noiDung;
 
     @OneToOne(fetch = FetchType.LAZY)

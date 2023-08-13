@@ -27,8 +27,7 @@ public class TaiKhoan {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Quyen quyen;
-    @Column(nullable = true)
-    private String anhdaidien;
+    private String anhDaiDien= "user.png";
     @Column(nullable = false)
     private String tenDayDu;
 
@@ -38,22 +37,45 @@ public class TaiKhoan {
 
     @Enumerated(EnumType.STRING)
     private GioiTinh gioiTinh;
-
+    @Column(columnDefinition = "TEXT")
     private String diaChi;
     @Enumerated(EnumType.STRING)
     private TrangThai trangthai;
     @CreationTimestamp
-    @Column()
     private LocalDateTime ngayTao;
     @UpdateTimestamp
-    @Column()
     private LocalDateTime ngayCapNhat;
+    public void capNhatThongTin(String soDienThoai, Date ngaySinh, GioiTinh gioiTinh, String diaChi) {
+        if (soDienThoai != null) {
+            this.soDienThoai = soDienThoai;
+        }
+        if (ngaySinh != null) {
+            this.ngaySinh = ngaySinh;
+        }
+        if (gioiTinh != null) {
+            this.gioiTinh = gioiTinh;
+        }
+        if (diaChi != null) {
+            this.diaChi = diaChi;
+        }
+        this.ngayCapNhat = LocalDateTime.now();
+    }
+    public enum Quyen {
+        QuanTriVien, GiangVien, SinhVien
+    }
 
+    public enum GioiTinh {
+        Nam, Nu, Khac
+    }
+
+    public enum TrangThai {
+        Mo, Khoa
+    }
     public TaiKhoan() {
     }
 
     public TaiKhoan(Long maTaiKhoan, String tenDangNhap, String matKhau,
-                    String email, Quyen quyen, String anhdaidien, String tenDayDu,
+                    String email, Quyen quyen, String anhDaiDien, String tenDayDu,
                     String soDienThoai, Date ngaySinh, GioiTinh gioiTinh, String diaChi,
                     TrangThai trangthai, LocalDateTime ngayTao, LocalDateTime ngayCapNhat) {
         this.maTaiKhoan = maTaiKhoan;
@@ -61,7 +83,7 @@ public class TaiKhoan {
         this.matKhau = matKhau;
         this.email = email;
         this.quyen = quyen;
-        this.anhdaidien = anhdaidien;
+        this.anhDaiDien = anhDaiDien;
         this.tenDayDu = tenDayDu;
         this.soDienThoai = soDienThoai;
         this.ngaySinh = ngaySinh;
@@ -73,26 +95,36 @@ public class TaiKhoan {
     }
 
     public TaiKhoan(Long maTaiKhoan, String tenDangNhap, String matKhau,
-                    String email, Quyen quyen, String anhdaidien, String tenDayDu,
+                    String email, Quyen quyen, String anhDaiDien, String tenDayDu,
                     String soDienThoai, GioiTinh gioiTinh, TrangThai trangthai) {
         this.maTaiKhoan = maTaiKhoan;
         this.tenDangNhap = tenDangNhap;
         this.matKhau = matKhau;
         this.email = email;
         this.quyen = quyen;
-        this.anhdaidien = anhdaidien;
+        this.anhDaiDien = anhDaiDien;
         this.tenDayDu = tenDayDu;
         this.soDienThoai = soDienThoai;
         this.gioiTinh = gioiTinh;
         this.trangthai = trangthai;
     }
-
-    public String getAnhdaidien() {
-        return anhdaidien;
+    public TaiKhoan(String tenDangNhap, String matKhau, String email
+            , Quyen quyen, String tenDayDu, GioiTinh gioiTinh) {
+        this.tenDangNhap = tenDangNhap;
+        this.matKhau = matKhau;
+        this.email = email;
+        this.quyen = quyen;
+        this.tenDayDu = tenDayDu;
+        this.gioiTinh = gioiTinh;
+        this.trangthai = TrangThai.Mo;
     }
 
-    public void setAnhdaidien(String anhdaidien) {
-        this.anhdaidien = anhdaidien;
+    public String getAnhdaidien() {
+        return anhDaiDien;
+    }
+
+    public void setAnhdaidien(String anhDaiDien) {
+        this.anhDaiDien = anhDaiDien;
     }
 
     public TrangThai getTrangthai() {
@@ -199,15 +231,4 @@ public class TaiKhoan {
         this.diaChi = diaChi;
     }
 
-    public enum Quyen {
-        QuanTriVien, GiangVien, SinhVien
-    }
-
-    public enum GioiTinh {
-        Nam, Nu, Khac
-    }
-
-    public enum TrangThai {
-        Mo, Khoa
-    }
 }

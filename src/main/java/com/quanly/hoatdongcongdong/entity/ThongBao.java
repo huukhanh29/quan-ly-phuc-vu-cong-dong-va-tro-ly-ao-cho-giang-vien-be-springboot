@@ -15,6 +15,7 @@ public class ThongBao {
     @JoinColumn(name = "maTaiKhoan")
     private TaiKhoan taiKhoan;
     private String tieuDe;
+    @Column(columnDefinition = "TEXT")
     private String noiDung;
     @Enumerated(EnumType.STRING)
     private TrangThai trangThai;

@@ -4,6 +4,8 @@ import com.quanly.hoatdongcongdong.entity.ThongBao;
 import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.ThongBaoRepository;
+import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +19,11 @@ import java.util.List;
 public class ThongBaoController {
     @Autowired
     private ThongBaoRepository thongBaoRepository;
-
-    @GetMapping("/{maTk}")
-    public ResponseEntity<?> layThongBaoTheoNguoiDungId(@PathVariable Long maTk) {
+    @Autowired
+    private TaiKhoanService taiKhoanService;
+    @GetMapping()
+    public ResponseEntity<?> layThongBaoTheoNguoiDungId(HttpServletRequest httpServletRequest) {
+        Long maTk =  taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
         List<ThongBao> thongBaos = thongBaoRepository.findByTaiKhoan_MaTaiKhoan(maTk);
         return ResponseEntity.ok(thongBaos);
     }
@@ -41,8 +45,9 @@ public class ThongBaoController {
         return ResponseEntity.ok("Da_xoa_thong_bao");
     }
 
-    @DeleteMapping("/xoa-tat-ca/{maTk}")
-    public ResponseEntity<?> xoaTatCaThongBaoTheoNguoiDungId(@PathVariable Long maTk) {
+    @DeleteMapping("/xoa-tat-ca")
+    public ResponseEntity<?> xoaTatCaThongBaoTheoNguoiDungId(HttpServletRequest httpServletRequest) {
+        Long maTk =  taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
         List<ThongBao> thongBaos = thongBaoRepository.findByTaiKhoan_MaTaiKhoanAndTrangThai(maTk, ThongBao.TrangThai.DaDoc);
         if (!thongBaos.isEmpty()) {
             thongBaoRepository.deleteAllByTaiKhoan_MaTaiKhoanAndTrangThai(maTk, ThongBao.TrangThai.DaDoc);

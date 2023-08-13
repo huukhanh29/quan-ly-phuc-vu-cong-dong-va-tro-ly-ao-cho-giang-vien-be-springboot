@@ -5,6 +5,7 @@ import com.quanly.hoatdongcongdong.payload.request.CauHoiRequest;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.*;
 import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
+import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,8 @@ public class CauHoiController {
     private SinhVienRepository sinhVienRepository;
     @Autowired
     private TaiKhoanRepository taiKhoanRepository;
+    @Autowired
+    private TaiKhoanService taiKhoanService;
     @PostMapping("/dat-cau-hoi")
     public ResponseEntity<?> getAnswer(@RequestBody CauHoiRequest request,
                                        HttpServletRequest httpServletRequest) {
@@ -66,7 +69,7 @@ public class CauHoiController {
         if (cauHoi != null) {
             //thêm vào lịch sử khi thực hiện hỏi thành công
             LichSu lichSu = new LichSu();
-            TaiKhoan currentUser = getCurrentUser(httpServletRequest, taiKhoanRepository);
+            TaiKhoan currentUser = taiKhoanService.getCurrentUser(httpServletRequest);
             Optional<SinhVien> sinhVien= sinhVienRepository.findById(currentUser.getMaTaiKhoan());
             if (sinhVien.isPresent()) {
                 lichSu.setSinhVien(sinhVien.get());
