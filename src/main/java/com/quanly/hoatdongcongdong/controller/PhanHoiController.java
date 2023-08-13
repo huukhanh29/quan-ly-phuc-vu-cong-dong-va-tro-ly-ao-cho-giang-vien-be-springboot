@@ -146,7 +146,7 @@ public class PhanHoiController {
 
             ThongBao thongBao = new ThongBao();
             Optional<TaiKhoan> taiKhoan = taiKhoanRepository.findByTenDangNhap(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap());
-            thongBao.setNoiDung("Câu hỏi " + "\"" +phanHoi.getNoiDung() + "\"" +
+            thongBao.setNoiDung("Câu hỏi " +  phanHoi.getNoiDung()  +
                     " của bạn đã được phản hồi vui lòng hỏi chatbot với từ khóa " + newCauHoi.getCauHoi() + ".");
             thongBao.setTieuDe("Trả lời phản hồi");
             thongBao.setTaiKhoan(taiKhoan.get());

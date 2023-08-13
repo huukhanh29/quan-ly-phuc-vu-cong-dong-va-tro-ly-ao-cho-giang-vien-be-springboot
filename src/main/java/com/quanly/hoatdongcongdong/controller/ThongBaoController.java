@@ -18,7 +18,7 @@ public class ThongBaoController {
     @Autowired
     private ThongBaoRepository thongBaoRepository;
 
-    @GetMapping("/{nguoiDungId}")
+    @GetMapping("/{maTk}")
     public ResponseEntity<?> layThongBaoTheoNguoiDungId(@PathVariable Long maTk) {
         List<ThongBao> thongBaos = thongBaoRepository.findByTaiKhoan_MaTaiKhoan(maTk);
         return ResponseEntity.ok(thongBaos);
@@ -30,7 +30,7 @@ public class ThongBaoController {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông báo với mã=" + maThongBao));
         thongBao.setTrangThai(ThongBao.TrangThai.DaDoc);
         thongBaoRepository.save(thongBao);
-        return ResponseEntity.ok(thongBao);
+        return ResponseEntity.ok("Da_doc_thong_bao");
     }
 
     @DeleteMapping("/xoa/{maThongBao}")
@@ -38,10 +38,10 @@ public class ThongBaoController {
         ThongBao thongBao = thongBaoRepository.findById(maThongBao)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông báo với mã=" + maThongBao));
         thongBaoRepository.delete(thongBao);
-        return ResponseEntity.ok(thongBao);
+        return ResponseEntity.ok("Da_xoa_thong_bao");
     }
 
-    @DeleteMapping("/xoa/tat-ca/{maTk}")
+    @DeleteMapping("/xoa-tat-ca/{maTk}")
     public ResponseEntity<?> xoaTatCaThongBaoTheoNguoiDungId(@PathVariable Long maTk) {
         List<ThongBao> thongBaos = thongBaoRepository.findByTaiKhoan_MaTaiKhoanAndTrangThai(maTk, ThongBao.TrangThai.DaDoc);
         if (!thongBaos.isEmpty()) {

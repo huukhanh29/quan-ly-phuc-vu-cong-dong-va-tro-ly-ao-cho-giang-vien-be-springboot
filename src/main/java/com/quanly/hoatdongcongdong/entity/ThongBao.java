@@ -16,6 +16,7 @@ public class ThongBao {
     private TaiKhoan taiKhoan;
     private String tieuDe;
     private String noiDung;
+    @Enumerated(EnumType.STRING)
     private TrangThai trangThai;
     @CreationTimestamp
     private LocalDateTime ngayTao;
