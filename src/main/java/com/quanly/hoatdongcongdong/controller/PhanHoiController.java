@@ -52,12 +52,12 @@ public class PhanHoiController {
         phanHoiEntity.setSinhVien(sinhVien.get());
 
         if (phanHoiRepository.findByNoiDung(phanHoiEntity.getNoiDung()) != null) {
-            return new ResponseEntity<>(new MessageResponse("WARNING: CONTENT IS ALREADY EXISTS"),
-                    HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(new MessageResponse("Phan_hoi_da_ton_tai"),
+                    HttpStatus.BAD_REQUEST);
         }
 
-        PhanHoi createdPhanHoi = phanHoiRepository.save(phanHoiEntity);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdPhanHoi);
+        phanHoiRepository.save(phanHoiEntity);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Them_phan_hoi_thanh_cong");
     }
 
     @GetMapping("/lay-danh-sach")
@@ -77,9 +77,9 @@ public class PhanHoiController {
         if (!searchTerm.isEmpty()) {
             spec = spec.and((root, criteriaQuery, criteriaBuilder) -> {
                 String pattern = "%" + searchTerm + "%";
-                Join<PhanHoi, TaiKhoan> taiKhoanJoin = root.join("taiKhoan", JoinType.LEFT);
+                Join<PhanHoi, TaiKhoan> taiKhoanJoin = root.join("sinhVien").join("taiKhoan", JoinType.LEFT);
                 Join<PhanHoi, CauHoi> cauHoiJoin = root.join("cauHoi", JoinType.LEFT);
-                Predicate taiKhoanPredicate = criteriaBuilder.like(taiKhoanJoin.get("hoTen"), pattern);
+                Predicate taiKhoanPredicate = criteriaBuilder.like(taiKhoanJoin.get("tenDayDu"), pattern);
                 Predicate cauHoiPredicate = criteriaBuilder.like(cauHoiJoin.get("cauHoi"), pattern);
                 Predicate noiDungPredicate = criteriaBuilder.like(root.get("noiDung"), pattern);
                 return criteriaBuilder.or(
@@ -89,12 +89,11 @@ public class PhanHoiController {
                         noiDungPredicate
                 );
             });
-
         }
 
         if (maTaiKhoan != null) {
             spec = spec.and((root, criteriaQuery, criteriaBuilder) -> {
-                return criteriaBuilder.equal(root.get("taiKhoan").get("maTaiKhoan"), maTaiKhoan);
+                return criteriaBuilder.equal(root.get("sinhVien").get("taiKhoan").get("maTaiKhoan"), maTaiKhoan);
             });
         }
 
@@ -118,7 +117,7 @@ public class PhanHoiController {
         thongBao.setTaiKhoan(taiKhoan.get());
         thongBao.setTrangThai(ThongBao.TrangThai.ChuaDoc);
         thongBaoRepository.save(thongBao);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Da_xoa");
     }
 
     @DeleteMapping("/xoa-tat-ca")
@@ -126,7 +125,7 @@ public class PhanHoiController {
         List<PhanHoi> phanHois = phanHoiRepository.findAllByCauHoiNotNull();
         if (!phanHois.isEmpty()) {
             phanHoiRepository.deleteByCauHoiNotNull();
-            return ResponseEntity.ok("Deleted");
+            return ResponseEntity.ok("Da_xoa_cac_phan_hoi_da_tra_loi");
         } else {
             return new ResponseEntity<>(new MessageResponse("NOT FOUND"), HttpStatus.BAD_REQUEST);
         }
@@ -147,7 +146,7 @@ public class PhanHoiController {
 
             ThongBao thongBao = new ThongBao();
             Optional<TaiKhoan> taiKhoan = taiKhoanRepository.findByTenDangNhap(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap());
-            thongBao.setNoiDung("Câu hỏi " + phanHoi.getNoiDung() +
+            thongBao.setNoiDung("Câu hỏi " + "\"" +phanHoi.getNoiDung() + "\"" +
                     " của bạn đã được phản hồi vui lòng hỏi chatbot với từ khóa " + newCauHoi.getCauHoi() + ".");
             thongBao.setTieuDe("Trả lời phản hồi");
             thongBao.setTaiKhoan(taiKhoan.get());

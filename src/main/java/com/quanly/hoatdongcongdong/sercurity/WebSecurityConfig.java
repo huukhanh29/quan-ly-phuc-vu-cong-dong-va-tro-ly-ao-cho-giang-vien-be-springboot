@@ -68,6 +68,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
                         auth.requestMatchers("/tai-khoan/**").permitAll()
                                 .requestMatchers("/cau-hoi/**").hasAnyAuthority("QuanTriVien","SinhVien")
                                 .requestMatchers("/lich-su/**").hasAnyAuthority("QuanTriVien","SinhVien")
+                                .requestMatchers("/phan-hoi/**").hasAnyAuthority("QuanTriVien","SinhVien")
                                 .anyRequest().authenticated()
                 )
                         .cors(Customizer.withDefaults());
