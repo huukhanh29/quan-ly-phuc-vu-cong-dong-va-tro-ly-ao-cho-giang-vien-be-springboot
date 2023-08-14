@@ -4,7 +4,6 @@ import com.quanly.hoatdongcongdong.entity.ChucDanh;
 import com.quanly.hoatdongcongdong.entity.GiangVien;
 import com.quanly.hoatdongcongdong.entity.SinhVien;
 import com.quanly.hoatdongcongdong.entity.TaiKhoan;
-import com.quanly.hoatdongcongdong.payload.response.ThongTinTaiKhoanResponse;
 import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
 import com.quanly.hoatdongcongdong.repository.SinhVienRepository;
 import com.quanly.hoatdongcongdong.repository.TaiKhoanRepository;
@@ -48,30 +47,7 @@ public class TaiKhoanService {
     public Boolean existsByTenDangNhap(String ten) {
         return taiKhoanRepository.existsByTenDangNhap(ten);
     }
-    public ThongTinTaiKhoanResponse layThongTinNguoiDung(Long maTaiKhoan) {
-        TaiKhoan taiKhoan = taiKhoanRepository.findById(maTaiKhoan)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy tài khoản"));
 
-        ThongTinTaiKhoanResponse nguoiDungDTO = new ThongTinTaiKhoanResponse();
-        nguoiDungDTO.setMaTaiKhoan(taiKhoan.getMaTaiKhoan());
-        nguoiDungDTO.setDiaChi(taiKhoan.getDiaChi());
-        nguoiDungDTO.setGioiTinh(taiKhoan.getGioiTinh());
-        nguoiDungDTO.setTenDangNhap(taiKhoan.getTenDangNhap());
-        nguoiDungDTO.setTenDayDu(taiKhoan.getTenDayDu());
-        nguoiDungDTO.setSoDienThoai(taiKhoan.getSoDienThoai());
-        nguoiDungDTO.setNgaySinh(taiKhoan.getNgaySinh());
-        if (taiKhoan.getQuyen() == TaiKhoan.Quyen.SinhVien) {
-            SinhVien sinhVien = sinhVienRepository.findById(maTaiKhoan)
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy sinh viên"));
-            nguoiDungDTO.setNamNhapHoc(sinhVien.getNamNhapHoc());
-        } else if (taiKhoan.getQuyen() == TaiKhoan.Quyen.GiangVien) {
-            GiangVien giangVien = giangVienRepository.findById(maTaiKhoan)
-                    .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy giảng viên"));
-            nguoiDungDTO.setChucDanh(giangVien.getChucDanh());
-        }
-
-        return nguoiDungDTO;
-    }
     public Boolean isTaiKhoanKhoa(String ten) {
         Optional<TaiKhoan> taiKhoan = findByTenDangNhap(ten);
         return taiKhoan.isPresent() && taiKhoan.get().getTrangthai().equals(TaiKhoan.TrangThai.Khoa);

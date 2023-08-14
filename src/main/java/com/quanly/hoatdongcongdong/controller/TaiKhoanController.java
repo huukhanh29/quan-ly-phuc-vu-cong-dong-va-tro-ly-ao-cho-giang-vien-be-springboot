@@ -2,28 +2,31 @@ package com.quanly.hoatdongcongdong.controller;
 
 import com.quanly.hoatdongcongdong.entity.GiangVien;
 import com.quanly.hoatdongcongdong.entity.GioTichLuy;
+import com.quanly.hoatdongcongdong.entity.SinhVien;
 import com.quanly.hoatdongcongdong.entity.TaiKhoan;
 import com.quanly.hoatdongcongdong.payload.request.MatKhauMoiRequest;
 import com.quanly.hoatdongcongdong.payload.response.JwtResponse;
-import com.quanly.hoatdongcongdong.payload.response.ThongTinTaiKhoanResponse;
 import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
 import com.quanly.hoatdongcongdong.repository.GioTichLuyRepository;
+import com.quanly.hoatdongcongdong.repository.SinhVienRepository;
 import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
 import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -39,16 +42,64 @@ public class TaiKhoanController {
     private GioTichLuyRepository gioTichLuyRepository;
     @Autowired
     private GiangVienRepository giangVienRepository;
+    @Autowired
+    private SinhVienRepository sinhVienRepository;
     @GetMapping("/thong-tin")
     public ResponseEntity<?> layThongTinNguoiDung(HttpServletRequest httpServletRequest) {
         try {
-            Long maTaiKhoan = taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
-            ThongTinTaiKhoanResponse nguoiDungDTO = taiKhoanService.layThongTinNguoiDung(maTaiKhoan);
-            return ResponseEntity.ok(nguoiDungDTO);
+            TaiKhoan taiKhoan = taiKhoanService.getCurrentUser(httpServletRequest);
+            if(taiKhoan.getQuyen() == TaiKhoan.Quyen.SinhVien){
+                Optional<SinhVien> sinhVien = sinhVienRepository.findById(taiKhoan.getMaTaiKhoan());
+                return ResponseEntity.ok(sinhVien.get());
+            }
+
+            if(taiKhoan.getQuyen() == TaiKhoan.Quyen.GiangVien){
+                Optional<GiangVien> giangVien = giangVienRepository.findById(taiKhoan.getMaTaiKhoan());
+                return ResponseEntity.ok(giangVien.get());
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng");
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng");
         }
     }
+    @GetMapping("/lay-danh-sach")
+    public ResponseEntity<?> getAllUsersByRole(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "maTaiKhoan") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDir,
+            @RequestParam(required = false, defaultValue = "") String searchTerm,
+            @RequestParam(required = false, defaultValue = "") String userRole
+    ) {
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
+        Pageable paging = PageRequest.of(page, size, sort);
+
+        Specification<?> spec = null;
+
+        if (!searchTerm.isEmpty()) {
+            spec = (root, criteriaQuery, criteriaBuilder) -> {
+                String pattern = "%" + searchTerm + "%";
+                return criteriaBuilder.or(
+                        criteriaBuilder.like(root.get("taiKhoan").get("tenDayDu"), pattern),
+                        criteriaBuilder.like(root.get("taiKhoan").get("email"), pattern),
+                        criteriaBuilder.like(root.get("taiKhoan").get("tenDangNhap"), pattern)
+                );
+            };
+        }
+
+        Page<?> result;
+        if (userRole.equals("SinhVien")) {
+            result = sinhVienRepository.findAll((Specification<SinhVien>) spec, paging);
+        } else if (userRole.equals("GiangVien")) {
+            result = giangVienRepository.findAll((Specification<GiangVien>) spec, paging);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Không có quyền truy cập danh sách này.");
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+
     @PutMapping("/cap-nhat-thong-tin")
     public ResponseEntity<?> updateUserProfile(@RequestBody TaiKhoan request,
                                                HttpServletRequest httpServletRequest) {
@@ -59,8 +110,7 @@ public class TaiKhoanController {
                     request.getNgaySinh(),
                     request.getGioiTinh(),
                     request.getDiaChi());
-            ThongTinTaiKhoanResponse nguoiDungDTO = taiKhoanService.layThongTinNguoiDung(currentUser.getMaTaiKhoan());
-            return ResponseEntity.ok(nguoiDungDTO);
+            return ResponseEntity.ok(currentUser);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng");
         }

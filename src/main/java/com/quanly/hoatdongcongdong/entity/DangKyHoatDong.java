@@ -17,16 +17,16 @@ public class DangKyHoatDong {
     private HoatDong hoatDong;
 
     @Enumerated(EnumType.STRING)
-    private TrangThaiDangKy trangThai;
+    private TrangThaiDangKy trangThaiDangKy;
     public enum TrangThaiDangKy {
         ChoDuyet, ChoXacNhan, HoanThanh
     }
 
-    public DangKyHoatDong(Long maDangKy, GiangVien giangVien, HoatDong hoatDong, TrangThaiDangKy trangThai) {
+    public DangKyHoatDong(Long maDangKy, GiangVien giangVien, HoatDong hoatDong, TrangThaiDangKy trangThaiDangKy) {
         this.maDangKy = maDangKy;
         this.giangVien = giangVien;
         this.hoatDong = hoatDong;
-        this.trangThai = trangThai;
+        this.trangThaiDangKy = trangThaiDangKy;
     }
 
     public Long getMaDangKy() {
@@ -53,12 +53,12 @@ public class DangKyHoatDong {
         this.hoatDong = hoatDong;
     }
 
-    public TrangThaiDangKy getTrangThai() {
-        return trangThai;
+    public TrangThaiDangKy getTrangThaiDangKy() {
+        return trangThaiDangKy;
     }
 
-    public void setTrangThai(TrangThaiDangKy trangThai) {
-        this.trangThai = trangThai;
+    public void setTrangThaiDangKy(TrangThaiDangKy trangThaiDangKy) {
+        this.trangThaiDangKy = trangThaiDangKy;
     }
 
     public DangKyHoatDong() {

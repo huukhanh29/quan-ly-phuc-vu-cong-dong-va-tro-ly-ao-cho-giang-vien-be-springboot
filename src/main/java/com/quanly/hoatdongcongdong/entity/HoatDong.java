@@ -25,8 +25,9 @@ public class HoatDong {
     private LocalDateTime thoiGianBatDau;
     private LocalDateTime thoiGianKetThuc;
     public enum TrangThaiHoatDong {
-        ChuaDuyet, DaDuyet
+        ChuaDuyet, ChuaDienRa, DaDienRa
     }
+
     @Enumerated(EnumType.STRING)
     private TrangThaiHoatDong trangThai;
 
