@@ -49,9 +49,6 @@ public class AuthController {
     private ChucDanhRepository chucDanhRepository;
 
     @Autowired
-    private PasswordEncoder encoder;
-
-    @Autowired
     private RefreshTokenService refreshTokenService;
 
     @Autowired

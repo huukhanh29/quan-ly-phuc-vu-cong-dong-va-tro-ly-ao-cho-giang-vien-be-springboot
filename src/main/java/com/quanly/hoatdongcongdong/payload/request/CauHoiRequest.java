@@ -1,6 +1,9 @@
 package com.quanly.hoatdongcongdong.payload.request;
 
+import jakarta.persistence.Column;
+
 public class CauHoiRequest {
+    @Column(columnDefinition = "TEXT")
     private String cauHoi;
 
     public CauHoiRequest(String cauHoi) {

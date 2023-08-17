@@ -1,5 +1,7 @@
 package com.quanly.hoatdongcongdong.entity;
+
 import jakarta.persistence.*;
+
 @Entity
 @Table(name = "DangKyHoatDong")
 public class DangKyHoatDong {
@@ -11,22 +13,34 @@ public class DangKyHoatDong {
     @ManyToOne
     @JoinColumn(name = "maGiangVien")
     private GiangVien giangVien;
-
+    @Column(columnDefinition = "TEXT")
+    private String lyDoHuy;
     @ManyToOne
     @JoinColumn(name = "maHoatDong")
     private HoatDong hoatDong;
 
     @Enumerated(EnumType.STRING)
     private TrangThaiDangKy trangThaiDangKy;
+
     public enum TrangThaiDangKy {
-        ChoDuyet, ChoXacNhan, HoanThanh
+        Chua_Duyet, Da_Duyet, Da_Huy
     }
 
-    public DangKyHoatDong(Long maDangKy, GiangVien giangVien, HoatDong hoatDong, TrangThaiDangKy trangThaiDangKy) {
+
+    public DangKyHoatDong(Long maDangKy, GiangVien giangVien, String lyDoHuy, HoatDong hoatDong, TrangThaiDangKy trangThaiDangKy) {
         this.maDangKy = maDangKy;
         this.giangVien = giangVien;
+        this.lyDoHuy = lyDoHuy;
         this.hoatDong = hoatDong;
         this.trangThaiDangKy = trangThaiDangKy;
+    }
+
+    public String getLyDoHuy() {
+        return lyDoHuy;
+    }
+
+    public void setLyDoHuy(String lyDoHuy) {
+        this.lyDoHuy = lyDoHuy;
     }
 
     public Long getMaDangKy() {

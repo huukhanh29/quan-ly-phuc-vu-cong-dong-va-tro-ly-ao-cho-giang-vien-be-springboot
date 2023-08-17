@@ -1,9 +1,12 @@
 package com.quanly.hoatdongcongdong.entity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "HoatDong")
@@ -17,62 +20,91 @@ public class HoatDong {
     @Column(columnDefinition = "TEXT")
     private String moTa;
     private String diaDiem;
-    @ManyToOne
-    @JoinColumn(name = "maGiangVienDeXuat")
-    private GiangVien giangVienDeXuat;
+
     private int gioTichLuyThamGia;
     private int gioTichLuyToChuc;
     private LocalDateTime thoiGianBatDau;
     private LocalDateTime thoiGianKetThuc;
-    public enum TrangThaiHoatDong {
-        ChuaDuyet, ChuaDienRa, DaDienRa
-    }
-
-    @Enumerated(EnumType.STRING)
-    private TrangThaiHoatDong trangThai;
 
     private String tenQuyetDinh;
     private String soQuyetDinh;
     private String nguoiKyQuyetDinh;
     private String fileQuyetDinh;
+    public enum CapToChuc {
+        KHOA, TRUONG, BOMON, CA_NHAN
+    }
 
+    @Enumerated(EnumType.STRING)
+    private CapToChuc capToChuc;
     @ManyToOne
     @JoinColumn(name = "maLoaiHoatDong")
     private LoaiHoatDong loaiHoatDong;
-
+    @ManyToMany
+    @JoinTable(
+            name = "ToChuc",
+            joinColumns = @JoinColumn(name = "maHoatDong"),
+            inverseJoinColumns = @JoinColumn(name = "maGiangVien")
+    )
+    private List<GiangVien> giangVienToChucs = new ArrayList<>();
     @CreationTimestamp
     private LocalDateTime ngayTao;
     @UpdateTimestamp
     private LocalDateTime ngayCapNhat;
+    @Formula("(CASE WHEN thoi_gian_bat_dau > now() THEN 'SAP_DIEN_RA' WHEN thoi_gian_ket_thuc > now() THEN 'DANG_DIEN_RA' ELSE 'DA_DIEN_RA' END)")
+    @Enumerated(EnumType.STRING)
+    private TrangThaiHoatDong trangThaiHoatDong;
+    public enum TrangThaiHoatDong {
+        SAP_DIEN_RA, DANG_DIEN_RA, DA_DIEN_RA
+    }
+    public TrangThaiHoatDong getTrangThaiHoatDong() {
+        return trangThaiHoatDong;
+    }
+
+    public void setTrangThaiHoatDong(TrangThaiHoatDong trangThaiHoatDong) {
+        this.trangThaiHoatDong = trangThaiHoatDong;
+    }
 
     public HoatDong() {
     }
 
     public HoatDong(Long maHoatDong, String tenHoatDong, String moTa,
-                    String diaDiem, GiangVien giangVienDeXuat,
-                    int gioTichLuyThamGia, int gioTichLuyToChuc,
-                    LocalDateTime thoiGianBatDau,
-                    LocalDateTime thoiGianKetThuc, TrangThaiHoatDong trangThai,
-                    String tenQuyetDinh, String soQuyetDinh, String nguoiKyQuyetDinh,
-                    String fileQuyetDinh, LoaiHoatDong loaiHoatDong,
+                    String diaDiem, int gioTichLuyThamGia,
+                    int gioTichLuyToChuc, LocalDateTime thoiGianBatDau,
+                    LocalDateTime thoiGianKetThuc, String tenQuyetDinh,
+                    String soQuyetDinh, String nguoiKyQuyetDinh, String fileQuyetDinh,
+                    CapToChuc capToChuc, LoaiHoatDong loaiHoatDong, List<GiangVien> giangVienToChucs,
                     LocalDateTime ngayTao, LocalDateTime ngayCapNhat) {
         this.maHoatDong = maHoatDong;
         this.tenHoatDong = tenHoatDong;
         this.moTa = moTa;
         this.diaDiem = diaDiem;
-        this.giangVienDeXuat = giangVienDeXuat;
         this.gioTichLuyThamGia = gioTichLuyThamGia;
         this.gioTichLuyToChuc = gioTichLuyToChuc;
         this.thoiGianBatDau = thoiGianBatDau;
         this.thoiGianKetThuc = thoiGianKetThuc;
-        this.trangThai = trangThai;
         this.tenQuyetDinh = tenQuyetDinh;
         this.soQuyetDinh = soQuyetDinh;
         this.nguoiKyQuyetDinh = nguoiKyQuyetDinh;
         this.fileQuyetDinh = fileQuyetDinh;
+        this.capToChuc = capToChuc;
         this.loaiHoatDong = loaiHoatDong;
+        this.giangVienToChucs = giangVienToChucs;
         this.ngayTao = ngayTao;
         this.ngayCapNhat = ngayCapNhat;
+    }
+
+    public HoatDong(String tenHoatDong, String moTa,
+                    String diaDiem,
+                    int gioTichLuyThamGia, int gioTichLuyToChuc,
+                    LocalDateTime thoiGianBatDau,
+                    LocalDateTime thoiGianKetThuc) {
+        this.tenHoatDong = tenHoatDong;
+        this.moTa = moTa;
+        this.diaDiem = diaDiem;
+        this.gioTichLuyThamGia = gioTichLuyThamGia;
+        this.gioTichLuyToChuc = gioTichLuyToChuc;
+        this.thoiGianBatDau = thoiGianBatDau;
+        this.thoiGianKetThuc = thoiGianKetThuc;
     }
 
     public Long getMaHoatDong() {
@@ -107,14 +139,6 @@ public class HoatDong {
         this.diaDiem = diaDiem;
     }
 
-    public GiangVien getGiangVienDeXuat() {
-        return giangVienDeXuat;
-    }
-
-    public void setGiangVienDeXuat(GiangVien giangVienDeXuat) {
-        this.giangVienDeXuat = giangVienDeXuat;
-    }
-
     public int getGioTichLuyThamGia() {
         return gioTichLuyThamGia;
     }
@@ -145,14 +169,6 @@ public class HoatDong {
 
     public void setThoiGianKetThuc(LocalDateTime thoiGianKetThuc) {
         this.thoiGianKetThuc = thoiGianKetThuc;
-    }
-
-    public TrangThaiHoatDong getTrangThai() {
-        return trangThai;
-    }
-
-    public void setTrangThai(TrangThaiHoatDong trangThai) {
-        this.trangThai = trangThai;
     }
 
     public String getTenQuyetDinh() {
@@ -210,4 +226,21 @@ public class HoatDong {
     public void setNgayCapNhat(LocalDateTime ngayCapNhat) {
         this.ngayCapNhat = ngayCapNhat;
     }
+
+    public CapToChuc getCapToChuc() {
+        return capToChuc;
+    }
+
+    public void setCapToChuc(CapToChuc capToChuc) {
+        this.capToChuc = capToChuc;
+    }
+
+    public List<GiangVien> getGiangVienToChucs() {
+        return giangVienToChucs;
+    }
+
+    public void setGiangVienToChucs(List<GiangVien> giangVienToChucs) {
+        this.giangVienToChucs = giangVienToChucs;
+    }
+
 }

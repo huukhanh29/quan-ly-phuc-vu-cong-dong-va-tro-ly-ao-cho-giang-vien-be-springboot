@@ -6,6 +6,7 @@ import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.payload.response.PhanHoiResponse;
 import com.quanly.hoatdongcongdong.repository.*;
 import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
+import com.quanly.hoatdongcongdong.sercurity.services.ThongBaoService;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -43,6 +44,8 @@ public class PhanHoiController {
     private ThongBaoRepository thongBaoRepository;
     @Autowired
     private SinhVienRepository sinhVienRepository;
+    @Autowired
+    private ThongBaoService thongBaoService;
 
     @PostMapping("/them-moi")
     public ResponseEntity<?> createPhanHoi(@RequestBody PhanHoiRequest phanHoiRequest,
@@ -110,15 +113,15 @@ public class PhanHoiController {
                 .orElseThrow(() -> new ResourceNotFoundException("PhanHoi", "maPhanHoi", phanHoiId));
 
         phanHoiRepository.delete(phanHoi);
-
-        ThongBao thongBao = new ThongBao();
+        // Tạo thông báo cho người dùng
         Optional<TaiKhoan> taiKhoan = taiKhoanRepository.findByTenDangNhap(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap());
-        thongBao.setTieuDe("Xóa phản hồi");
-        thongBao.setNoiDung("Phản hồi " + phanHoi.getNoiDung() +
-                " của bạn đã bị xóa và không được phản hồi do có nội dung hỏi không hợp lý.");
-        thongBao.setTaiKhoan(taiKhoan.get());
-        thongBao.setTrangThai(ThongBao.TrangThai.ChuaDoc);
-        thongBaoRepository.save(thongBao);
+        String tieuDe = "Xóa phản hồi";
+        String nDung = "Phản hồi " + phanHoi.getNoiDung() +
+                " của bạn đã bị xóa và không được phản hồi do có nội dung hỏi không hợp lý.";
+        ThongBao thongBao = thongBaoService.taoMoiThongBao(
+                taiKhoan.get(), tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
+        );
+        thongBaoService.luuThongBao(thongBao);
         return ResponseEntity.ok("Da_xoa");
     }
 
@@ -145,15 +148,15 @@ public class PhanHoiController {
                     .orElseThrow(() -> new ResourceNotFoundException("PhanHoi", "id", phanHoiId));
             phanHoi.setCauHoi(newCauHoi);
             phanHoiRepository.save(phanHoi);
-
-            ThongBao thongBao = new ThongBao();
+            // Tạo thông báo cho người dùng
             Optional<TaiKhoan> taiKhoan = taiKhoanRepository.findByTenDangNhap(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap());
-            thongBao.setNoiDung("Câu hỏi " +  phanHoi.getNoiDung()  +
-                    " của bạn đã được phản hồi vui lòng hỏi chatbot với từ khóa " + newCauHoi.getCauHoi() + ".");
-            thongBao.setTieuDe("Trả lời phản hồi");
-            thongBao.setTaiKhoan(taiKhoan.get());
-            thongBao.setTrangThai(ThongBao.TrangThai.ChuaDoc);
-            thongBaoRepository.save(thongBao);
+            String tieuDe = "Trả lời phản hồi";
+            String nDung = "Câu hỏi " +  phanHoi.getNoiDung()  +
+                    " của bạn đã được phản hồi vui lòng hỏi chatbot với từ khóa " + newCauHoi.getCauHoi() + ".";
+            ThongBao thongBao = thongBaoService.taoMoiThongBao(
+                    taiKhoan.get(), tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
+            );
+            thongBaoService.luuThongBao(thongBao);
             return ResponseEntity.ok(cauHoi);
         }
     }

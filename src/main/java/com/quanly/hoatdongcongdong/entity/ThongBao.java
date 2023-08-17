@@ -23,7 +23,9 @@ public class ThongBao {
     private LocalDateTime ngayTao;
     @UpdateTimestamp
     private LocalDateTime ngayCapNhat;
-
+    public enum TrangThai {
+        DaDoc, ChuaDoc
+    }
     public ThongBao() {
     }
 
@@ -94,8 +96,6 @@ public class ThongBao {
     public void setNgayCapNhat(LocalDateTime ngayCapNhat) {
         this.ngayCapNhat = ngayCapNhat;
     }
-    public enum TrangThai {
-        DaDoc, ChuaDoc
-    }
+
 }
 
