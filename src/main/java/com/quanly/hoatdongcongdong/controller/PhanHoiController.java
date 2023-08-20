@@ -4,27 +4,14 @@ import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.payload.request.PhanHoiRequest;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.payload.response.PhanHoiResponse;
-import com.quanly.hoatdongcongdong.repository.*;
-import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
-import com.quanly.hoatdongcongdong.sercurity.services.ThongBaoService;
-import io.jsonwebtoken.Claims;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
+import com.quanly.hoatdongcongdong.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
-import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
 import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
-
-import java.util.List;
 import java.util.Optional;
 
 
@@ -32,37 +19,44 @@ import java.util.Optional;
 @RequestMapping("/phan-hoi")
 @CrossOrigin(value = "*")
 public class PhanHoiController {
+
+    private final PhanHoiService phanHoiService;
+    private final TaiKhoanService taiKhoanService;
+    private final CauHoiService cauHoiService;
+    private final ThongBaoService thongBaoService;
+    private final SinhVienService sinhVienService;
+
     @Autowired
-    private PhanHoiRepository phanHoiRepository;
-    @Autowired
-    private TaiKhoanService taiKhoanService;
-    @Autowired
-    private TaiKhoanRepository taiKhoanRepository;
-    @Autowired
-    private CauHoiRepository cauHoiRepository;
-    @Autowired
-    private ThongBaoRepository thongBaoRepository;
-    @Autowired
-    private SinhVienRepository sinhVienRepository;
-    @Autowired
-    private ThongBaoService thongBaoService;
+    public PhanHoiController(
+            PhanHoiService phanHoiService,
+            TaiKhoanService taiKhoanService,
+            CauHoiService cauHoiService,
+            ThongBaoService thongBaoService,
+            SinhVienService sinhVienService) {
+        this.phanHoiService = phanHoiService;
+        this.taiKhoanService = taiKhoanService;
+        this.cauHoiService = cauHoiService;
+        this.thongBaoService = thongBaoService;
+        this.sinhVienService =sinhVienService;
+    }
 
     @PostMapping("/them-moi")
     public ResponseEntity<?> createPhanHoi(@RequestBody PhanHoiRequest phanHoiRequest,
-                                                 HttpServletRequest request) {
-        TaiKhoan currentUser = taiKhoanService.getCurrentUser(request);
-        Optional<SinhVien> sinhVien= sinhVienRepository.findById(currentUser.getMaTaiKhoan());
-        PhanHoi phanHoiEntity = new PhanHoi();
-        phanHoiEntity.setNoiDung(phanHoiRequest.getNoiDung());
-        phanHoiEntity.setSinhVien(sinhVien.get());
-
-        if (phanHoiRepository.findByNoiDung(phanHoiEntity.getNoiDung()) != null) {
-            return new ResponseEntity<>(new MessageResponse("Phan_hoi_da_ton_tai"),
+                                           HttpServletRequest request) {
+        if (phanHoiService.findByNoiDung(phanHoiRequest.getNoiDung()) != null) {
+            return new ResponseEntity<>(new MessageResponse("Phản hồi đã tồn tại!"),
+                    HttpStatus.BAD_REQUEST);
+        }
+        // Lấy thông tin người dùng hiện tại
+        Optional<SinhVien> sinhVien = sinhVienService.findById(taiKhoanService.getCurrentUser(request).getMaTaiKhoan());
+        if(sinhVien.isPresent()){
+            phanHoiService.createPhanHoi(phanHoiRequest.getNoiDung(), sinhVien.get());
+        }else {
+            return new ResponseEntity<>(new MessageResponse("Sinh viên không tồn tại"),
                     HttpStatus.BAD_REQUEST);
         }
 
-        phanHoiRepository.save(phanHoiEntity);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Them_phan_hoi_thanh_cong");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Thêm phản hồi thành công!");
     }
 
     @GetMapping("/lay-danh-sach")
@@ -74,91 +68,44 @@ public class PhanHoiController {
             @RequestParam(required = false, defaultValue = "") String searchTerm,
             @RequestParam(required = false) Long maTaiKhoan
     ) {
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
-        Pageable paging = PageRequest.of(page, size, sort);
-
-        Specification<PhanHoi> spec = Specification.where(null);
-
-        if (!searchTerm.isEmpty()) {
-            spec = spec.and((root, criteriaQuery, criteriaBuilder) -> {
-                String pattern = "%" + searchTerm + "%";
-                Join<PhanHoi, TaiKhoan> taiKhoanJoin = root.join("sinhVien").join("taiKhoan", JoinType.LEFT);
-                Join<PhanHoi, CauHoi> cauHoiJoin = root.join("cauHoi", JoinType.LEFT);
-                Predicate taiKhoanPredicate = criteriaBuilder.like(taiKhoanJoin.get("tenDayDu"), pattern);
-                Predicate cauHoiPredicate = criteriaBuilder.like(cauHoiJoin.get("cauHoi"), pattern);
-                Predicate noiDungPredicate = criteriaBuilder.like(root.get("noiDung"), pattern);
-                return criteriaBuilder.or(
-                        criteriaBuilder.and(taiKhoanPredicate, cauHoiPredicate, noiDungPredicate),
-                        taiKhoanPredicate,
-                        cauHoiPredicate,
-                        noiDungPredicate
-                );
-            });
-        }
-
-        if (maTaiKhoan != null) {
-            spec = spec.and((root, criteriaQuery, criteriaBuilder) -> {
-                return criteriaBuilder.equal(root.get("sinhVien").get("taiKhoan").get("maTaiKhoan"), maTaiKhoan);
-            });
-        }
-
-        Page<PhanHoi> phanHois = phanHoiRepository.findAll(spec, paging);
-
-        return phanHois.map(PhanHoiResponse::fromEntity);
+        Page<PhanHoiResponse> phanHois = phanHoiService.getAllPhanHoi(page, size, sortBy, sortDir, searchTerm, maTaiKhoan);
+        return phanHois;
     }
 
-    @DeleteMapping("/xoa/{id}")
-    public ResponseEntity<?> deletePhanHoi(@PathVariable(value = "id") Long phanHoiId) {
-        PhanHoi phanHoi = phanHoiRepository.findById(phanHoiId)
-                .orElseThrow(() -> new ResourceNotFoundException("PhanHoi", "maPhanHoi", phanHoiId));
-
-        phanHoiRepository.delete(phanHoi);
-        // Tạo thông báo cho người dùng
-        Optional<TaiKhoan> taiKhoan = taiKhoanRepository.findByTenDangNhap(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap());
-        String tieuDe = "Xóa phản hồi";
-        String nDung = "Phản hồi " + phanHoi.getNoiDung() +
-                " của bạn đã bị xóa và không được phản hồi do có nội dung hỏi không hợp lý.";
-        ThongBao thongBao = thongBaoService.taoMoiThongBao(
-                taiKhoan.get(), tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
-        );
-        thongBaoService.luuThongBao(thongBao);
-        return ResponseEntity.ok("Da_xoa");
+    @DeleteMapping("/xoa/{ma}")
+    public ResponseEntity<?> deletePhanHoi(@PathVariable(value = "ma") Long phanHoiId) {
+        try {
+            phanHoiService.deletePhanHoiById(phanHoiId);
+            return ResponseEntity.ok("Đã xóa");
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(new MessageResponse("Câu hỏi không tồn tại!"), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse("Không thể xóa câu hỏi."), HttpStatus.BAD_REQUEST);
+        }
     }
-
     @DeleteMapping("/xoa-tat-ca")
     public ResponseEntity<?> deleteAllPhanHoi() {
-        List<PhanHoi> phanHois = phanHoiRepository.findAllByCauHoiNotNull();
-        if (!phanHois.isEmpty()) {
-            phanHoiRepository.deleteByCauHoiNotNull();
-            return ResponseEntity.ok("Da_xoa_cac_phan_hoi_da_tra_loi");
+        String result = phanHoiService.deleteAllPhanHoi();
+        if (result.equals("success")) {
+            return ResponseEntity.ok("Đã xóa tất cả các phản hồi đã được trả lời");
         } else {
-            return new ResponseEntity<>(new MessageResponse("NOT FOUND"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new MessageResponse("Không tìm thấy phản hồi đã được trả lời"), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/tra-loi/{id}")
     public ResponseEntity<?> replyToPhanHoi(@RequestBody CauHoi cauHoi,
                                             @PathVariable(value = "id") Long phanHoiId) {
-        if (cauHoiRepository.findByCauHoi(cauHoi.getCauHoi()) != null) {
-            return new ResponseEntity<>(new MessageResponse("Question already exists"), HttpStatus.CONFLICT);
-        } else {
-            cauHoiRepository.save(cauHoi);
-            CauHoi newCauHoi = cauHoiRepository.findTopByOrderByMaCauHoiDesc();
-            PhanHoi phanHoi = phanHoiRepository.findById(phanHoiId)
-                    .orElseThrow(() -> new ResourceNotFoundException("PhanHoi", "id", phanHoiId));
-            phanHoi.setCauHoi(newCauHoi);
-            phanHoiRepository.save(phanHoi);
-            // Tạo thông báo cho người dùng
-            Optional<TaiKhoan> taiKhoan = taiKhoanRepository.findByTenDangNhap(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap());
-            String tieuDe = "Trả lời phản hồi";
-            String nDung = "Câu hỏi " +  phanHoi.getNoiDung()  +
-                    " của bạn đã được phản hồi vui lòng hỏi chatbot với từ khóa " + newCauHoi.getCauHoi() + ".";
-            ThongBao thongBao = thongBaoService.taoMoiThongBao(
-                    taiKhoan.get(), tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
-            );
-            thongBaoService.luuThongBao(thongBao);
-            return ResponseEntity.ok(cauHoi);
+        try{
+            if (cauHoiService.findByCauHoi(cauHoi.getCauHoi()) != null) {
+                return new ResponseEntity<>(new MessageResponse("Câu hỏi đã tồn tại"), HttpStatus.CONFLICT);
+            } else {
+                phanHoiService.replyToPhanHoi(cauHoi, phanHoiId);
+                return ResponseEntity.ok(cauHoi);
+            }
+        }catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(new MessageResponse("Phản hồi không tồn tại!"), HttpStatus.NOT_FOUND);
         }
+
     }
 }
-

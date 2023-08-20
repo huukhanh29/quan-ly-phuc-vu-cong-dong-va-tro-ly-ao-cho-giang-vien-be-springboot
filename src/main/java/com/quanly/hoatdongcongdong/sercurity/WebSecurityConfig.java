@@ -1,9 +1,8 @@
 package com.quanly.hoatdongcongdong.sercurity;
 
-import com.quanly.hoatdongcongdong.entity.TaiKhoan;
 import com.quanly.hoatdongcongdong.sercurity.jwt.AuthEntryPointJwt;
 import com.quanly.hoatdongcongdong.sercurity.jwt.AuthTokenFilter;
-import com.quanly.hoatdongcongdong.sercurity.services.UserDetailsServiceImpl;
+import com.quanly.hoatdongcongdong.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,7 +70,6 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
                                 .requestMatchers("/phan-hoi/**").hasAnyAuthority("QuanTriVien","SinhVien")
                                 .requestMatchers("/thong-bao/**").hasAnyAuthority("QuanTriVien","SinhVien", "GiangVien")
                                 .requestMatchers("/chuc-danh/**").hasAnyAuthority("QuanTriVien", "GiangVien")
-                                .requestMatchers("/loai-hoat-dong/**").hasAnyAuthority("QuanTriVien", "GiangVien")
                                 .requestMatchers("/tai-khoan/**").hasAnyAuthority("QuanTriVien", "GiangVien", "SinhVien")
                                 .requestMatchers("/dang-ky-hoat-dong/**").hasAnyAuthority("QuanTriVien", "GiangVien")
                                 .requestMatchers("/hoat-dong/**").hasAnyAuthority("QuanTriVien", "GiangVien")

@@ -22,14 +22,14 @@ public class CauHoi{
 
     @UpdateTimestamp
     private LocalDateTime ngayCapNhat;
-//    @Formula("(SELECT COUNT(DISTINCT h.ma_tai_khoan) FROM lich_su h WHERE h.ma_cau_hoi= ma_cau_hoi)")
-//    private int soLuongDaHoi;
-//    public int getSoLuongDaHoi() {
-//        return soLuongDaHoi;
-//    }
-//    public void setSoLuongDaHoi(int soLuongDaHoi) {
-//        this.soLuongDaHoi = soLuongDaHoi;
-//    }
+    @Formula("(SELECT COUNT(DISTINCT h.ma_sinh_vien) FROM lich_su h WHERE h.ma_cau_hoi= ma_cau_hoi)")
+    private int soLuongDaHoi;
+    public int getSoLuongDaHoi() {
+        return soLuongDaHoi;
+    }
+    public void setSoLuongDaHoi(int soLuongDaHoi) {
+        this.soLuongDaHoi = soLuongDaHoi;
+    }
     public CauHoi(Long maCauHoi, String cauHoi, String traLoi, LocalDateTime ngayTao, LocalDateTime ngayCapNhat) {
         this.maCauHoi = maCauHoi;
         this.cauHoi = cauHoi;

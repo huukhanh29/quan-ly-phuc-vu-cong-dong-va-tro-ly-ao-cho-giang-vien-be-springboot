@@ -1,22 +1,17 @@
 package com.quanly.hoatdongcongdong.controller;
+
 import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
 import com.quanly.hoatdongcongdong.payload.request.CauHoiRequest;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
-import com.quanly.hoatdongcongdong.repository.*;
-import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
-import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
-import io.jsonwebtoken.Claims;
+import com.quanly.hoatdongcongdong.service.*;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,72 +19,74 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.quanly.hoatdongcongdong.sercurity.Helpers.*;
+
 @RestController
 @RequestMapping("/cau-hoi")
 @CrossOrigin(value = "*")
 public class CauHoiController {
+
+    private final CauHoiService cauHoiService;
+    private final PhanHoiService phanHoiService;
+    private final LichSuService lichSuService;
+    private final SinhVienService sinhVienService;
+    private final TaiKhoanService taiKhoanService;
+
     @Autowired
-    private CauHoiRepository cauHoiRepository;
-    @Autowired
-    private PhanHoiRepository phanHoiRepository;
-    @Autowired
-    private LichSuRepository lichSuRepository;
-    @Autowired
-    private SinhVienRepository sinhVienRepository;
-    @Autowired
-    private TaiKhoanRepository taiKhoanRepository;
-    @Autowired
-    private TaiKhoanService taiKhoanService;
+    public CauHoiController(CauHoiService cauHoiService, PhanHoiService phanHoiService,
+                            LichSuService lichSuService, SinhVienService sinhVienService,
+                            TaiKhoanService taiKhoanService) {
+        this.cauHoiService = cauHoiService;
+        this.phanHoiService = phanHoiService;
+        this.lichSuService = lichSuService;
+        this.sinhVienService = sinhVienService;
+        this.taiKhoanService = taiKhoanService;
+    }
+
     @PostMapping("/dat-cau-hoi")
     public ResponseEntity<?> getAnswer(@RequestBody CauHoiRequest request,
                                        HttpServletRequest httpServletRequest) {
         String question = request.getCauHoi().toLowerCase();
-        List<CauHoi> cauHoiList = cauHoiRepository.findAll();
-        List<Float> percSame = new ArrayList<>();
-        List<Float> same = new ArrayList<>();
+
+        List<CauHoi> cauHoiList = cauHoiService.findAllNoPage();
+
+        CauHoi bestMatch = null;
+        float maxSimilarity = 0.5f;
+
         for (CauHoi cauHoi : cauHoiList) {
-            String query = cauHoi.getCauHoi();
-            String q = query.toLowerCase();
-            float a = calculateSimilarity(createSlug(question), createSlug(q));
-            percSame.add(a);
-        }
-        for (CauHoi cauHoi : cauHoiList) {
-            String query = cauHoi.getCauHoi();
-            String q = query.toLowerCase();
-            float b = calculateSimilarity(createSlug(question), createSlug(q));
-            same.add(b);
-            float maxSame = Collections.max(same);
-            float maxPercSame = Collections.max(percSame);
-            if (maxSame == maxPercSame && maxPercSame != 0 && b >= 0.5) {
-                question = cauHoi.getCauHoi();
-                break;
+            String query = cauHoi.getCauHoi().toLowerCase();
+            float similarity = calculateSimilarity(createSlug(question), createSlug(query));
+
+            if (similarity > maxSimilarity) {
+                bestMatch = cauHoi;
+                maxSimilarity = similarity;
             }
         }
-        CauHoi cauHoi = cauHoiRepository.findByCauHoi(question);
-        if (cauHoi != null) {
-            //thêm vào lịch sử khi thực hiện hỏi thành công
-            LichSu lichSu = new LichSu();
+
+        if (bestMatch != null) {
             TaiKhoan currentUser = taiKhoanService.getCurrentUser(httpServletRequest);
-            Optional<SinhVien> sinhVien= sinhVienRepository.findById(currentUser.getMaTaiKhoan());
+            Optional<SinhVien> sinhVien = sinhVienService.findById(currentUser.getMaTaiKhoan());
+
             if (sinhVien.isPresent()) {
+                LichSu lichSu = new LichSu();
+                lichSu.setCauHoi(bestMatch);
                 lichSu.setSinhVien(sinhVien.get());
-                lichSu.setCauHoi(cauHoi);
-                lichSuRepository.save(lichSu);
+                lichSuService.saveLichSu(lichSu);
+                return ResponseEntity.ok(bestMatch);
             } else {
-                return new ResponseEntity<>(new MessageResponse("Khong_tim_thay_sinh_vien"), HttpStatus.BAD_REQUEST);
+                throw new EntityNotFoundException("Không tìm thấy sinh viên!");
             }
-            return ResponseEntity.ok(cauHoi);
         } else {
-            return new ResponseEntity<String>(new String("unknown"),HttpStatus.OK);
+            return ResponseEntity.ok(new MessageResponse("unknown"));
         }
     }
 
+
     @PostMapping("/them-moi")
     public ResponseEntity<?> createCauHoi(@RequestBody CauHoi cauHoi) {
-        if (cauHoiRepository.findByCauHoi(cauHoi.getCauHoi()) != null) {
-            return new ResponseEntity<>(new MessageResponse("Question already exists"), HttpStatus.CONFLICT);
+        if (cauHoiService.findByCauHoi(cauHoi.getCauHoi()) != null) {
+            return new ResponseEntity<>(new MessageResponse("Câu hỏi đã tồn tại!"), HttpStatus.CONFLICT);
         } else {
-            cauHoiRepository.save(cauHoi);
+            cauHoiService.saveCauHoi(cauHoi);
             return ResponseEntity.ok(cauHoi);
         }
     }
@@ -102,57 +99,46 @@ public class CauHoiController {
             @RequestParam(defaultValue = "ASC") String sortDir,
             @RequestParam(required = false, defaultValue = "") String searchTerm
     ) {
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
-        Pageable paging = PageRequest.of(page, size, sort);
-
-        Specification<CauHoi> spec = Specification.where(null);
-
-        if (!searchTerm.isEmpty()) {
-            spec = spec.and((root, criteriaQuery, criteriaBuilder) -> {
-                String pattern = "%" + searchTerm + "%";
-                return criteriaBuilder.or(
-                        criteriaBuilder.like(root.get("cauHoi"), pattern)
-                );
-            });
-        }
-        return cauHoiRepository.findAll(spec, paging);
+        return cauHoiService.getAllCauHoi(page, size, sortBy, sortDir, searchTerm);
     }
 
     @GetMapping("/{ma}")
-    public CauHoi getCauHoiById(@PathVariable(value = "ma") Long cauHoiId) {
-        return cauHoiRepository.findById(cauHoiId)
-                .orElseThrow(() -> new ResourceNotFoundException("CauHoi", "maCauHoi", cauHoiId));
+    public ResponseEntity<?> getCauHoiById(@PathVariable(value = "ma") Long cauHoiId) {
+        Optional<CauHoi> cauHoi = cauHoiService.getCauHoiById(cauHoiId);
+        if (cauHoi.isPresent()) {
+            return ResponseEntity.ok(cauHoi.get());
+        } else {
+            return new ResponseEntity<>(new MessageResponse("Câu hỏi không tồn tại!"), HttpStatus.NOT_FOUND);
+        }
     }
 
     @PutMapping("/cap-nhat/{ma}")
-    public CauHoi updateCauHoi(@PathVariable(value = "ma") Long cauHoiId,
-                               @RequestBody CauHoi cauHoiDetails) {
-        CauHoi cauHoi = cauHoiRepository.findById(cauHoiId)
-                .orElseThrow(() -> new ResourceNotFoundException("CauHoi", "maCauHoi", cauHoiId));
+    public ResponseEntity<?> updateCauHoi(@PathVariable(value = "ma") Long cauHoiId,
+                                          @RequestBody CauHoi cauHoiDetails) {
 
-        cauHoi.setCauHoi(cauHoiDetails.getCauHoi());
-        cauHoi.setTraLoi(cauHoiDetails.getTraLoi());
+        CauHoi updatedCauHoi = cauHoiService.updateCauHoi(cauHoiId, cauHoiDetails);
+        return ResponseEntity.ok(updatedCauHoi);
 
-        return cauHoiRepository.save(cauHoi);
     }
 
     @DeleteMapping("/xoa/{ma}")
     public ResponseEntity<?> deleteCauHoi(@PathVariable(value = "ma") Long cauHoiId) {
-        CauHoi cauHoi = cauHoiRepository.findById(cauHoiId)
-                .orElseThrow(() -> new ResourceNotFoundException("CauHoi", "maCauHoi", cauHoiId));
-        PhanHoi feedback = phanHoiRepository.findFirstByCauHoi_MaCauHoi(cauHoiId);
-        LichSu historyEntity = lichSuRepository.findFirstByCauHoi_MaCauHoi(cauHoiId);
-        if (feedback != null || historyEntity != null) {
-            return new ResponseEntity<>(new MessageResponse("Da_su_dung"), HttpStatus.BAD_REQUEST);
-        }
-        cauHoiRepository.delete(cauHoi);
 
+        PhanHoi feedback = phanHoiService.findFirstByCauHoi_MaCauHoi(cauHoiId);
+        LichSu historyEntity = lichSuService.findFirstByCauHoi_MaCauHoi(cauHoiId);
+        if (feedback != null || historyEntity != null) {
+            return new ResponseEntity<>(new MessageResponse("Câu hỏi đã được lưu trữ! Không thể xóa!"), HttpStatus.BAD_REQUEST);
+        }
+        cauHoiService.deleteCauHoiById(cauHoiId);
         return ResponseEntity.ok("Đã xóa");
+
     }
 
     @GetMapping("/tong-cau-hoi")
     public Long countCauHoi() {
-        return cauHoiRepository.count();
+        return cauHoiService.countCauHoi();
     }
+
 }
+
 

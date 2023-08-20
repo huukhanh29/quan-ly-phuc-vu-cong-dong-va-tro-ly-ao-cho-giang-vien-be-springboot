@@ -1,11 +1,9 @@
 package com.quanly.hoatdongcongdong.controller;
 
 import com.quanly.hoatdongcongdong.entity.ThongBao;
-import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
-import com.quanly.hoatdongcongdong.repository.ThongBaoRepository;
-import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
-import com.quanly.hoatdongcongdong.sercurity.services.ThongBaoService;
+import com.quanly.hoatdongcongdong.service.TaiKhoanService;
+import com.quanly.hoatdongcongdong.service.ThongBaoService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

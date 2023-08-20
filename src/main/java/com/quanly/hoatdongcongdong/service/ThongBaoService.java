@@ -1,4 +1,4 @@
-package com.quanly.hoatdongcongdong.sercurity.services;
+package com.quanly.hoatdongcongdong.service;
 import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.repository.ThongBaoRepository;
 import jakarta.persistence.EntityNotFoundException;

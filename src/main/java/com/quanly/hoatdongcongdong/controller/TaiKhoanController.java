@@ -1,16 +1,13 @@
 package com.quanly.hoatdongcongdong.controller;
 
-import com.quanly.hoatdongcongdong.entity.GiangVien;
-import com.quanly.hoatdongcongdong.entity.GioTichLuy;
-import com.quanly.hoatdongcongdong.entity.SinhVien;
-import com.quanly.hoatdongcongdong.entity.TaiKhoan;
+import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.payload.request.MatKhauMoiRequest;
 import com.quanly.hoatdongcongdong.payload.response.JwtResponse;
 import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
 import com.quanly.hoatdongcongdong.repository.GioTichLuyRepository;
 import com.quanly.hoatdongcongdong.repository.SinhVienRepository;
 import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
-import com.quanly.hoatdongcongdong.sercurity.services.TaiKhoanService;
+import com.quanly.hoatdongcongdong.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -39,22 +36,24 @@ public class TaiKhoanController {
     @Autowired
     private JwtUtils jwtUtils;
     @Autowired
-    private GioTichLuyRepository gioTichLuyRepository;
+    private GioTichLuyService gioTichLuyService;
     @Autowired
-    private GiangVienRepository giangVienRepository;
+    private GiangVienService giangVienService;
     @Autowired
-    private SinhVienRepository sinhVienRepository;
+    private SinhVienService sinhVienService;
+    @Autowired
+    private RefreshTokenService refreshTokenService;
     @GetMapping("/thong-tin")
     public ResponseEntity<?> layThongTinNguoiDung(HttpServletRequest httpServletRequest) {
         try {
             TaiKhoan taiKhoan = taiKhoanService.getCurrentUser(httpServletRequest);
             if(taiKhoan.getQuyen() == TaiKhoan.Quyen.SinhVien){
-                Optional<SinhVien> sinhVien = sinhVienRepository.findById(taiKhoan.getMaTaiKhoan());
+                Optional<SinhVien> sinhVien = sinhVienService.findById(taiKhoan.getMaTaiKhoan());
                 return ResponseEntity.ok(sinhVien.get());
             }
 
             if(taiKhoan.getQuyen() == TaiKhoan.Quyen.GiangVien){
-                Optional<GiangVien> giangVien = giangVienRepository.findById(taiKhoan.getMaTaiKhoan());
+                Optional<GiangVien> giangVien = giangVienService.findById(taiKhoan.getMaTaiKhoan());
                 return ResponseEntity.ok(giangVien.get());
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng");
@@ -89,9 +88,9 @@ public class TaiKhoanController {
 
         Page<?> result;
         if (userRole.equals("SinhVien")) {
-            result = sinhVienRepository.findAll((Specification<SinhVien>) spec, paging);
+            result = sinhVienService.findAllWithSpec((Specification<SinhVien>) spec, paging);
         } else if (userRole.equals("GiangVien")) {
-            result = giangVienRepository.findAll((Specification<GiangVien>) spec, paging);
+            result = giangVienService.findAllWithSpec((Specification<GiangVien>) spec, paging);
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Không có quyền truy cập danh sách này.");
         }
@@ -130,8 +129,11 @@ public class TaiKhoanController {
             // Cấp lại token và gửi trong response
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String jwt = jwtUtils.generateJwtToken(authentication);
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
-            return ResponseEntity.ok(new JwtResponse(jwt));
+            JwtResponse response = new JwtResponse(jwt, refreshToken.getToken(), userDetails.getUsername(), userDetails.getAuthority().getAuthority());
+            return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng");
         }
@@ -140,7 +142,7 @@ public class TaiKhoanController {
     @GetMapping("/danh-sach-nam-dang-ky-hoat-dong")
     public ResponseEntity<?> getAcademicYearsByUser(HttpServletRequest httpServletRequest) {
         Long maGv = taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
-        List<String> academicYears = gioTichLuyRepository.findDistinctNamHocByGiangVien(maGv);
+        List<String> academicYears = gioTichLuyService.findDistinctNamHocByGiangVien(maGv);
         return ResponseEntity.ok(academicYears);
     }
 
@@ -149,7 +151,7 @@ public class TaiKhoanController {
             @RequestParam(required = false) String namHoc,
                                                   @RequestParam(defaultValue = "Khen thưởng") String loai) {
         Long maGv = taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
-        List<String> academicYears = gioTichLuyRepository.findDistinctNamHocByGiangVien(maGv);
+        List<String> academicYears = gioTichLuyService.findDistinctNamHocByGiangVien(maGv);
         if (namHoc == null || namHoc.isEmpty()) {
             if (!academicYears.isEmpty()) {
                 namHoc = academicYears.get(0);
@@ -157,8 +159,8 @@ public class TaiKhoanController {
                 return null;
             }
         }
-        List<GioTichLuy> danhSachGioTichLuyCuaGiangVien = gioTichLuyRepository.findByNamHoc(namHoc);
-        List<GiangVien> danhSachGiangVien = giangVienRepository.findAll();
+        List<GioTichLuy> danhSachGioTichLuyCuaGiangVien = gioTichLuyService.findByNamHoc(namHoc);
+        List<GiangVien> danhSachGiangVien = giangVienService.findAll();
         List<GiangVien> giangVienKetQua = new ArrayList<>();
         if (loai.equals("Khen thưởng")) {
             giangVienKetQua = danhSachGioTichLuyCuaGiangVien.stream()
@@ -180,7 +182,7 @@ public class TaiKhoanController {
         for (GiangVien giangVien : giangVienKetQua) {
             Map<String, Object> thongTinGiangVien = new HashMap<>();
             int tongSoGio = 0;
-            GioTichLuy gioTichLuyCuaGiangVien = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNamHoc(giangVien.getMaTaiKhoan(),namHoc);
+            GioTichLuy gioTichLuyCuaGiangVien = gioTichLuyService.findByGiangVien_MaTaiKhoanAndNamHoc(giangVien.getMaTaiKhoan(),namHoc);
             if (gioTichLuyCuaGiangVien != null) {
                 tongSoGio = gioTichLuyCuaGiangVien.getTongSoGio();
             }

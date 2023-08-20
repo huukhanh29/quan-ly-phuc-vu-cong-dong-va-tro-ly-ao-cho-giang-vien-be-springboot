@@ -1,4 +1,4 @@
-package com.quanly.hoatdongcongdong.sercurity.services;
+package com.quanly.hoatdongcongdong.service;
 
 import com.quanly.hoatdongcongdong.entity.ChucDanh;
 import com.quanly.hoatdongcongdong.entity.GiangVien;
@@ -34,14 +34,9 @@ public class TaiKhoanService {
     private SinhVienRepository sinhVienRepository;
     @Autowired
     PasswordEncoder encoder;
-    @PersistenceContext
-    private EntityManager entityManager;
     public Optional<TaiKhoan> findByTenDangNhap(String ten) {
 
         return taiKhoanRepository.findByTenDangNhap(ten);
-    }
-    public List<TaiKhoan> findAllGiangVienAccounts() {
-        return taiKhoanRepository.findByQuyen(TaiKhoan.Quyen.GiangVien);
     }
 
     public Boolean existsByTenDangNhap(String ten) {

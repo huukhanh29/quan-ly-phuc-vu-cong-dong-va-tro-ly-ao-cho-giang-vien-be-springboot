@@ -1,4 +1,4 @@
-package com.quanly.hoatdongcongdong.sercurity.services;
+package com.quanly.hoatdongcongdong.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.quanly.hoatdongcongdong.entity.TaiKhoan;

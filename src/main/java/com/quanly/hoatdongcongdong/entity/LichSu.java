@@ -15,7 +15,7 @@ public class LichSu {
     private SinhVien sinhVien;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "maCauhoi", nullable = false)
+    @JoinColumn(name = "maCauHoi", nullable = false)
     private CauHoi cauHoi;
 
     @CreationTimestamp

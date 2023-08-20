@@ -1,14 +1,13 @@
 package com.quanly.hoatdongcongdong.sercurity.jwt;
 
 import com.quanly.hoatdongcongdong.entity.TaiKhoan;
-import com.quanly.hoatdongcongdong.sercurity.services.UserDetailsImpl;
+import com.quanly.hoatdongcongdong.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
