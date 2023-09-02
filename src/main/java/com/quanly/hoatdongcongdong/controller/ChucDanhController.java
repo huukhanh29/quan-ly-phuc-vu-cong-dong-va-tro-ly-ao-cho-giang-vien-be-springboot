@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(value = "/chuc-danh")
+@RequestMapping(value = "/api/chuc-danh")
 @CrossOrigin(value = "*")
 public class ChucDanhController {
 

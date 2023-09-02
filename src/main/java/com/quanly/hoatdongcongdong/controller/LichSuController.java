@@ -20,7 +20,7 @@ import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 @RestController
-@RequestMapping("/lich-su")
+@RequestMapping("/api/lich-su")
 @CrossOrigin(value = "*")
 public class LichSuController {
     private final TaiKhoanService taiKhoanService;

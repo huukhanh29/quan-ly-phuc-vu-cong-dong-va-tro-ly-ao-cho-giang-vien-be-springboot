@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/dang-ky-hoat-dong")
+@RequestMapping("/api/dang-ky-hoat-dong")
 @CrossOrigin(value = "*")
 public class DangKyHoatDongController {
 

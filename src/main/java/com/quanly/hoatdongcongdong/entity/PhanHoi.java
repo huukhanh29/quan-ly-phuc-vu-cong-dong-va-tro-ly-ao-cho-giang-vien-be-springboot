@@ -13,7 +13,7 @@ public class PhanHoi {
     @Column(columnDefinition = "TEXT")
     private String noiDung;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "maCauHoi", nullable = true)
     private CauHoi cauHoi;
 

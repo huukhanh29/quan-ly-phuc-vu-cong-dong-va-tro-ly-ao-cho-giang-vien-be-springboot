@@ -61,7 +61,7 @@ public class PhanHoiService {
         Optional<PhanHoi> optionalPhanHoi = phanHoiRepository.findById(id);
         return optionalPhanHoi.orElse(null);
     }
-    public Page<PhanHoiResponse> getAllPhanHoi(int page, int size, String sortBy, String sortDir, String searchTerm, Long maTaiKhoan) {
+    public Page<PhanHoi> getAllPhanHoi(int page, int size, String sortBy, String sortDir, String searchTerm, String tenDangNhap) {
         Pageable paging = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDir), sortBy));
 
         Specification<PhanHoi> spec = Specification.where(null);
@@ -83,14 +83,13 @@ public class PhanHoiService {
             });
         }
 
-        if (maTaiKhoan != null) {
+        if (tenDangNhap != null) {
             spec = spec.and((root, criteriaQuery, criteriaBuilder) -> {
-                return criteriaBuilder.equal(root.get("sinhVien").get("taiKhoan").get("maTaiKhoan"), maTaiKhoan);
+                return criteriaBuilder.equal(root.get("sinhVien").get("taiKhoan").get("tenDangNhap"), tenDangNhap);
             });
         }
 
-        Page<PhanHoi> phanHois = phanHoiRepository.findAll(spec, paging);
-        return phanHois.map(PhanHoiResponse::fromEntity);
+        return phanHoiRepository.findAll(spec, paging);
     }
 
     public void deletePhanHoiById(Long phanHoiId) {

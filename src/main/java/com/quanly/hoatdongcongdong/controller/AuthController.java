@@ -35,9 +35,9 @@ import java.util.stream.Collectors;
 import org.springframework.validation.ObjectError;
 
 
-@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials = "true")
+@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/tai-khoan")
+@RequestMapping("/api/tai-khoan")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final TaiKhoanService taiKhoanService;

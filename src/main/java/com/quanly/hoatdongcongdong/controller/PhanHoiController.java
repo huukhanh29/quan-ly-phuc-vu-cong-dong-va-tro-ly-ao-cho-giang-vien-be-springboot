@@ -3,7 +3,6 @@ package com.quanly.hoatdongcongdong.controller;
 import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.payload.request.PhanHoiRequest;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
-import com.quanly.hoatdongcongdong.payload.response.PhanHoiResponse;
 import com.quanly.hoatdongcongdong.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,7 +15,7 @@ import java.util.Optional;
 
 
 @RestController
-@RequestMapping("/phan-hoi")
+@RequestMapping("/api/phan-hoi")
 @CrossOrigin(value = "*")
 public class PhanHoiController {
 
@@ -44,8 +43,8 @@ public class PhanHoiController {
     public ResponseEntity<?> createPhanHoi(@RequestBody PhanHoiRequest phanHoiRequest,
                                            HttpServletRequest request) {
         if (phanHoiService.findByNoiDung(phanHoiRequest.getNoiDung()) != null) {
-            return new ResponseEntity<>(new MessageResponse("Phản hồi đã tồn tại!"),
-                    HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new MessageResponse("exist"),
+                    HttpStatus.OK);
         }
         // Lấy thông tin người dùng hiện tại
         Optional<SinhVien> sinhVien = sinhVienService.findById(taiKhoanService.getCurrentUser(request).getMaTaiKhoan());
@@ -56,19 +55,20 @@ public class PhanHoiController {
                     HttpStatus.BAD_REQUEST);
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("Thêm phản hồi thành công!");
+        return new ResponseEntity<>(new MessageResponse("OK"),
+                HttpStatus.CREATED);
     }
 
     @GetMapping("/lay-danh-sach")
-    public Page<PhanHoiResponse> getAllPhanHoi(
+    public Page<PhanHoi> getAllPhanHoi(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "ngayTao") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDir,
             @RequestParam(required = false, defaultValue = "") String searchTerm,
-            @RequestParam(required = false) Long maTaiKhoan
+            @RequestParam(required = false) String tenDangNhap
     ) {
-        Page<PhanHoiResponse> phanHois = phanHoiService.getAllPhanHoi(page, size, sortBy, sortDir, searchTerm, maTaiKhoan);
+        Page<PhanHoi> phanHois = phanHoiService.getAllPhanHoi(page, size, sortBy, sortDir, searchTerm, tenDangNhap);
         return phanHois;
     }
 

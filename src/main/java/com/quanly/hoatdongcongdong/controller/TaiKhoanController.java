@@ -3,9 +3,6 @@ package com.quanly.hoatdongcongdong.controller;
 import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.payload.request.MatKhauMoiRequest;
 import com.quanly.hoatdongcongdong.payload.response.JwtResponse;
-import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
-import com.quanly.hoatdongcongdong.repository.GioTichLuyRepository;
-import com.quanly.hoatdongcongdong.repository.SinhVienRepository;
 import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
 import com.quanly.hoatdongcongdong.service.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,9 +24,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials = "true")
+@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/tai-khoan")
+@RequestMapping("/api/tai-khoan")
 public class TaiKhoanController {
     @Autowired
     private TaiKhoanService taiKhoanService;
@@ -123,7 +120,9 @@ public class TaiKhoanController {
             if (!taiKhoanService.isMatKhauHopLe(matKhauMoiRequest.getMatKhauCu(), currentUser.getMatKhau())) {
                 return ResponseEntity.badRequest().body("NOMATCH");
             }
-
+            if (taiKhoanService.isMatKhauHopLe(matKhauMoiRequest.getMatKhauMoi(), currentUser.getMatKhau())) {
+                return ResponseEntity.badRequest().body("NOCHANGE");
+            }
             taiKhoanService.capNhatMatKhauNguoiDung(currentUser.getMaTaiKhoan(), matKhauMoiRequest.getMatKhauMoi());
 
             // Cấp lại token và gửi trong response

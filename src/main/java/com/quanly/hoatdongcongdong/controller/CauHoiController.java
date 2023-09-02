@@ -21,7 +21,7 @@ import java.util.Optional;
 import static com.quanly.hoatdongcongdong.sercurity.Helpers.*;
 
 @RestController
-@RequestMapping("/cau-hoi")
+@RequestMapping("/api/cau-hoi")
 @CrossOrigin(value = "*")
 public class CauHoiController {
 
