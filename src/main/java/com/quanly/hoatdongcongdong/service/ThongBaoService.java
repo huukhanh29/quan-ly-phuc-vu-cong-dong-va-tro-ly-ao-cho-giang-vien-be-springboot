@@ -42,7 +42,9 @@ public class ThongBaoService {
     public List<ThongBao> layThongBaoTheoTaiKhoan(Long maTaiKhoan) {
         return thongBaoRepository.findByTaiKhoan_MaTaiKhoan(maTaiKhoan);
     }
-
+    public Long soThongBaoChuaDocTheoTaiKhoan(Long maTaiKhoan) {
+        return thongBaoRepository.countChuaDocByMaTaiKhoan(maTaiKhoan);
+    }
     public void xoaThongBaoDaDocTheoTaiKhoan(Long maTaiKhoan) {
         thongBaoRepository.deleteAllByTaiKhoan_MaTaiKhoanAndTrangThai(maTaiKhoan, ThongBao.TrangThai.DaDoc);
     }

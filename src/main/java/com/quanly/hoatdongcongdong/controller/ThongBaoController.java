@@ -26,7 +26,12 @@ public class ThongBaoController {
         List<ThongBao> thongBaos = thongBaoService.layThongBaoTheoTaiKhoan(maTk);
         return ResponseEntity.ok(thongBaos);
     }
-
+    @GetMapping("/chua-doc")
+    public ResponseEntity<Long> demThongBaoChuaDoc(HttpServletRequest httpServletRequest) {
+        Long maTk =  taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
+        Long soLuongChuaDoc = thongBaoService.soThongBaoChuaDocTheoTaiKhoan(maTk);
+        return ResponseEntity.ok(soLuongChuaDoc);
+    }
     @PutMapping("/trang-thai/{maThongBao}")
     public ResponseEntity<?> datTrangThaiThongBao(@PathVariable Long maThongBao) {
         ThongBao thongBao = thongBaoService.layThongBaoTheoMaThongBao(maThongBao);

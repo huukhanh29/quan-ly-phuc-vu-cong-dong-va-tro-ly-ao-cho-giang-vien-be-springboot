@@ -41,21 +41,35 @@ public class TaiKhoanController {
     @Autowired
     private RefreshTokenService refreshTokenService;
     @GetMapping("/thong-tin")
-    public ResponseEntity<?> layThongTinNguoiDung(HttpServletRequest httpServletRequest) {
-        try {
-            TaiKhoan taiKhoan = taiKhoanService.getCurrentUser(httpServletRequest);
-            if(taiKhoan.getQuyen() == TaiKhoan.Quyen.SinhVien){
-                Optional<SinhVien> sinhVien = sinhVienService.findById(taiKhoan.getMaTaiKhoan());
-                return ResponseEntity.ok(sinhVien.get());
-            }
+    public ResponseEntity<?> getUserDetails(
+            @RequestParam(value = "tenDangNhap", required = false) String tenDangNhap,
+            HttpServletRequest httpServletRequest) {
 
-            if(taiKhoan.getQuyen() == TaiKhoan.Quyen.GiangVien){
-                Optional<GiangVien> giangVien = giangVienService.findById(taiKhoan.getMaTaiKhoan());
-                return ResponseEntity.ok(giangVien.get());
+        TaiKhoan queriedUser;
+
+        if (tenDangNhap != null && !tenDangNhap.isEmpty()) {
+            // Tìm kiếm tài khoản theo tên đăng nhập
+            queriedUser = taiKhoanService.findByTenDangNhap(tenDangNhap)
+                    .orElseThrow(() -> new EntityNotFoundException("User with username " + tenDangNhap + " not found"));
+        } else {
+            // Sử dụng thông tin của người dùng hiện tại
+            queriedUser = taiKhoanService.getCurrentUser(httpServletRequest);
+            if (queriedUser == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng");
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng");
+        }
+
+        switch (queriedUser.getQuyen()) {
+            case GiangVien:
+                GiangVien giaoVien = giangVienService.findById(queriedUser.getMaTaiKhoan())
+                        .orElseThrow(() -> new EntityNotFoundException("GiaoVien not found"));
+                return ResponseEntity.ok(giaoVien);
+            case SinhVien:
+                SinhVien hocVien = sinhVienService.findById(queriedUser.getMaTaiKhoan())
+                        .orElseThrow(() -> new EntityNotFoundException("HocVien not found"));
+                return ResponseEntity.ok(hocVien);
+            default:
+                return ResponseEntity.badRequest().body("Quyền không hợp lệ!");
         }
     }
     @GetMapping("/lay-danh-sach")
