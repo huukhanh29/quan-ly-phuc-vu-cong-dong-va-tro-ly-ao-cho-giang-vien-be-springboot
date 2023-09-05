@@ -26,6 +26,7 @@ public class ThongBaoController {
         List<ThongBao> thongBaos = thongBaoService.layThongBaoTheoTaiKhoan(maTk);
         return ResponseEntity.ok(thongBaos);
     }
+    //lấy số thông báo chưa đọc
     @GetMapping("/chua-doc")
     public ResponseEntity<Long> demThongBaoChuaDoc(HttpServletRequest httpServletRequest) {
         Long maTk =  taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();

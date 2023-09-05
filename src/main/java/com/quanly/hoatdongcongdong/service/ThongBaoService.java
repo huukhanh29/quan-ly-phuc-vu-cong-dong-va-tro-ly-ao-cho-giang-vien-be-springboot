@@ -3,6 +3,7 @@ import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.repository.ThongBaoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,7 +12,16 @@ import java.util.List;
 public class ThongBaoService {
 
     private final ThongBaoRepository thongBaoRepository;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
+    public void sendNotificationToUser(String username, String message) {
+        messagingTemplate.convertAndSendToUser(
+                username,
+                "/queue/specific-user",  // Đường dẫn queue tới người dùng cụ thể
+                message
+        );
+    }
     @Autowired
     public ThongBaoService(ThongBaoRepository thongBaoRepository) {
         this.thongBaoRepository = thongBaoRepository;

@@ -1,5 +1,6 @@
 package com.quanly.hoatdongcongdong.service;
 
+
 import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
 import com.quanly.hoatdongcongdong.payload.response.PhanHoiResponse;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +29,9 @@ public class PhanHoiService {
     private TaiKhoanService taiKhoanService;
     @Autowired
     private CauHoiService cauHoiService;
+    @Autowired
+    private SimpMessageSendingOperations messagingTemplate;
+
     private final PhanHoiRepository phanHoiRepository;
 
 
@@ -121,7 +126,10 @@ public class PhanHoiService {
             PhanHoi phanHoi = phanHoiOptional.get();
             phanHoi.setCauHoi(newCauHoi);
             phanHoiRepository.save(phanHoi);
-            // Tạo thông báo cho người dùng
+            //messagingTemplate.convertAndSend("/topic/notification", "ok");
+            messagingTemplate.convertAndSendToUser("sinhvien1", "/queue/messages", "ok lala");
+
+            //messagingTemplate.convertAndSendToUser("sinhvien1", "/queue/notification", "OK");
             Optional<TaiKhoan> taiKhoan = taiKhoanService.findByTenDangNhap(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap());
             String tieuDe = "Trả lời phản hồi";
             String noiDung = "Câu hỏi " + phanHoi.getNoiDung() +
