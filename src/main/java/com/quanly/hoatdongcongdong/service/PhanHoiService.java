@@ -126,10 +126,7 @@ public class PhanHoiService {
             PhanHoi phanHoi = phanHoiOptional.get();
             phanHoi.setCauHoi(newCauHoi);
             phanHoiRepository.save(phanHoi);
-            //messagingTemplate.convertAndSend("/topic/notification", "ok");
-            messagingTemplate.convertAndSendToUser("sinhvien1", "/queue/messages", "ok lala");
-
-            //messagingTemplate.convertAndSendToUser("sinhvien1", "/queue/notification", "OK");
+            messagingTemplate.convertAndSendToUser(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap(), "/queue/messages", "reply-feedback");
             Optional<TaiKhoan> taiKhoan = taiKhoanService.findByTenDangNhap(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap());
             String tieuDe = "Trả lời phản hồi";
             String noiDung = "Câu hỏi " + phanHoi.getNoiDung() +
