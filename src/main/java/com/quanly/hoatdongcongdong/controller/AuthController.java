@@ -24,15 +24,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import org.springframework.validation.ObjectError;
+
 
 
 @CrossOrigin(origins = "*")
@@ -64,7 +60,7 @@ public class AuthController {
         String taiKhoan = loginRequest.getTaiKhoan();
 
         if (taiKhoanService.isTaiKhoanKhoa(taiKhoan)) {
-            throw new BadRequestException("Tài khoản bị khóa");
+            return new ResponseEntity<>(new MessageResponse("account-block"), HttpStatus.OK);
         }
 
         // Kiểm tra thông tin
@@ -73,23 +69,18 @@ public class AuthController {
                 !taiKhoanService.isMatKhauHopLe(loginRequest.getMatKhau(), taiKhoanInfo.get().getMatKhau()) ||
                 !taiKhoanService.existsByTenDangNhap(taiKhoan)
         ) {
-            throw new BadRequestException("Sai thông tin đăng nhập");
+            return new ResponseEntity<>(new MessageResponse("info-warning"), HttpStatus.OK);
         }
 
-        Authentication authentication;
-        try {
-            authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getTaiKhoan(), loginRequest.getMatKhau()));
-        } catch (AuthenticationException e) {
-            throw new UnAuthorizeException("Lỗi xác thực");
-        }
-
+        Authentication authentication= authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getTaiKhoan(), loginRequest.getMatKhau()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
+        Long expirationDate = jwtUtils.getExpirationDateFromJwtToken(jwt).getTime()/1000;
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
-        JwtResponse response = new JwtResponse(jwt, refreshToken.getToken(), userDetails.getUsername(), userDetails.getAuthority().getAuthority());
+        JwtResponse response = new JwtResponse(jwt, refreshToken.getRefreshtoken(), userDetails.getUsername(), userDetails.getAuthority().getAuthority(), expirationDate);
         return ResponseEntity.ok(response);
     }
 
@@ -103,21 +94,16 @@ public class AuthController {
                 .map(user -> {
                     Authentication authentication = jwtUtils.getAuthenticationFromUser(user);
                     String jwt = jwtUtils.generateJwtToken(authentication);
+                    Long expirationDate = jwtUtils.getExpirationDateFromJwtToken(jwt).getTime()/1000;
                     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-                    JwtResponse response = new JwtResponse(jwt, requestRefreshToken, userDetails.getUsername(), userDetails.getAuthority().getAuthority());
+                    JwtResponse response = new JwtResponse(jwt, requestRefreshToken, userDetails.getUsername(), userDetails.getAuthority().getAuthority(),expirationDate);
                     return ResponseEntity.ok(response);
                 })
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken, "Refresh token is not in database!"));
     }
 
 
-    @PostMapping("/dang-xuat")
-    public ResponseEntity<?> logoutUser() {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long userId = userDetails.getId();
-        refreshTokenService.deleteByMaTaiKhoan(userId);
-        return ResponseEntity.ok(new MessageResponse("Log out successful!"));
-    }
+
 
     @PostMapping("/them-tai-khoan")
     public ResponseEntity<?> themNguoiDung(@Valid @RequestBody TaiKhoanMoiRequest request) {

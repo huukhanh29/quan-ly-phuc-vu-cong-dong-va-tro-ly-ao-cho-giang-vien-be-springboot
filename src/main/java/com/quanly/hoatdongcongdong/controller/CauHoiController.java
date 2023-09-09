@@ -138,7 +138,6 @@ public class CauHoiController {
     public Long countCauHoi() {
         return cauHoiService.countCauHoi();
     }
-
 }
 
 

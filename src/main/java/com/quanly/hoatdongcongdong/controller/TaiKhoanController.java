@@ -2,7 +2,9 @@ package com.quanly.hoatdongcongdong.controller;
 
 import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.payload.request.MatKhauMoiRequest;
+import com.quanly.hoatdongcongdong.payload.request.TokenRefreshRequest;
 import com.quanly.hoatdongcongdong.payload.response.JwtResponse;
+import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
 import com.quanly.hoatdongcongdong.service.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -144,8 +146,8 @@ public class TaiKhoanController {
             String jwt = jwtUtils.generateJwtToken(authentication);
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-
-            JwtResponse response = new JwtResponse(jwt, refreshToken.getToken(), userDetails.getUsername(), userDetails.getAuthority().getAuthority());
+            Long expirationDate = jwtUtils.getExpirationDateFromJwtToken(jwt).getTime()/1000;
+            JwtResponse response = new JwtResponse(jwt, refreshToken.getRefreshtoken(), userDetails.getUsername(), userDetails.getAuthority().getAuthority(), expirationDate);
             return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng");
@@ -158,7 +160,15 @@ public class TaiKhoanController {
         List<String> academicYears = gioTichLuyService.findDistinctNamHocByGiangVien(maGv);
         return ResponseEntity.ok(academicYears);
     }
-
+    @PostMapping("/dang-xuat")
+    public ResponseEntity<?> logoutUser(@Valid @RequestBody TokenRefreshRequest request,
+                                        HttpServletRequest httpServletRequest) {
+//        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        Long userId = userDetails.getId();
+//        TaiKhoan currentUser = taiKhoanService.getCurrentUser(httpServletRequest);
+        refreshTokenService.deleteByRf(request.getRefreshToken());
+        return ResponseEntity.ok(new MessageResponse("Log out successful!"));
+    }
     @GetMapping("/ds-giang-vien-khen-thuong-hoac-khien-trach")
     public List<Map<String, Object>> getGiangVien(HttpServletRequest httpServletRequest,
             @RequestParam(required = false) String namHoc,

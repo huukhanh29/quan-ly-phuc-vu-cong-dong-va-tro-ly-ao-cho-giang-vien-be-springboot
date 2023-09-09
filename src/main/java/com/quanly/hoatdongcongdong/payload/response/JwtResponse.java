@@ -6,16 +6,20 @@ public class JwtResponse {
   private String tenTaiKhoan;
   private String quyen;
   private String refreshToken;
+  private Long ngayHetHan;
 
   public JwtResponse() {
   }
 
-  public JwtResponse(String token, String refreshToken, String tenTaiKhoan, String quyen) {
+  public JwtResponse(String token, String refreshToken, String tenTaiKhoan,
+                     String quyen, Long ngayHetHan) {
     this.token = token;
     this.refreshToken = refreshToken;
     this.tenTaiKhoan = tenTaiKhoan;
     this.quyen = quyen;
+    this.ngayHetHan = ngayHetHan;
   }
+
 
   public String getTenTaiKhoan() {
     return tenTaiKhoan;
@@ -55,5 +59,13 @@ public class JwtResponse {
 
   public void setType(String type) {
     this.type = type;
+  }
+
+  public Long getNgayHetHan() {
+    return ngayHetHan;
+  }
+
+  public void setNgayHetHan(Long ngayHetHan) {
+    this.ngayHetHan = ngayHetHan;
   }
 }

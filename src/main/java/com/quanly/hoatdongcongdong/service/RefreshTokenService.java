@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Service
 public class RefreshTokenService {
-    @Value(" 604800000")
+    @Value("604800000")
     private Long refreshTokenDurationMs;
 
     @Autowired
@@ -26,14 +26,14 @@ public class RefreshTokenService {
     private TaiKhoanRepository taiKhoanRepository;
 
     public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenRepository.findByToken(token);
+        return refreshTokenRepository.findByRefreshtoken(token);
     }
     public RefreshToken createRefreshToken(Long maTK) {
 
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setTaiKhoan(taiKhoanRepository.findByMaTaiKhoan(maTK).get());
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
-        refreshToken.setToken(UUID.randomUUID().toString());
+        refreshToken.setRefreshtoken(UUID.randomUUID().toString());
         refreshToken = refreshTokenRepository.save(refreshToken);
 
         return refreshToken;
@@ -42,15 +42,15 @@ public class RefreshTokenService {
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
-            throw new TokenRefreshException(token.getToken(),
+            throw new TokenRefreshException(token.getRefreshtoken(),
                     "Refresh token was expired. Please make a new signin request");
         }
         return token;
     }
 
     @Transactional
-    public int deleteByMaTaiKhoan(Long maTK) {
-        return refreshTokenRepository.deleteByTaiKhoan(taiKhoanRepository.findById(maTK).get());
+    public void deleteByRf(String refreshToken) {
+        refreshTokenRepository.deleteByRefreshtoken(refreshToken);
     }
 
     //tự động xóa các refreshtoken sau 1 ngày.
