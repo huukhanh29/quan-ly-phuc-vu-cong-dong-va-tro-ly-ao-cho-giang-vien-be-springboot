@@ -52,7 +52,7 @@ public class TaiKhoanController {
         if (tenDangNhap != null && !tenDangNhap.isEmpty()) {
             // Tìm kiếm tài khoản theo tên đăng nhập
             queriedUser = taiKhoanService.findByTenDangNhap(tenDangNhap)
-                    .orElseThrow(() -> new EntityNotFoundException("User with username " + tenDangNhap + " not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("not-found"));
         } else {
             // Sử dụng thông tin của người dùng hiện tại
             queriedUser = taiKhoanService.getCurrentUser(httpServletRequest);
@@ -62,16 +62,19 @@ public class TaiKhoanController {
         }
 
         switch (queriedUser.getQuyen()) {
-            case GiangVien:
+            case GiangVien -> {
                 GiangVien giaoVien = giangVienService.findById(queriedUser.getMaTaiKhoan())
                         .orElseThrow(() -> new EntityNotFoundException("GiaoVien not found"));
                 return ResponseEntity.ok(giaoVien);
-            case SinhVien:
+            }
+            case SinhVien -> {
                 SinhVien hocVien = sinhVienService.findById(queriedUser.getMaTaiKhoan())
                         .orElseThrow(() -> new EntityNotFoundException("HocVien not found"));
                 return ResponseEntity.ok(hocVien);
-            default:
+            }
+            default -> {
                 return ResponseEntity.badRequest().body("Quyền không hợp lệ!");
+            }
         }
     }
     @GetMapping("/lay-danh-sach")
@@ -124,7 +127,7 @@ public class TaiKhoanController {
                     request.getDiaChi());
             return ResponseEntity.ok(currentUser);
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng");
+            return new ResponseEntity<>(new MessageResponse("taikhoan-notfound"), HttpStatus.NOT_FOUND);
         }
     }
     @PutMapping("/doi-mat-khau")
@@ -134,10 +137,10 @@ public class TaiKhoanController {
             TaiKhoan currentUser = taiKhoanService.getCurrentUser(httpServletRequest);
 
             if (!taiKhoanService.isMatKhauHopLe(matKhauMoiRequest.getMatKhauCu(), currentUser.getMatKhau())) {
-                return ResponseEntity.badRequest().body("NOMATCH");
+                return new ResponseEntity<>(new MessageResponse("not-match"), HttpStatus.OK);
             }
             if (taiKhoanService.isMatKhauHopLe(matKhauMoiRequest.getMatKhauMoi(), currentUser.getMatKhau())) {
-                return ResponseEntity.badRequest().body("NOCHANGE");
+                return new ResponseEntity<>(new MessageResponse("no-change"), HttpStatus.OK);
             }
             taiKhoanService.capNhatMatKhauNguoiDung(currentUser.getMaTaiKhoan(), matKhauMoiRequest.getMatKhauMoi());
 
@@ -163,9 +166,6 @@ public class TaiKhoanController {
     @PostMapping("/dang-xuat")
     public ResponseEntity<?> logoutUser(@Valid @RequestBody TokenRefreshRequest request,
                                         HttpServletRequest httpServletRequest) {
-//        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        Long userId = userDetails.getId();
-//        TaiKhoan currentUser = taiKhoanService.getCurrentUser(httpServletRequest);
         refreshTokenService.deleteByRf(request.getRefreshToken());
         return ResponseEntity.ok(new MessageResponse("Log out successful!"));
     }

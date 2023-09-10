@@ -51,7 +51,7 @@ public class PhanHoiController {
         if(sinhVien.isPresent()){
             phanHoiService.createPhanHoi(phanHoiRequest.getNoiDung(), sinhVien.get());
         }else {
-            return new ResponseEntity<>(new MessageResponse("Sinh viên không tồn tại"),
+            return new ResponseEntity<>(new MessageResponse("sinhvien-notfound"),
                     HttpStatus.BAD_REQUEST);
         }
 
@@ -78,9 +78,9 @@ public class PhanHoiController {
             phanHoiService.deletePhanHoiById(phanHoiId);
             return ResponseEntity.ok("Đã xóa");
         } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(new MessageResponse("Câu hỏi không tồn tại!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new MessageResponse("caihoi-notfound"), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return new ResponseEntity<>(new MessageResponse("Không thể xóa câu hỏi."), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new MessageResponse("cant-delete"), HttpStatus.BAD_REQUEST);
         }
     }
     @DeleteMapping("/xoa-tat-ca")
@@ -89,7 +89,7 @@ public class PhanHoiController {
         if (result.equals("success")) {
             return ResponseEntity.ok("Đã xóa tất cả các phản hồi đã được trả lời");
         } else {
-            return new ResponseEntity<>(new MessageResponse("Không tìm thấy phản hồi đã được trả lời"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new MessageResponse("not-found"), HttpStatus.OK);
         }
     }
 
@@ -98,13 +98,13 @@ public class PhanHoiController {
                                             @PathVariable(value = "id") Long phanHoiId) {
         try{
             if (cauHoiService.findByCauHoi(cauHoi.getCauHoi()) != null) {
-                return new ResponseEntity<>(new MessageResponse("Câu hỏi đã tồn tại"), HttpStatus.CONFLICT);
+                return new ResponseEntity<>(new MessageResponse("cauhoi-exist"), HttpStatus.OK);
             } else {
                 phanHoiService.replyToPhanHoi(cauHoi, phanHoiId);
                 return ResponseEntity.ok(cauHoi);
             }
         }catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(new MessageResponse("Phản hồi không tồn tại!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new MessageResponse("phanhoi-notfound"), HttpStatus.NOT_FOUND);
         }
 
     }

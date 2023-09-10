@@ -1,11 +1,14 @@
 package com.quanly.hoatdongcongdong.sercurity;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quanly.hoatdongcongdong.entity.TaiKhoan;
 import com.quanly.hoatdongcongdong.repository.TaiKhoanRepository;
 import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.text.Normalizer;
 import java.util.Arrays;
@@ -25,12 +28,17 @@ public class Helpers {
         return (float) matches / words2.length;
     }
 
-    public static Map<String, Integer> getWordFrequency(String[] words) {
-        Map<String, Integer> frequencyMap = new HashMap<>();
-        for (String word : words) {
-            frequencyMap.put(word, frequencyMap.getOrDefault(word, 0) + 1);
+    public static ResponseEntity<String> createErrorResponse(String errorMessage, HttpStatus httpStatus) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            // Chuyển thông báo lỗi thành JSON
+            String errorJson = objectMapper.writeValueAsString(errorMessage);
+            // Trả về JSON và mã HTTP tùy chỉnh
+            return new ResponseEntity<>(errorJson, httpStatus);
+        } catch (Exception e) {
+            // Xử lý các exception khác nếu cần
+            return new ResponseEntity<>("Lỗi xử lý JSON", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return frequencyMap;
     }
 
     public static String createSlug(String string) {

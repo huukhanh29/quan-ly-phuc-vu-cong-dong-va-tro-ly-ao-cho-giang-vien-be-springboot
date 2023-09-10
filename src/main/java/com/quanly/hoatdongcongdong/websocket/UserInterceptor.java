@@ -17,7 +17,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.stereotype.Component;
 
 public class UserInterceptor implements ChannelInterceptor {
     @Override
@@ -34,9 +33,6 @@ public class UserInterceptor implements ChannelInterceptor {
                     String jwtToken = token.toString().substring(7);
                     if (JwtUtils.validateJwtToken(jwtToken)) {
                         accessor.setUser(new User(((ArrayList<String>) name).get(0))); // Xác thực thành công
-                    } else {
-                        throw new SecurityException("JWT Token is invalid"); // Xác thực thất bại
-
                     }
                 }
             }

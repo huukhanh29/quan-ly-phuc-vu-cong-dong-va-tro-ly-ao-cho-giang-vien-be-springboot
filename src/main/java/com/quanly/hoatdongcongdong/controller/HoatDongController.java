@@ -77,7 +77,7 @@ public class HoatDongController {
     @DeleteMapping("/xoa/{maHoatDong}")
     public ResponseEntity<?> deleteHoatDong(@PathVariable Long maHoatDong) {
         if (dangKyHoatDongService.existsByHoatDong_MaHoatDong(maHoatDong)) {
-            return new ResponseEntity<>(new MessageResponse("Không thể xóa do đã có dữ liệu lưu trữ!"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new MessageResponse("cant-delete"), HttpStatus.BAD_REQUEST);
         }
         hoatDongService.deleteHoatDongById(maHoatDong);
         return ResponseEntity.ok("Đã xóa");

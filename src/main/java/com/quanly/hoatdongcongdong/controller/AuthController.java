@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 
-
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/tai-khoan")
@@ -102,9 +101,6 @@ public class AuthController {
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken, "Refresh token is not in database!"));
     }
 
-
-
-
     @PostMapping("/them-tai-khoan")
     public ResponseEntity<?> themNguoiDung(@Valid @RequestBody TaiKhoanMoiRequest request) {
         if (request.getQuyen() == TaiKhoan.Quyen.SinhVien) {
@@ -114,7 +110,7 @@ public class AuthController {
         } else if (request.getQuyen() == TaiKhoan.Quyen.GiangVien) {
             Optional<ChucDanh> chucDanh = chucDanhService.findById(request.getMaChucDanh());
             if (chucDanh.isEmpty()) {
-                throw new EntityNotFoundException("Không tìm thấy chức danh!");
+                return new ResponseEntity<>(new MessageResponse("chucdanh-notfound"), HttpStatus.NOT_FOUND);
             }
             taiKhoanService.themMoiGiangVien(request.getTenDangNhap(), request.getMatKhau(),
                     request.getEmail(), request.getQuyen(), request.getTenDayDu(),

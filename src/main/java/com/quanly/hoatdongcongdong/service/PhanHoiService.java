@@ -5,6 +5,7 @@ import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
 import com.quanly.hoatdongcongdong.payload.response.PhanHoiResponse;
 import com.quanly.hoatdongcongdong.repository.PhanHoiRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -19,6 +20,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -88,7 +90,7 @@ public class PhanHoiService {
             });
         }
 
-        if (tenDangNhap != null) {
+        if (!Objects.equals(tenDangNhap, "")) {
             spec = spec.and((root, criteriaQuery, criteriaBuilder) -> {
                 return criteriaBuilder.equal(root.get("sinhVien").get("taiKhoan").get("tenDangNhap"), tenDangNhap);
             });
@@ -102,7 +104,7 @@ public class PhanHoiService {
         if (optionalPhanHoi.isPresent()) {
             phanHoiRepository.deleteById(phanHoiId);
         } else {
-            throw new ResourceNotFoundException("PhanHoi", "maPhanHoi", phanHoiId);
+            throw new EntityNotFoundException("phanhoi-notfound");
         }
 
     }
@@ -136,7 +138,7 @@ public class PhanHoiService {
             );
             thongBaoService.luuThongBao(thongBao);
         }else {
-            throw new ResourceNotFoundException("PhanHoi", "maPhanHoi", phanHoiId);
+            throw new EntityNotFoundException("phanhoi-notfound");
         }
 
     }

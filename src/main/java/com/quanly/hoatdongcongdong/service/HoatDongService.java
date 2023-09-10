@@ -3,8 +3,8 @@ package com.quanly.hoatdongcongdong.service;
 import com.quanly.hoatdongcongdong.entity.GiangVien;
 import com.quanly.hoatdongcongdong.entity.HoatDong;
 import com.quanly.hoatdongcongdong.entity.LoaiHoatDong;
-import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
 import com.quanly.hoatdongcongdong.payload.response.HoatDongResponse;
+import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.DangKyHoatDongRepository;
 import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
 import com.quanly.hoatdongcongdong.repository.HoatDongRepository;
@@ -16,6 +16,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -133,18 +135,20 @@ public class HoatDongService {
 
         return "Hoạt động đã được thêm thành công";
     }
-    public String updateHoatDong(Long maHoatDong, HoatDongResponse hoatDongResponse) {
+    public void updateHoatDong(Long maHoatDong, HoatDongResponse hoatDongResponse) {
 
         // Kiểm tra hoạt động có tồn tại không
         Optional<HoatDong> existingHoatDong = hoatDongRepository.findById(maHoatDong);
         if (existingHoatDong.isEmpty()) {
-            return "Hoạt động không tồn tại";
+            new ResponseEntity<>(new MessageResponse("hoatdong-notfound"), HttpStatus.NOT_FOUND);
+            return;
         }
 
         // Kiểm tra nếu loại hoạt động không tồn tại
         Optional<LoaiHoatDong> loaiHoatDong = loaiHoatDongRepository.findById(hoatDongResponse.getMaLoaiHoatDong());
         if (loaiHoatDong.isEmpty()) {
-            return "Loại hoạt động không tồn tại";
+            new ResponseEntity<>(new MessageResponse("hoatdong-exist"), HttpStatus.OK);
+            return;
         }
 
         HoatDong hoatDong = existingHoatDong.get();
@@ -167,19 +171,6 @@ public class HoatDongService {
 
         hoatDongRepository.save(hoatDong);
 
-        return "Hoạt động đã được cập nhật thành công";
-    }
-    public String deleteHoatDong(Long maHoatDong) {
-
-        // Kiểm tra xem hoạt động đã được lưu trữ trong bảng DangKyHoatDong hay chưa
-        if (dangKyHoatDongRepository.existsByHoatDong_MaHoatDong(maHoatDong)) {
-            return "Không thể xóa hoạt động đã có dữ liệu đăng ký";
-        }
-
-        // Xóa hoạt động nếu không có dữ liệu đăng ký
-        hoatDongRepository.deleteById(maHoatDong);
-
-        return "Hoạt động đã được xóa thành công";
     }
     public void deleteHoatDongById(Long maHoatDong) {
 
@@ -187,7 +178,7 @@ public class HoatDongService {
         if (hoatDong.isPresent()) {
             hoatDongRepository.deleteById(maHoatDong);
         } else {
-            throw new EntityNotFoundException("Không tìm thấy hoạt động!");
+            throw new EntityNotFoundException("hoatdong-notfound");
         }
 
     }

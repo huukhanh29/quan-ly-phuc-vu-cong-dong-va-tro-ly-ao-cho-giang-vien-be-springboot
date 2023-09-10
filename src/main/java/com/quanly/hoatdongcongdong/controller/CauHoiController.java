@@ -73,7 +73,7 @@ public class CauHoiController {
                 lichSuService.saveLichSu(lichSu);
                 return ResponseEntity.ok(bestMatch);
             } else {
-                throw new EntityNotFoundException("Không tìm thấy sinh viên!");
+                return new ResponseEntity<>(new MessageResponse("sinhvien-notfound"), HttpStatus.NOT_FOUND);
             }
         } else {
             return ResponseEntity.ok(new MessageResponse("unknown"));
@@ -84,7 +84,7 @@ public class CauHoiController {
     @PostMapping("/them-moi")
     public ResponseEntity<?> createCauHoi(@RequestBody CauHoi cauHoi) {
         if (cauHoiService.findByCauHoi(cauHoi.getCauHoi()) != null) {
-            return new ResponseEntity<>(new MessageResponse("Câu hỏi đã tồn tại!"), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new MessageResponse("cauhoi-exist"), HttpStatus.OK);
         } else {
             cauHoiService.saveCauHoi(cauHoi);
             return ResponseEntity.ok(cauHoi);
@@ -108,7 +108,7 @@ public class CauHoiController {
         if (cauHoi.isPresent()) {
             return ResponseEntity.ok(cauHoi.get());
         } else {
-            return new ResponseEntity<>(new MessageResponse("Câu hỏi không tồn tại!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new MessageResponse("cauhoi-notfound"), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -127,7 +127,7 @@ public class CauHoiController {
         PhanHoi feedback = phanHoiService.findFirstByCauHoi_MaCauHoi(cauHoiId);
         LichSu historyEntity = lichSuService.findFirstByCauHoi_MaCauHoi(cauHoiId);
         if (feedback != null || historyEntity != null) {
-            return new ResponseEntity<>(new MessageResponse("Câu hỏi đã được lưu trữ! Không thể xóa!"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new MessageResponse("cant-delete"), HttpStatus.OK);
         }
         cauHoiService.deleteCauHoiById(cauHoiId);
         return ResponseEntity.ok("Đã xóa");

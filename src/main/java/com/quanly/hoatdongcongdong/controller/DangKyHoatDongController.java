@@ -1,6 +1,7 @@
 package com.quanly.hoatdongcongdong.controller;
 
 import com.quanly.hoatdongcongdong.payload.request.HuyHoatDongRequest;
+import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
 import com.quanly.hoatdongcongdong.repository.GioTichLuyRepository;
 import com.quanly.hoatdongcongdong.service.*;
@@ -61,25 +62,25 @@ public class DangKyHoatDongController {
     }
 
     @PostMapping("/{maHoatDong}")
-    public ResponseEntity<String> dangKyHoatDong(@PathVariable Long maHoatDong, HttpServletRequest httpServletRequest) {
+    public ResponseEntity<?> dangKyHoatDong(@PathVariable Long maHoatDong, HttpServletRequest httpServletRequest) {
         // Lấy thông tin người dùng đang đăng nhập
         TaiKhoan currentUser = taiKhoanService.getCurrentUser(httpServletRequest);
 
         // Tìm hoạt động cần đăng ký
         Optional<HoatDong> optionalHoatDong = hoatDongService.findById(maHoatDong);
         if (optionalHoatDong.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy hoạt động với mã " + maHoatDong);
+            return new ResponseEntity<>(new MessageResponse("hoatdong-notfound"), HttpStatus.NOT_FOUND);
         }
         HoatDong hoatDong = optionalHoatDong.get();
 
         if (hoatDong.getTrangThaiHoatDong() != HoatDong.TrangThaiHoatDong.SAP_DIEN_RA) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không thể đăng ký hoạt động do hết thời gian đăng ký");
+            return new ResponseEntity<>(new MessageResponse("expired-register"), HttpStatus.OK);
         }
 
         Optional<GiangVien> giangVien = giangVienService.findById(currentUser.getMaTaiKhoan());
 
         if (dangKyHoatDongService.existsByGiangVien_MaTaiKhoanAndHoatDong_MaHoatDong(currentUser.getMaTaiKhoan(), maHoatDong)) {
-            return ResponseEntity.badRequest().body("Bạn đã đăng ký hoạt động này trước đó");
+            return new ResponseEntity<>(new MessageResponse("hoatdong-exist"), HttpStatus.OK);
         }
 
         dangKyHoatDongService.dangKyHoatDong(hoatDong, giangVien.get());
@@ -88,16 +89,16 @@ public class DangKyHoatDongController {
     }
 
     @PutMapping("/duyet-dang-ky/{maDangKy}")
-    public ResponseEntity<String> approveDangKyHoatDong(
+    public ResponseEntity<?> approveDangKyHoatDong(
             @PathVariable Long maDangKy) {
         Optional<DangKyHoatDong> dangKyHoatDong = dangKyHoatDongService.findById(maDangKy);
 
         if (dangKyHoatDong.isEmpty()) {
-            return ResponseEntity.badRequest().body("Hoạt động chưa đăng ký");
+            return new ResponseEntity<>(new MessageResponse("hoatdong-notfound"), HttpStatus.NOT_FOUND);
         }
 
         if (dangKyHoatDong.get().getTrangThaiDangKy() == DangKyHoatDong.TrangThaiDangKy.Da_Duyet) {
-            return ResponseEntity.badRequest().body("Đã duyệt hoạt động này trước đó");
+            return new ResponseEntity<>(new MessageResponse("hoatdong-exist"), HttpStatus.OK);
         }
         // Call the corresponding service method
         dangKyHoatDongService.approveDangKyHoatDong(dangKyHoatDong.get());
@@ -115,22 +116,22 @@ public class DangKyHoatDongController {
     }
 
     @PutMapping("/huy-hoat-dong/{maDangKy}")
-    public ResponseEntity<String> huyDangKyHoatDong(
+    public ResponseEntity<?> huyDangKyHoatDong(
             @PathVariable Long maDangKy,
             @RequestBody HuyHoatDongRequest huyHoatDongRequest) {
 
         Optional<DangKyHoatDong> dangKyHoatDong = dangKyHoatDongService.findById(maDangKy);
 
         if (dangKyHoatDong.isEmpty()) {
-            return ResponseEntity.badRequest().body("Hoạt động chưa đăng ký");
+            return new ResponseEntity<>(new MessageResponse("hoatdong-notfound"), HttpStatus.NOT_FOUND);
         }
         if (dangKyHoatDong.get().getTrangThaiDangKy().equals(DangKyHoatDong.TrangThaiDangKy.Da_Huy)) {
-            return ResponseEntity.badRequest().body("Hoạt động đã hủy trước đó");
+            return new ResponseEntity<>(new MessageResponse("hoatdong-exist"), HttpStatus.OK);
         }
         if (!huyHoatDongRequest.getLyDoHuy().equals("")) {
             dangKyHoatDongService.huyDangKyHoatDong(dangKyHoatDong.get(), huyHoatDongRequest);
         } else {
-            return ResponseEntity.badRequest().body("Lý do hủy không được trống");
+            return new ResponseEntity<>(new MessageResponse("lydo-notempty"), HttpStatus.OK);
         }
 
         return ResponseEntity.ok("Hủy đăng ký hoạt động thành công.");

@@ -54,7 +54,7 @@ public class TaiKhoanService {
     public void capNhatThongTinNguoiDung(Long id, String soDienThoai, Date ngaySinh,
                                          TaiKhoan.GioiTinh gioiTinh, String diaChi) {
         TaiKhoan taiKhoan = taiKhoanRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy người dùng với id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("taikhoan-notfound"));
 
         taiKhoan.capNhatThongTin(soDienThoai, ngaySinh, gioiTinh, diaChi);
         taiKhoanRepository.save(taiKhoan);
@@ -69,7 +69,7 @@ public class TaiKhoanService {
         Claims claims = JwtUtils.getClaimsFromToken(token);
         Long currentUserId = claims.get("id", Long.class);
         return taiKhoanRepository.findById(currentUserId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("taikhoan-notfound"));
     }
     public void capNhatMatKhauNguoiDung(Long maTaiKhoan, String matKhauMoi) {
         Optional<TaiKhoan> optionalTaiKhoan = taiKhoanRepository.findById(maTaiKhoan);
@@ -82,16 +82,18 @@ public class TaiKhoanService {
 
             taiKhoanRepository.save(taiKhoan);
         } else {
-            throw new EntityNotFoundException("Không tìm thấy người dùng với mã tài khoản: " + maTaiKhoan);
+            throw new EntityNotFoundException("taikhoan-notfound");
         }
     }
     @Transactional
     public void themMoiSinhVien(String tenDangNhap, String matKhau, String email, TaiKhoan.Quyen quyen,
                                 String tenDayDu, TaiKhoan.GioiTinh gioiTinh, Year namNhapHoc) {
         if (existsByTenDangNhap(tenDangNhap)) {
-            throw new EntityExistsException("Tên đăng nhập đã tồn tại");
+            throw new EntityExistsException("username-exist");
         }
-
+        if (taiKhoanRepository.existsByEmail(email)) {
+            throw new EntityExistsException("email-exist");
+        }
         TaiKhoan taiKhoan = new TaiKhoan(tenDangNhap, encoder.encode(matKhau), email,
                 quyen, tenDayDu,gioiTinh);
         taiKhoanRepository.save(taiKhoan);
@@ -105,9 +107,11 @@ public class TaiKhoanService {
     public void themMoiGiangVien(String tenDangNhap, String matKhau, String email, TaiKhoan.Quyen quyen,
                                  String tenDayDu, TaiKhoan.GioiTinh gioiTinh, ChucDanh chucDanh) {
         if (existsByTenDangNhap(tenDangNhap)) {
-            throw new EntityExistsException("Tên đăng nhập đã tồn tại");
+            throw new EntityExistsException("username-exist");
         }
-
+        if (taiKhoanRepository.existsByEmail(email)) {
+            throw new EntityExistsException("email-exist");
+        }
         TaiKhoan taiKhoan = new TaiKhoan(tenDangNhap, encoder.encode(matKhau), email,
                 quyen, tenDayDu,gioiTinh);
         taiKhoanRepository.save(taiKhoan);
