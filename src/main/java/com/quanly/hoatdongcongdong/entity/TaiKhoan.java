@@ -41,11 +41,28 @@ public class TaiKhoan {
     @Column(columnDefinition = "TEXT")
     private String diaChi;
     @Enumerated(EnumType.STRING)
-    private TrangThai trangthai;
+    private TrangThai trangThai;
     @CreationTimestamp
     private LocalDateTime ngayTao;
     @UpdateTimestamp
     private LocalDateTime ngayCapNhat;
+
+    public TaiKhoan(String tenDangNhap, String matKhau, String email, Quyen quyen,
+                    String tenDayDu, GioiTinh gioiTinh, String soDienThoai, Date ngaySinh,
+                    String diaChi) {
+        this.tenDangNhap = tenDangNhap;
+        this.matKhau = matKhau;
+        this.email = email;
+        this.quyen = quyen;
+        this.tenDayDu = tenDayDu;
+        this.gioiTinh = gioiTinh;
+        this.soDienThoai =soDienThoai;
+        this.ngaySinh= ngaySinh;
+        this.diaChi =diaChi;
+        this.trangThai = TrangThai.Mo;
+
+    }
+
     public void capNhatThongTin(String soDienThoai, Date ngaySinh, GioiTinh gioiTinh, String diaChi) {
         if (soDienThoai != null) {
             this.soDienThoai = soDienThoai;
@@ -90,7 +107,7 @@ public class TaiKhoan {
         this.ngaySinh = ngaySinh;
         this.gioiTinh = gioiTinh;
         this.diaChi = diaChi;
-        this.trangthai = trangthai;
+        this.trangThai = trangthai;
         this.ngayTao = ngayTao;
         this.ngayCapNhat = ngayCapNhat;
     }
@@ -107,7 +124,7 @@ public class TaiKhoan {
         this.tenDayDu = tenDayDu;
         this.soDienThoai = soDienThoai;
         this.gioiTinh = gioiTinh;
-        this.trangthai = trangthai;
+        this.trangThai = trangthai;
     }
     public TaiKhoan(String tenDangNhap, String matKhau, String email
             , Quyen quyen, String tenDayDu, GioiTinh gioiTinh) {
@@ -117,7 +134,7 @@ public class TaiKhoan {
         this.quyen = quyen;
         this.tenDayDu = tenDayDu;
         this.gioiTinh = gioiTinh;
-        this.trangthai = TrangThai.Mo;
+        this.trangThai = TrangThai.Mo;
     }
 
     public String getAnhdaidien() {
@@ -128,12 +145,12 @@ public class TaiKhoan {
         this.anhDaiDien = anhDaiDien;
     }
 
-    public TrangThai getTrangthai() {
-        return trangthai;
+    public TrangThai getTrangThai() {
+        return trangThai;
     }
 
-    public void setTrangthai(TrangThai trangthai) {
-        this.trangthai = trangthai;
+    public void setTrangThai(TrangThai trangThai) {
+        this.trangThai = trangThai;
     }
 
     public LocalDateTime getNgayTao() {
@@ -232,4 +249,11 @@ public class TaiKhoan {
         this.diaChi = diaChi;
     }
 
+    public String getAnhDaiDien() {
+        return anhDaiDien;
+    }
+
+    public void setAnhDaiDien(String anhDaiDien) {
+        this.anhDaiDien = anhDaiDien;
+    }
 }

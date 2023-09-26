@@ -80,7 +80,7 @@ public class HoatDongService {
                             criteriaBuilder.like(root.get("moTa"), "%" + searchTerm + "%")
                     ));
         }
-        if (status != null) {
+        if (status != null ) {
             spec = spec.and((root, criteriaQuery, criteriaBuilder)
                     -> criteriaBuilder.equal(root.get("trangThaiHoatDong"), status));
         }
@@ -123,7 +123,7 @@ public class HoatDongService {
         hoatDong.setThoiGianKetThuc(hoatDongResponse.getThoiGianKetThuc());
         hoatDong.setLoaiHoatDong(loaiHoatDong.get());
 
-        List<GiangVien> giangVienToChucs = giangVienRepository.findByMaTaiKhoanIn(hoatDongResponse.getMaGiangVienToChucs());
+        List<GiangVien> giangVienToChucs = giangVienRepository.findByTaiKhoan_TenDangNhapIn(hoatDongResponse.getGiangVienToChucs());
         hoatDong.setGiangVienToChucs(giangVienToChucs);
         hoatDong.setTenQuyetDinh(hoatDongResponse.getTenQuyetDinh());
         hoatDong.setSoQuyetDinh(hoatDongResponse.getSoQuyetDinh());
@@ -161,7 +161,7 @@ public class HoatDongService {
         hoatDong.setThoiGianKetThuc(hoatDongResponse.getThoiGianKetThuc());
         hoatDong.setLoaiHoatDong(loaiHoatDong.get());
 
-        List<GiangVien> giangVienToChucs = giangVienRepository.findByMaTaiKhoanIn(hoatDongResponse.getMaGiangVienToChucs());
+        List<GiangVien> giangVienToChucs = giangVienRepository.findByTaiKhoan_TenDangNhapIn(hoatDongResponse.getGiangVienToChucs());
         hoatDong.setGiangVienToChucs(giangVienToChucs);
         hoatDong.setTenQuyetDinh(hoatDongResponse.getTenQuyetDinh());
         hoatDong.setSoQuyetDinh(hoatDongResponse.getSoQuyetDinh());

@@ -60,18 +60,18 @@ public class HoatDongController {
     }
 
     @PostMapping("/them-moi")
-    public ResponseEntity<String> addHoatDong(@RequestBody HoatDongResponse hoatDongResponse) {
+    public ResponseEntity<?> addHoatDong(@RequestBody HoatDongResponse hoatDongResponse) {
         // Process and save the new hoatDong using HoatDongService
         hoatDongService.addHoatDong(hoatDongResponse);
-        return ResponseEntity.ok("Hoạt động đã được thêm thành công");
+        return ResponseEntity.ok(new MessageResponse("đã thêm"));
     }
 
     @PutMapping("/cap-nhat/{maHoatDong}")
-    public ResponseEntity<String> updateHoatDong(@PathVariable Long maHoatDong,
+    public ResponseEntity<?> updateHoatDong(@PathVariable Long maHoatDong,
                                                  @RequestBody HoatDongResponse hoatDongResponse) {
         // Process and update the hoatDong using HoatDongService
         hoatDongService.updateHoatDong(maHoatDong, hoatDongResponse);
-        return ResponseEntity.ok("Hoạt động đã được cập nhật thành công");
+        return ResponseEntity.ok(new MessageResponse("đã cập nhật"));
     }
 
     @DeleteMapping("/xoa/{maHoatDong}")
@@ -80,7 +80,7 @@ public class HoatDongController {
             return new ResponseEntity<>(new MessageResponse("cant-delete"), HttpStatus.BAD_REQUEST);
         }
         hoatDongService.deleteHoatDongById(maHoatDong);
-        return ResponseEntity.ok("Đã xóa");
+        return ResponseEntity.ok(new MessageResponse("đã xóa"));
 
     }
 

@@ -37,5 +37,9 @@ public class GiangVienService {
     public Page<GiangVien> findAllWithSpec(Specification<GiangVien> spec, Pageable pageable) {
         return giangVienRepository.findAll(spec, pageable);
     }
+    public List<GiangVien> getAllGiangVien() {
+        return giangVienRepository.findAll();
+    }
+
 }
 

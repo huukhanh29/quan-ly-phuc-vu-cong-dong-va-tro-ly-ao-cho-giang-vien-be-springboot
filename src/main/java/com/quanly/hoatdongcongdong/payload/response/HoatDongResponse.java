@@ -20,7 +20,15 @@ public class HoatDongResponse {
     private String fileQuyetDinh;
     private HoatDong.CapToChuc capToChuc;
     private Long maLoaiHoatDong;
-    private List<Long> maGiangVienToChucs;
+    private List<String> giangVienToChucs;
+
+    public List<String> getGiangVienToChucs() {
+        return giangVienToChucs;
+    }
+
+    public void setGiangVienToChucs(List<String> giangVienToChucs) {
+        this.giangVienToChucs = giangVienToChucs;
+    }
 
     public String getTenHoatDong() {
         return tenHoatDong;
@@ -126,12 +134,6 @@ public class HoatDongResponse {
         this.maLoaiHoatDong = maLoaiHoatDong;
     }
 
-    public List<Long> getMaGiangVienToChucs() {
-        return maGiangVienToChucs;
-    }
 
-    public void setMaGiangVienToChucs(List<Long> maGiangVienToChucs) {
-        this.maGiangVienToChucs = maGiangVienToChucs;
-    }
 }
 

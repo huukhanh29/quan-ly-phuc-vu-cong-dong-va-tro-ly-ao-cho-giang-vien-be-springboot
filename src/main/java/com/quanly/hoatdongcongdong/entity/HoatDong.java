@@ -31,7 +31,7 @@ public class HoatDong {
     private String nguoiKyQuyetDinh;
     private String fileQuyetDinh;
     public enum CapToChuc {
-        KHOA, TRUONG, BOMON, CA_NHAN
+        KHOA, TRUONG, BOMON, CANHAN
     }
 
     @Enumerated(EnumType.STRING)

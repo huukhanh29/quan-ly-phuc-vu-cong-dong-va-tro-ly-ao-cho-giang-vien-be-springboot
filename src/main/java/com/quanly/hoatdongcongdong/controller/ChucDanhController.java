@@ -62,7 +62,7 @@ public class ChucDanhController {
         giangVien.setChucDanh(chucDanh.get());
         giangVienService.saveGiangVien(giangVien);
 
-        return ResponseEntity.ok("Da cap nhat chuc danh");
+        return ResponseEntity.ok(new MessageResponse("đã cập nhật"));
     }
 
     @GetMapping("/du-lieu-bieu-do/{academic}")

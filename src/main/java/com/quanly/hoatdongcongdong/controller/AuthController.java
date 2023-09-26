@@ -9,6 +9,7 @@ import com.quanly.hoatdongcongdong.exception.UnAuthorizeException;
 import com.quanly.hoatdongcongdong.payload.request.LoginRequest;
 import com.quanly.hoatdongcongdong.payload.request.TaiKhoanMoiRequest;
 import com.quanly.hoatdongcongdong.payload.request.TokenRefreshRequest;
+import com.quanly.hoatdongcongdong.payload.request.TokenRequest;
 import com.quanly.hoatdongcongdong.payload.response.JwtResponse;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
@@ -36,23 +37,32 @@ import java.util.Optional;
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final TaiKhoanService taiKhoanService;
-    private final ChucDanhService chucDanhService;
+
     private final RefreshTokenService refreshTokenService;
     private final JwtUtils jwtUtils;
 
     @Autowired
     public AuthController(AuthenticationManager authenticationManager,
-                               TaiKhoanService taiKhoanService,
-                               ChucDanhService chucDanhService,
-                               RefreshTokenService refreshTokenService,
-                               JwtUtils jwtUtils) {
+                          TaiKhoanService taiKhoanService,
+                          RefreshTokenService refreshTokenService,
+                          JwtUtils jwtUtils) {
         this.authenticationManager = authenticationManager;
         this.taiKhoanService = taiKhoanService;
-        this.chucDanhService = chucDanhService;
         this.refreshTokenService = refreshTokenService;
         this.jwtUtils = jwtUtils;
     }
 
+    @PostMapping("/kiem-tra-dang-nhap")
+    public ResponseEntity<?> testLogin(@RequestBody TokenRequest token) {
+        if (token.getToken() != null && !token.getToken().isEmpty()) {
+            if (JwtUtils.testJwtToken(token.getToken())) {
+                return ResponseEntity.ok(new MessageResponse("ok"));
+            }else{
+                return new ResponseEntity<>(new MessageResponse("error"), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(new MessageResponse("empty"), HttpStatus.OK);
+    }
 
     @PostMapping("/dang-nhap")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -71,11 +81,11 @@ public class AuthController {
             return new ResponseEntity<>(new MessageResponse("info-warning"), HttpStatus.OK);
         }
 
-        Authentication authentication= authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getTaiKhoan(), loginRequest.getMatKhau()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
-        Long expirationDate = jwtUtils.getExpirationDateFromJwtToken(jwt).getTime()/1000;
+        Long expirationDate = jwtUtils.getExpirationDateFromJwtToken(jwt).getTime() / 1000;
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
@@ -93,32 +103,13 @@ public class AuthController {
                 .map(user -> {
                     Authentication authentication = jwtUtils.getAuthenticationFromUser(user);
                     String jwt = jwtUtils.generateJwtToken(authentication);
-                    Long expirationDate = jwtUtils.getExpirationDateFromJwtToken(jwt).getTime()/1000;
+                    Long expirationDate = jwtUtils.getExpirationDateFromJwtToken(jwt).getTime() / 1000;
                     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-                    JwtResponse response = new JwtResponse(jwt, requestRefreshToken, userDetails.getUsername(), userDetails.getAuthority().getAuthority(),expirationDate);
+                    JwtResponse response = new JwtResponse(jwt, requestRefreshToken, userDetails.getUsername(), userDetails.getAuthority().getAuthority(), expirationDate);
                     return ResponseEntity.ok(response);
                 })
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken, "Refresh token is not in database!"));
     }
 
-    @PostMapping("/them-tai-khoan")
-    public ResponseEntity<?> themNguoiDung(@Valid @RequestBody TaiKhoanMoiRequest request) {
-        if (request.getQuyen() == TaiKhoan.Quyen.SinhVien) {
-            taiKhoanService.themMoiSinhVien(request.getTenDangNhap(), request.getMatKhau(),
-                    request.getEmail(), request.getQuyen(), request.getTenDayDu(),
-                    request.getGioiTinh(), request.getNamNhapHoc());
-        } else if (request.getQuyen() == TaiKhoan.Quyen.GiangVien) {
-            Optional<ChucDanh> chucDanh = chucDanhService.findById(request.getMaChucDanh());
-            if (chucDanh.isEmpty()) {
-                return new ResponseEntity<>(new MessageResponse("chucdanh-notfound"), HttpStatus.NOT_FOUND);
-            }
-            taiKhoanService.themMoiGiangVien(request.getTenDangNhap(), request.getMatKhau(),
-                    request.getEmail(), request.getQuyen(), request.getTenDayDu(),
-                    request.getGioiTinh(), chucDanh.get());
-        } else {
-            throw new EntityNotFoundException("Quyền tài khoản không hợp lệ");
-        }
-        return ResponseEntity.ok(new MessageResponse("Thêm tài khoản thành công!"));
-    }
 
 }

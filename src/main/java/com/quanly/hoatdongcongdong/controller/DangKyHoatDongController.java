@@ -112,7 +112,7 @@ public class DangKyHoatDongController {
         );
         thongBaoService.luuThongBao(thongBao);
 
-        return ResponseEntity.ok("Phê duyệt đăng ký hoạt động thành công.");
+        return ResponseEntity.ok(new MessageResponse("đã phê duyệt"));
     }
 
     @PutMapping("/huy-hoat-dong/{maDangKy}")
@@ -134,6 +134,6 @@ public class DangKyHoatDongController {
             return new ResponseEntity<>(new MessageResponse("lydo-notempty"), HttpStatus.OK);
         }
 
-        return ResponseEntity.ok("Hủy đăng ký hoạt động thành công.");
+        return ResponseEntity.ok(new MessageResponse("đã hủy"));
     }
 }

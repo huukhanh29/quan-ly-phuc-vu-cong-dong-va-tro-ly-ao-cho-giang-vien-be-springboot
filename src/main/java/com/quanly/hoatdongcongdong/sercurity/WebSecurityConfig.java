@@ -6,6 +6,7 @@ import com.quanly.hoatdongcongdong.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -18,6 +19,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import javax.sql.DataSource;
 
 
 @Configuration
@@ -64,7 +67,9 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/tai-khoan/**").permitAll()
+                        auth.requestMatchers("/api/tai-khoan/dang-nhap").permitAll()
+                                .requestMatchers("/api/tai-khoan/cap-lai-token").permitAll()
+                                .requestMatchers("/api/tai-khoan/kiem-tra-dang-nhap").permitAll()
                                 .requestMatchers("/ws/**").permitAll()
                                 .requestMatchers("/api/cau-hoi/**").hasAnyAuthority("QuanTriVien","SinhVien")
                                 .requestMatchers("/api/lich-su/**").hasAnyAuthority("QuanTriVien","SinhVien")

@@ -13,7 +13,7 @@ public class PhanHoi {
     @Column(columnDefinition = "TEXT")
     private String noiDung;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "maCauHoi", nullable = true)
     private CauHoi cauHoi;
 

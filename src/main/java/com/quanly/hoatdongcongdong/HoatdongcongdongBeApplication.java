@@ -8,11 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,10 +84,61 @@ public class HoatdongcongdongBeApplication implements CommandLineRunner {
             adminAccount.setMatKhau(passwordEncoder.encode("admin123"));
             adminAccount.setEmail("admin@example.com");
             adminAccount.setQuyen(TaiKhoan.Quyen.QuanTriVien);
-            adminAccount.setTrangthai(TaiKhoan.TrangThai.Mo);
+            adminAccount.setTrangThai(TaiKhoan.TrangThai.Mo);
             adminAccount.setGioiTinh(TaiKhoan.GioiTinh.Nam);
             taiKhoanRepository.save(adminAccount);
         }
 
     }
+    @Bean
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+    @Bean
+    public CommandLineRunner initializeDb(JdbcTemplate jdbcTemplate) {
+        return args -> {
+            String dropFunctionSql = "DROP FUNCTION IF EXISTS CALCULATE_SIMILARITY;";
+            jdbcTemplate.execute(dropFunctionSql);
+
+            String createFunctionSql = "CREATE FUNCTION CALCULATE_SIMILARITY(str1 TEXT, str2 TEXT) RETURNS FLOAT " +
+                    "DETERMINISTIC " +
+                    "BEGIN " +
+                    "   DECLARE tmp TEXT; " +
+                    "   DECLARE s1 TEXT; " +
+                    "   DECLARE s2 TEXT; " +
+                    "   DECLARE words1_len INT; " +
+                    "   DECLARE words2_len INT; " +
+                    "   DECLARE common_count INT DEFAULT 0; " +
+                    "   DECLARE i INT DEFAULT 1; " +
+                    "   DECLARE j INT DEFAULT 1; " +
+                    "   DECLARE word1 VARCHAR(255); " +
+                    "   DECLARE word2 VARCHAR(255); " +
+                    "   IF LENGTH(str1) > LENGTH(str2) THEN " +
+                    "     SET s1 = str2; " +
+                    "     SET s2 = str1; " +
+                    "   ELSE " +
+                    "     SET s1 = str1; " +
+                    "     SET s2 = str2; " +
+                    "   END IF; " +
+                    "   SET words1_len = LENGTH(s1) - LENGTH(REPLACE(s1, ' ', '')) + 1; " +
+                    "   SET words2_len = LENGTH(s2) - LENGTH(REPLACE(s2, ' ', '')) + 1; " +
+                    "   WHILE i <= words1_len DO " +
+                    "     SET word1 = SUBSTRING_INDEX(SUBSTRING_INDEX(s1, ' ', i), ' ', -1); " +
+                    "     SET j = 1; " +
+                    "     WHILE j <= words2_len DO " +
+                    "       SET word2 = SUBSTRING_INDEX(SUBSTRING_INDEX(s2, ' ', j), ' ', -1); " +
+                    "       IF word1 = word2 THEN " +
+                    "         SET common_count = common_count + 1; " +
+                    "       END IF; " +
+                    "       SET j = j + 1; " +
+                    "     END WHILE; " +
+                    "     SET i = i + 1; " +
+                    "   END WHILE; " +
+                    "   RETURN common_count / words2_len; " +
+                    "END;";
+
+            jdbcTemplate.execute(createFunctionSql);
+        };
+    }
+
 }

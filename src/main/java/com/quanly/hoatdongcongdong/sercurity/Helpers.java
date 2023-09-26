@@ -17,6 +17,13 @@ import java.util.Map;
 
 public class Helpers {
     public static float calculateSimilarity(String str1, String str2) {
+        // Nếu str1 dài hơn str2, đổi chỗ chúng
+        if(str1.length() > str2.length()) {
+            String temp = str1;
+            str1 = str2;
+            str2 = temp;
+        }
+
         String[] words1 = str1.split(" ");
         String[] words2 = str2.split(" ");
         int matches = 0;
@@ -27,6 +34,7 @@ public class Helpers {
         }
         return (float) matches / words2.length;
     }
+
 
     public static ResponseEntity<String> createErrorResponse(String errorMessage, HttpStatus httpStatus) {
         try {

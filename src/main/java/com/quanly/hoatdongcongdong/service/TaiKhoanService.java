@@ -1,9 +1,6 @@
 package com.quanly.hoatdongcongdong.service;
 
-import com.quanly.hoatdongcongdong.entity.ChucDanh;
-import com.quanly.hoatdongcongdong.entity.GiangVien;
-import com.quanly.hoatdongcongdong.entity.SinhVien;
-import com.quanly.hoatdongcongdong.entity.TaiKhoan;
+import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
 import com.quanly.hoatdongcongdong.repository.SinhVienRepository;
 import com.quanly.hoatdongcongdong.repository.TaiKhoanRepository;
@@ -38,14 +35,16 @@ public class TaiKhoanService {
 
         return taiKhoanRepository.findByTenDangNhap(ten);
     }
-
+    public void save(TaiKhoan taiKhoan) {
+        taiKhoanRepository.save(taiKhoan);
+    }
     public Boolean existsByTenDangNhap(String ten) {
         return taiKhoanRepository.existsByTenDangNhap(ten);
     }
 
     public Boolean isTaiKhoanKhoa(String ten) {
         Optional<TaiKhoan> taiKhoan = findByTenDangNhap(ten);
-        return taiKhoan.isPresent() && taiKhoan.get().getTrangthai().equals(TaiKhoan.TrangThai.Khoa);
+        return taiKhoan.isPresent() && taiKhoan.get().getTrangThai().equals(TaiKhoan.TrangThai.Khoa);
     }
 
     public Boolean isMatKhauHopLe(String matKhau, String encodedMatKhau) {
@@ -87,7 +86,8 @@ public class TaiKhoanService {
     }
     @Transactional
     public void themMoiSinhVien(String tenDangNhap, String matKhau, String email, TaiKhoan.Quyen quyen,
-                                String tenDayDu, TaiKhoan.GioiTinh gioiTinh, Year namNhapHoc) {
+                                String tenDayDu, TaiKhoan.GioiTinh gioiTinh, Year namNhapHoc, String soDienThoai,
+                                Date ngaySinh, String diaChi) {
         if (existsByTenDangNhap(tenDangNhap)) {
             throw new EntityExistsException("username-exist");
         }
@@ -95,7 +95,7 @@ public class TaiKhoanService {
             throw new EntityExistsException("email-exist");
         }
         TaiKhoan taiKhoan = new TaiKhoan(tenDangNhap, encoder.encode(matKhau), email,
-                quyen, tenDayDu,gioiTinh);
+                quyen, tenDayDu,gioiTinh, soDienThoai, ngaySinh, diaChi);
         taiKhoanRepository.save(taiKhoan);
 
         SinhVien sinhVien = new SinhVien();
@@ -105,7 +105,8 @@ public class TaiKhoanService {
     }
     @Transactional
     public void themMoiGiangVien(String tenDangNhap, String matKhau, String email, TaiKhoan.Quyen quyen,
-                                 String tenDayDu, TaiKhoan.GioiTinh gioiTinh, ChucDanh chucDanh) {
+                                 String tenDayDu, TaiKhoan.GioiTinh gioiTinh, ChucDanh chucDanh
+            , String soDienThoai, Date ngaySinh,  String diaChi) {
         if (existsByTenDangNhap(tenDangNhap)) {
             throw new EntityExistsException("username-exist");
         }
@@ -113,7 +114,7 @@ public class TaiKhoanService {
             throw new EntityExistsException("email-exist");
         }
         TaiKhoan taiKhoan = new TaiKhoan(tenDangNhap, encoder.encode(matKhau), email,
-                quyen, tenDayDu,gioiTinh);
+                quyen, tenDayDu,gioiTinh, soDienThoai, ngaySinh, diaChi);
         taiKhoanRepository.save(taiKhoan);
 
         GiangVien giangVien = new GiangVien();

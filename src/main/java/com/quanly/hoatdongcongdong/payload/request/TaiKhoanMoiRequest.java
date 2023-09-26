@@ -4,6 +4,7 @@ import com.quanly.hoatdongcongdong.entity.ChucDanh;
 import com.quanly.hoatdongcongdong.entity.TaiKhoan;
 
 import java.time.Year;
+import java.util.Date;
 
 public class TaiKhoanMoiRequest {
     private String tenDangNhap;
@@ -12,6 +13,9 @@ public class TaiKhoanMoiRequest {
     private String tenDayDu;
     private TaiKhoan.GioiTinh gioiTinh;
     private TaiKhoan.Quyen quyen;
+    private String soDienThoai;
+    private Date ngaySinh;
+    private String diaChi;
     private Year namNhapHoc; // Dùng cho sinh viên
     private Long maChucDanh; // Dùng cho giảng viên
 
@@ -79,4 +83,27 @@ public class TaiKhoanMoiRequest {
         this.maChucDanh = maChucDanh;
     }
 
+    public String getSoDienThoai() {
+        return soDienThoai;
+    }
+
+    public void setSoDienThoai(String soDienThoai) {
+        this.soDienThoai = soDienThoai;
+    }
+
+    public Date getNgaySinh() {
+        return ngaySinh;
+    }
+
+    public void setNgaySinh(Date ngaySinh) {
+        this.ngaySinh = ngaySinh;
+    }
+
+    public String getDiaChi() {
+        return diaChi;
+    }
+
+    public void setDiaChi(String diaChi) {
+        this.diaChi = diaChi;
+    }
 }

@@ -42,13 +42,13 @@ public class ThongBaoController {
         thongBao.setTrangThai(ThongBao.TrangThai.DaDoc);
         thongBaoService.luuThongBao(thongBao);
         messagingTemplate.convertAndSendToUser(thongBao.getTaiKhoan().getTenDangNhap(), "/queue/messages", "update-status");
-        return ResponseEntity.ok("Da_doc_thong_bao");
+        return ResponseEntity.ok(new MessageResponse("đã đọc"));
     }
 
     @DeleteMapping("/xoa/{maThongBao}")
     public ResponseEntity<?> xoaThongBao(@PathVariable Long maThongBao) {
         thongBaoService.xoaThongBaoTheoMa(maThongBao);
-        return ResponseEntity.ok("Da_xoa_thong_bao");
+        return ResponseEntity.ok(new MessageResponse("deleted"));
     }
 
     @DeleteMapping("/xoa-tat-ca")

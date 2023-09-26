@@ -122,7 +122,13 @@ public class PhanHoiService {
         phanHoiRepository.save(phanHoiEntity);
     }
     public void replyToPhanHoi(CauHoi cauHoi, Long phanHoiId) {
-        CauHoi newCauHoi = cauHoiService.saveCauHoi(cauHoi);
+        CauHoi newCauHoi;
+        if(!cauHoiService.existsByCauHoi(cauHoi.getCauHoi())){
+             newCauHoi = cauHoiService.saveCauHoi(cauHoi);
+        }else {
+            newCauHoi =cauHoi;
+        }
+
         Optional<PhanHoi> phanHoiOptional = phanHoiRepository.findById(phanHoiId);
         if (phanHoiOptional.isPresent()) {
             PhanHoi phanHoi = phanHoiOptional.get();

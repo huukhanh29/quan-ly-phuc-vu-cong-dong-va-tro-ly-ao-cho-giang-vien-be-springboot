@@ -12,7 +12,6 @@ public class SinhVien {
 
     private Year namNhapHoc;
 
-
     @OneToOne
     @JoinColumn(name = "maTaiKhoan", referencedColumnName = "maTaiKhoan", insertable = false, updatable = false)
     @MapsId

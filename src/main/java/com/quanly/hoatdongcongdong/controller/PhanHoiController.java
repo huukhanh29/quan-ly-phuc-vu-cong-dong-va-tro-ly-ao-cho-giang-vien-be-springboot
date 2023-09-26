@@ -76,7 +76,7 @@ public class PhanHoiController {
     public ResponseEntity<?> deletePhanHoi(@PathVariable(value = "ma") Long phanHoiId) {
         try {
             phanHoiService.deletePhanHoiById(phanHoiId);
-            return ResponseEntity.ok("Đã xóa");
+            return new ResponseEntity<>(new MessageResponse("đã xóa"), HttpStatus.OK);
         } catch (ResourceNotFoundException e) {
             return new ResponseEntity<>(new MessageResponse("caihoi-notfound"), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -98,6 +98,8 @@ public class PhanHoiController {
                                             @PathVariable(value = "id") Long phanHoiId) {
         try{
             if (cauHoiService.findByCauHoi(cauHoi.getCauHoi()) != null) {
+                CauHoi cauHoi1 = cauHoiService.findByCauHoi(cauHoi.getCauHoi());
+                phanHoiService.replyToPhanHoi(cauHoi1, phanHoiId);
                 return new ResponseEntity<>(new MessageResponse("cauhoi-exist"), HttpStatus.OK);
             } else {
                 phanHoiService.replyToPhanHoi(cauHoi, phanHoiId);
@@ -106,6 +108,5 @@ public class PhanHoiController {
         }catch (ResourceNotFoundException e) {
             return new ResponseEntity<>(new MessageResponse("phanhoi-notfound"), HttpStatus.NOT_FOUND);
         }
-
     }
 }

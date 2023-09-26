@@ -7,16 +7,21 @@ import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.quanly.hoatdongcongdong.sercurity.Helpers.*;
 
@@ -95,7 +100,7 @@ public class CauHoiController {
     public Page<CauHoi> getAllCauHoi(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "maCauHoi") String sortBy,
+            @RequestParam(defaultValue = "ngayTao") String sortBy,
             @RequestParam(defaultValue = "ASC") String sortDir,
             @RequestParam(required = false, defaultValue = "") String searchTerm
     ) {
@@ -130,7 +135,7 @@ public class CauHoiController {
             return new ResponseEntity<>(new MessageResponse("cant-delete"), HttpStatus.OK);
         }
         cauHoiService.deleteCauHoiById(cauHoiId);
-        return ResponseEntity.ok("Đã xóa");
+        return ResponseEntity.ok(new MessageResponse("đã xóa"));
 
     }
 
@@ -138,6 +143,57 @@ public class CauHoiController {
     public Long countCauHoi() {
         return cauHoiService.countCauHoi();
     }
+
+    @PostMapping("/them-file")
+    public ResponseEntity<?> uploadWordFile(@RequestParam("file") MultipartFile file) {
+        try {
+            XWPFDocument document = new XWPFDocument(file.getInputStream());
+            List<CauHoi> cauHoiList = new ArrayList<>();
+            int paragraphCount = 0; // Bắt đầu từ đoạn thứ 0
+
+            for (XWPFParagraph paragraph : document.getParagraphs()) {
+                paragraphCount++; // Tăng biến đếm cho mỗi đoạn được xử lý
+                String text = paragraph.getText();
+                System.out.println("Paragraph content: " + text);
+                String[] lines = text.split("\\n");
+
+                // Kiểm tra số lượng dòng và định dạng của từng dòng
+                if (lines.length >= 2 &&
+                        lines[0].matches("^\\d+\\.\\s*Từ\\s*khóa:\\s*.*") &&
+                        lines[1].matches("^Câu\\s*trả\\s*lời:\\s*.*")) {
+
+                    String tuKhoa = lines[0].replaceFirst("^\\d+\\.\\s*Từ\\s*khóa:\\s*", "").trim();
+                    String cauTraLoi = lines[1].replaceFirst("Câu\\s*trả\\s*lời:\\s*", "").trim();
+
+                    System.out.println("Keyword: " + tuKhoa);
+                    System.out.println("Answer: " + cauTraLoi);
+
+                    // Kiểm tra câu hỏi đã tồn tại trong cơ sở dữ liệu hay chưa
+                    if (!cauHoiService.existsByCauHoi(tuKhoa)) {
+                        CauHoi cauHoi = new CauHoi();
+                        cauHoi.setCauHoi(tuKhoa);
+                        cauHoi.setTraLoi(cauTraLoi);
+                        cauHoiList.add(cauHoi);
+                    } else {
+                        // Câu hỏi đã tồn tại, thực hiện xử lý tùy ý (ví dụ: ghi log)
+                        return new ResponseEntity<>(new MessageResponse("Exist: " + paragraphCount), HttpStatus.OK);
+                    }
+                } else {
+                    // Trả về thông báo lỗi với số thứ tự của đoạn văn bị sai
+                    return new ResponseEntity<>(new MessageResponse("Error: " + paragraphCount), HttpStatus.OK);
+                }
+            }
+
+            // Lưu danh sách câu hỏi mới vào cơ sở dữ liệu
+            cauHoiService.saveAll(cauHoiList);
+            return new ResponseEntity<>(new MessageResponse("ok"), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(new MessageResponse("error"), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
 }
 
 

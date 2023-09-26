@@ -87,4 +87,13 @@ public class JwtUtils {
         }
         return false;
     }
+    public static boolean testJwtToken(String authToken) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key()).build().parseClaimsJws(authToken);
+            return true;
+        } catch (JwtException e) {
+            return false;
+        }
+    }
+
 }

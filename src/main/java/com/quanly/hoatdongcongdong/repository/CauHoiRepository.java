@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface CauHoiRepository extends JpaRepository<CauHoi, Long>, JpaSpecificationExecutor<CauHoi> {
     CauHoi findByCauHoi(String cauHoi);
-
+    boolean existsByCauHoi(String cauHoi);
     List<CauHoi> findAll();
 
     // Tìm kiếm phần tử có maCauHoi lớn nhất

@@ -2,7 +2,9 @@ package com.quanly.hoatdongcongdong.controller;
 
 import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.payload.request.MatKhauMoiRequest;
+import com.quanly.hoatdongcongdong.payload.request.TaiKhoanMoiRequest;
 import com.quanly.hoatdongcongdong.payload.request.TokenRefreshRequest;
+import com.quanly.hoatdongcongdong.payload.request.TrangThaiTaiKhoanRequest;
 import com.quanly.hoatdongcongdong.payload.response.JwtResponse;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
@@ -42,6 +44,9 @@ public class TaiKhoanController {
     private SinhVienService sinhVienService;
     @Autowired
     private RefreshTokenService refreshTokenService;
+    @Autowired
+    private ChucDanhService chucDanhService;
+
     @GetMapping("/thong-tin")
     public ResponseEntity<?> getUserDetails(
             @RequestParam(value = "tenDangNhap", required = false) String tenDangNhap,
@@ -73,10 +78,16 @@ public class TaiKhoanController {
                 return ResponseEntity.ok(hocVien);
             }
             default -> {
-                return ResponseEntity.badRequest().body("Quyền không hợp lệ!");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Quyền không hợp lệ");
             }
         }
     }
+    @GetMapping("/tat-ca-giang-vien")
+    public ResponseEntity<List<GiangVien>> getAllGiangVien() {
+        List<GiangVien> giangVienList = giangVienService.getAllGiangVien();
+        return ResponseEntity.ok(giangVienList);
+    }
+
     @GetMapping("/lay-danh-sach")
     public ResponseEntity<?> getAllUsersByRole(
             @RequestParam(defaultValue = "0") int page,
@@ -114,7 +125,48 @@ public class TaiKhoanController {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/them-tai-khoan")
+    public ResponseEntity<?> themNguoiDung(@Valid @RequestBody TaiKhoanMoiRequest request) {
+        if (request.getQuyen() == TaiKhoan.Quyen.SinhVien) {
+            taiKhoanService.themMoiSinhVien(request.getTenDangNhap(), request.getMatKhau(),
+                    request.getEmail(), request.getQuyen(), request.getTenDayDu(),
+                    request.getGioiTinh(), request.getNamNhapHoc(),
+                    request.getSoDienThoai(), request.getNgaySinh(), request.getDiaChi());
+        } else if (request.getQuyen() == TaiKhoan.Quyen.GiangVien) {
+            Optional<ChucDanh> chucDanh = chucDanhService.findById(request.getMaChucDanh());
+            if (chucDanh.isEmpty()) {
+                return new ResponseEntity<>(new MessageResponse("chucdanh-notfound"), HttpStatus.NOT_FOUND);
+            }
+            taiKhoanService.themMoiGiangVien(request.getTenDangNhap(), request.getMatKhau(),
+                    request.getEmail(), request.getQuyen(), request.getTenDayDu(),
+                    request.getGioiTinh(), chucDanh.get(), request.getSoDienThoai(),
+                    request.getNgaySinh(), request.getDiaChi());
+        } else {
+            throw new EntityNotFoundException("Quyền tài khoản không hợp lệ");
+        }
+        return ResponseEntity.ok(new MessageResponse("Thêm tài khoản thành công!"));
+    }
+    @PutMapping("/cap-nhat-trang-thai")
+    public ResponseEntity<?> updateStatus(
+            @RequestBody TrangThaiTaiKhoanRequest trangThaiTaiKhoanRequest,
+            HttpServletRequest httpServletRequest) {
 
+        TaiKhoan currentUser = taiKhoanService.getCurrentUser(httpServletRequest);
+        Optional<TaiKhoan> taiKhoan = taiKhoanService.findByTenDangNhap(trangThaiTaiKhoanRequest.getTenDangNhap());
+        if (currentUser == null) {
+            return new ResponseEntity<>(new MessageResponse("NOT_FOUND"), HttpStatus.NOT_FOUND);
+        }
+        if (currentUser.getQuyen().equals(TaiKhoan.Quyen.QuanTriVien) && taiKhoan.isPresent()) {
+            if (taiKhoan.get().getTrangThai().equals(trangThaiTaiKhoanRequest.getTrangThai())) {
+                return new ResponseEntity<>(new MessageResponse("NO_CHANGE"), HttpStatus.OK);
+            }
+            taiKhoan.get().setTrangThai(trangThaiTaiKhoanRequest.getTrangThai());
+            taiKhoanService.save(taiKhoan.get());
+        } else {
+            return new ResponseEntity<>(new MessageResponse("ERROR"), HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(new MessageResponse("OK"), HttpStatus.OK);
+    }
     @PutMapping("/cap-nhat-thong-tin")
     public ResponseEntity<?> updateUserProfile(@RequestBody TaiKhoan request,
                                                HttpServletRequest httpServletRequest) {
