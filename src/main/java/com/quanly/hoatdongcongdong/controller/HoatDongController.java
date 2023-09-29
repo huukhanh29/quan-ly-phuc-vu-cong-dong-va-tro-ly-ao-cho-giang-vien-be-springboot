@@ -24,15 +24,9 @@ public class HoatDongController {
     @Autowired
     private HoatDongService hoatDongService;
     @Autowired
-    private GiangVienService giangVienService;
-    @Autowired
     private LoaiHoatDongRepository loaiHoatDongRepository;
     @Autowired
     private DangKyHoatDongService dangKyHoatDongService;
-    @Autowired
-    private TaiKhoanService taiKhoanService;
-    @Autowired
-    private ThongBaoService thongBaoService;
 
     @GetMapping("/{maHoatDong}")
     public ResponseEntity<?> getHoatDongById(@PathVariable Long maHoatDong) {

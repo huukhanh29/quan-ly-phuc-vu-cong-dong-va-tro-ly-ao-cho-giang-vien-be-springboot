@@ -26,7 +26,6 @@ public class DangKyHoatDong {
         Chua_Duyet, Da_Duyet, Da_Huy
     }
 
-
     public DangKyHoatDong(Long maDangKy, GiangVien giangVien, String lyDoHuy, HoatDong hoatDong, TrangThaiDangKy trangThaiDangKy) {
         this.maDangKy = maDangKy;
         this.giangVien = giangVien;

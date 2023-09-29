@@ -19,14 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import com.quanly.hoatdongcongdong.entity.*;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -56,9 +48,10 @@ public class DangKyHoatDongController {
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false, defaultValue = "") String year,
-            @RequestParam(required = false) Long userId
+            @RequestParam(required = false) String username
     ) {
-        return dangKyHoatDongService.getDanhSachDangKyHoatDong(page, size, sortBy, sortDir, searchTerm, status, startTime, endTime, year, userId);
+        return dangKyHoatDongService.getDanhSachDangKyHoatDong(page, size,
+                sortBy, sortDir, searchTerm, status, startTime, endTime, year, username);
     }
 
     @PostMapping("/{maHoatDong}")
@@ -85,7 +78,7 @@ public class DangKyHoatDongController {
 
         dangKyHoatDongService.dangKyHoatDong(hoatDong, giangVien.get());
 
-        return ResponseEntity.ok("Đăng ký hoạt động thành công");
+        return new ResponseEntity<>(new MessageResponse("Đăng ký thành công!"), HttpStatus.OK);
     }
 
     @PutMapping("/duyet-dang-ky/{maDangKy}")

@@ -192,8 +192,6 @@ public class CauHoiController {
             return new ResponseEntity<>(new MessageResponse("error"), HttpStatus.BAD_REQUEST);
         }
     }
-
-
 }
 
 

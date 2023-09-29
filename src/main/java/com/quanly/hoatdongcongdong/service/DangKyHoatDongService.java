@@ -53,7 +53,7 @@ public class DangKyHoatDongService {
             String startTime,
             String endTime,
             String year,
-            Long userId
+            String username
     ) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
         Pageable paging = PageRequest.of(page, size, sort);
@@ -90,9 +90,9 @@ public class DangKyHoatDongService {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.between(root.get("hoatDong").get("thoiGianBatDau"), startOfYear, endOfYear));
         }
-        if (userId != null) {
+        if (username != null) {
             spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("giangVien").get("maTaiKhoan"), userId));
+                    criteriaBuilder.equal(root.get("giangVien").get("taiKhoan").get("tenDangNhap"), username));
         }
 
         return dangKyHoatDongRepository.findAll(spec, paging);

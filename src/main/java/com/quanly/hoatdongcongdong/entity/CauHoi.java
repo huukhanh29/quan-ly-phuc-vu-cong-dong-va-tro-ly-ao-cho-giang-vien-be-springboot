@@ -30,16 +30,16 @@ public class CauHoi{
     public void setSoLuongDaHoi(int soLuongDaHoi) {
         this.soLuongDaHoi = soLuongDaHoi;
     }
-    @Formula("(SELECT COUNT(*) - 1 FROM cau_hoi c WHERE CALCULATE_SIMILARITY(c.cau_hoi, cau_hoi) > 0.5)")
-    private int soLuongCauHoiTuongTu;
-
-    public int getSoLuongCauHoiTuongTu() {
-        return soLuongCauHoiTuongTu;
-    }
-
-    public void setSoLuongCauHoiTuongTu(int soLuongCauHoiTuongTu) {
-        this.soLuongCauHoiTuongTu = soLuongCauHoiTuongTu;
-    }
+//    @Formula("(SELECT COUNT(*) - 1 FROM cau_hoi c WHERE CALCULATE_SIMILARITY(c.cau_hoi, cau_hoi) > 0.7)")
+//    private int soLuongCauHoiTuongTu;
+//
+//    public int getSoLuongCauHoiTuongTu() {
+//        return soLuongCauHoiTuongTu;
+//    }
+//
+//    public void setSoLuongCauHoiTuongTu(int soLuongCauHoiTuongTu) {
+//        this.soLuongCauHoiTuongTu = soLuongCauHoiTuongTu;
+//    }
 
     public CauHoi(Long maCauHoi, String cauHoi, String traLoi, LocalDateTime ngayTao, LocalDateTime ngayCapNhat) {
         this.maCauHoi = maCauHoi;
