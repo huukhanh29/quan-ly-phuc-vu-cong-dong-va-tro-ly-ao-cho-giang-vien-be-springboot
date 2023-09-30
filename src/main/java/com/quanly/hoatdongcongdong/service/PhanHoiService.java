@@ -116,6 +116,7 @@ public class PhanHoiService {
         return "success";
     }
     public void createPhanHoi(String noiDung, SinhVien sinhVien) {
+        messagingTemplate.convertAndSendToUser("admin", "/queue/messages", "send-feedback");
         PhanHoi phanHoiEntity = new PhanHoi();
         phanHoiEntity.setNoiDung(noiDung);
         phanHoiEntity.setSinhVien(sinhVien);

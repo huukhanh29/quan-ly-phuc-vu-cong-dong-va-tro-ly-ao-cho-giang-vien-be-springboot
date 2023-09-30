@@ -2,9 +2,13 @@ package com.quanly.hoatdongcongdong.service;
 
 import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.payload.request.HuyHoatDongRequest;
+import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.DangKyHoatDongRepository;
 import com.quanly.hoatdongcongdong.repository.GioTichLuyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +26,8 @@ public class DangKyHoatDongService {
 
     private final DangKyHoatDongRepository dangKyHoatDongRepository;
     private final GioTichLuyRepository gioTichLuyRepository;
+    @Autowired
+    private SimpMessageSendingOperations messagingTemplate;
 
     @Autowired
     public DangKyHoatDongService(DangKyHoatDongRepository dangKyHoatDongRepository,
@@ -85,11 +91,20 @@ public class DangKyHoatDongService {
                     criteriaBuilder.lessThanOrEqualTo(root.get("hoatDong").get("thoiGianKetThuc"), endTimes));
         }
         if (!year.isEmpty()) {
-            LocalDateTime startOfYear = LocalDateTime.of(Integer.parseInt(year), 1, 1, 0, 0, 0);
-            LocalDateTime endOfYear = LocalDateTime.of(Integer.parseInt(year), 12, 31, 23, 59, 59);
+            // Tách chuỗi year thành hai phần và chuyển đổi thành số
+            String[] years = year.split("-");
+            int startYear = Integer.parseInt(years[0]);
+            int endYear = Integer.parseInt(years[1]);
+
+            // Tạo LocalDateTime cho tháng 7 ngày 1 của năm bắt đầu và tháng 7 ngày 1 của năm kết thúc
+            LocalDateTime startOfYear = LocalDateTime.of(startYear, 7, 1, 0, 0, 0);
+            LocalDateTime endOfYear = LocalDateTime.of(endYear, 7, 1, 0, 0, 0);
+
+            // Thêm điều kiện lọc vào Specification
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.between(root.get("hoatDong").get("thoiGianBatDau"), startOfYear, endOfYear));
         }
+
         if (username != null) {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.equal(root.get("giangVien").get("taiKhoan").get("tenDangNhap"), username));
@@ -99,19 +114,33 @@ public class DangKyHoatDongService {
     }
 
     public void dangKyHoatDong(HoatDong hoatDong, GiangVien giangVien) {
+        messagingTemplate.convertAndSendToUser("admin", "/queue/messages", "register-activity");
         DangKyHoatDong dangKyHoatDong = new DangKyHoatDong();
         dangKyHoatDong.setGiangVien(giangVien);
         dangKyHoatDong.setHoatDong(hoatDong);
         dangKyHoatDong.setTrangThaiDangKy(DangKyHoatDong.TrangThaiDangKy.Chua_Duyet);
         dangKyHoatDongRepository.save(dangKyHoatDong);
     }
+    public boolean kiemTraDangKyHoatDong(String ten, Long ma) {
+        if(dangKyHoatDongRepository.existsByGiangVien_TaiKhoan_TenDangNhapAndHoatDong_MaHoatDong(ten, ma)){
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public DangKyHoatDong findByGiangVienAndHoatDong(String ten, Long ma){
+        DangKyHoatDong dangKyHoatDong = dangKyHoatDongRepository.findByGiangVien_TaiKhoan_TenDangNhapAndHoatDong_MaHoatDong(ten, ma);
+        if(dangKyHoatDong != null){
+            return dangKyHoatDong;
+        }
+        return null;
+    }
 
     public void approveDangKyHoatDong(DangKyHoatDong dangKyHoatDong) {
-
-
         // Thực hiện phê duyệt đăng ký hoạt động
         dangKyHoatDong.setTrangThaiDangKy(DangKyHoatDong.TrangThaiDangKy.Da_Duyet);
         dangKyHoatDongRepository.save(dangKyHoatDong);
+        messagingTemplate.convertAndSendToUser(dangKyHoatDong.getGiangVien().getTaiKhoan().getTenDangNhap(), "/queue/messages", "approve-activity");
 
         GiangVien giangVien = dangKyHoatDong.getGiangVien();
         LocalDateTime thoiGianBatDau = dangKyHoatDong.getHoatDong().getThoiGianBatDau();

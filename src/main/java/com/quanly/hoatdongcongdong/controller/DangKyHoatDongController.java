@@ -47,8 +47,8 @@ public class DangKyHoatDongController {
             @RequestParam(required = false, defaultValue = "") String status,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
-            @RequestParam(required = false, defaultValue = "") String year,
-            @RequestParam(required = false) String username
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false, defaultValue = "") String year
     ) {
         return dangKyHoatDongService.getDanhSachDangKyHoatDong(page, size,
                 sortBy, sortDir, searchTerm, status, startTime, endTime, year, username);
@@ -73,7 +73,7 @@ public class DangKyHoatDongController {
         Optional<GiangVien> giangVien = giangVienService.findById(currentUser.getMaTaiKhoan());
 
         if (dangKyHoatDongService.existsByGiangVien_MaTaiKhoanAndHoatDong_MaHoatDong(currentUser.getMaTaiKhoan(), maHoatDong)) {
-            return new ResponseEntity<>(new MessageResponse("hoatdong-exist"), HttpStatus.OK);
+            return new ResponseEntity<>(new MessageResponse("dangky-exist"), HttpStatus.OK);
         }
 
         dangKyHoatDongService.dangKyHoatDong(hoatDong, giangVien.get());
@@ -126,7 +126,33 @@ public class DangKyHoatDongController {
         } else {
             return new ResponseEntity<>(new MessageResponse("lydo-notempty"), HttpStatus.OK);
         }
-
         return ResponseEntity.ok(new MessageResponse("đã hủy"));
+    }
+    @PostMapping("/kiem-tra/{maHoatDong}")
+    public ResponseEntity<?> kiemTraDangKyKhoaHoc(@PathVariable Long maHoatDong, HttpServletRequest httpServletRequest) {
+        TaiKhoan currentUser = taiKhoanService.getCurrentUser(httpServletRequest);
+
+        // Tìm hoạt động cần đăng ký
+        Optional<HoatDong> optionalHoatDong = hoatDongService.findById(maHoatDong);
+        if (optionalHoatDong.isEmpty()) {
+            return new ResponseEntity<>(new MessageResponse("hoatdong-notfound"), HttpStatus.NOT_FOUND);
+        }
+        HoatDong hoatDong = optionalHoatDong.get();
+        boolean check = dangKyHoatDongService.kiemTraDangKyHoatDong(currentUser.getTenDangNhap(), hoatDong.getMaHoatDong());
+        if(check){
+            DangKyHoatDong dangKyHoatDong = dangKyHoatDongService.findByGiangVienAndHoatDong(currentUser.getTenDangNhap(), hoatDong.getMaHoatDong());
+            if(dangKyHoatDong != null){
+                if(dangKyHoatDong.getTrangThaiDangKy() == DangKyHoatDong.TrangThaiDangKy.Da_Duyet){
+                    return new ResponseEntity<>(new MessageResponse("daduyet"), HttpStatus.OK);
+                }else if(dangKyHoatDong.getTrangThaiDangKy() == DangKyHoatDong.TrangThaiDangKy.Da_Huy){
+                    return new ResponseEntity<>(new MessageResponse("dahuy"), HttpStatus.OK);
+                }else if(dangKyHoatDong.getTrangThaiDangKy() == DangKyHoatDong.TrangThaiDangKy.Chua_Duyet){
+                    return new ResponseEntity<>(new MessageResponse("dadangky"), HttpStatus.OK);
+                }
+            }
+        }else {
+            return new ResponseEntity<>(new MessageResponse("false"), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new MessageResponse("unknown"), HttpStatus.OK);
     }
 }

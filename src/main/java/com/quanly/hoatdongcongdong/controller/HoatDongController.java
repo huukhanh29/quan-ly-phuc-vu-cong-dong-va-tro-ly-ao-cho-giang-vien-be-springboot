@@ -79,7 +79,7 @@ public class HoatDongController {
     }
 
     @GetMapping("/lay-danh-sach-nam")
-    public List<Integer> getYears() {
+    public List<String> getYears() {
         return hoatDongService.getYears();
     }
 

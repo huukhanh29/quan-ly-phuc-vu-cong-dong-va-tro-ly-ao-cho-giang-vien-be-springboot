@@ -10,5 +10,7 @@ import java.util.Optional;
 public interface DangKyHoatDongRepository extends JpaRepository<DangKyHoatDong, Long>, JpaSpecificationExecutor<DangKyHoatDong> {
     List<DangKyHoatDong> findByGiangVien_MaTaiKhoan(Long maTk);
     boolean existsByHoatDong_MaHoatDong(Long maHoatDong);
+    DangKyHoatDong findByGiangVien_TaiKhoan_TenDangNhapAndHoatDong_MaHoatDong(String ten, Long ma);
     boolean existsByGiangVien_MaTaiKhoanAndHoatDong_MaHoatDong(Long maTaiKhoan, Long maHoatDong);
+    boolean existsByGiangVien_TaiKhoan_TenDangNhapAndHoatDong_MaHoatDong(String ten, Long ma);
 }

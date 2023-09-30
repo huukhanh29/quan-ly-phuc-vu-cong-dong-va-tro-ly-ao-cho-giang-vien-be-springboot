@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -182,9 +183,15 @@ public class HoatDongService {
         }
 
     }
-    public List<Integer> getYears() {
-        return hoatDongRepository.findYears();
+    public List<String> getYears() {
+        List<Integer> years = hoatDongRepository.findYears();
+        List<String> result = new ArrayList<>();
+        for(Integer year: years) {
+            result.add(year + "-" + (year + 1));
+        }
+        return result;
     }
+
 
     public Long countUpcomingActivities() {
         return hoatDongRepository.countByTrangThaiHoatDong(HoatDong.TrangThaiHoatDong.SAP_DIEN_RA);
