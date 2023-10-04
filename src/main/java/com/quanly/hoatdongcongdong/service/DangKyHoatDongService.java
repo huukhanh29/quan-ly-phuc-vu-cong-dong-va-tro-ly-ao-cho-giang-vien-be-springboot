@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -90,7 +91,7 @@ public class DangKyHoatDongService {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.lessThanOrEqualTo(root.get("hoatDong").get("thoiGianKetThuc"), endTimes));
         }
-        if (!year.isEmpty()) {
+        if (!Objects.equals(year, "") || !year.isEmpty()) {
             // Tách chuỗi year thành hai phần và chuyển đổi thành số
             String[] years = year.split("-");
             int startYear = Integer.parseInt(years[0]);

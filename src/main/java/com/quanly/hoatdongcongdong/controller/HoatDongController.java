@@ -55,11 +55,13 @@ public class HoatDongController {
 
     @PostMapping("/them-moi")
     public ResponseEntity<?> addHoatDong(@RequestBody HoatDongResponse hoatDongResponse) {
-        // Process and save the new hoatDong using HoatDongService
         hoatDongService.addHoatDong(hoatDongResponse);
         return ResponseEntity.ok(new MessageResponse("đã thêm"));
     }
-
+    @GetMapping("/all")
+    public ResponseEntity<List<HoatDong>> getAllHoatDongs() {
+        return ResponseEntity.ok(hoatDongService.getAllHoatDongs());
+    }
     @PutMapping("/cap-nhat/{maHoatDong}")
     public ResponseEntity<?> updateHoatDong(@PathVariable Long maHoatDong,
                                                  @RequestBody HoatDongResponse hoatDongResponse) {

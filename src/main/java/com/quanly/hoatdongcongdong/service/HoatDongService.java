@@ -106,12 +106,13 @@ public class HoatDongService {
         return hoatDongRepository.findAll(spec, paging);
     }
 
-    public String addHoatDong(HoatDongResponse hoatDongResponse) {
+    public void addHoatDong(HoatDongResponse hoatDongResponse) {
 
         // Kiểm tra nếu loại hoạt động không tồn tại
         Optional<LoaiHoatDong> loaiHoatDong = loaiHoatDongRepository.findById(hoatDongResponse.getMaLoaiHoatDong());
         if (loaiHoatDong.isEmpty()) {
-            return "Loại hoạt động không tồn tại";
+            new ResponseEntity<>(new MessageResponse("hoatdong-notfound"), HttpStatus.NOT_FOUND);
+            return;
         }
 
         HoatDong hoatDong = new HoatDong();
@@ -133,8 +134,6 @@ public class HoatDongService {
         hoatDong.setNguoiKyQuyetDinh(hoatDongResponse.getNguoiKyQuyetDinh());
 
         hoatDongRepository.save(hoatDong);
-
-        return "Hoạt động đã được thêm thành công";
     }
     public void updateHoatDong(Long maHoatDong, HoatDongResponse hoatDongResponse) {
 
@@ -191,7 +190,9 @@ public class HoatDongService {
         }
         return result;
     }
-
+    public List<HoatDong> getAllHoatDongs() {
+        return hoatDongRepository.findAll();
+    }
 
     public Long countUpcomingActivities() {
         return hoatDongRepository.countByTrangThaiHoatDong(HoatDong.TrangThaiHoatDong.SAP_DIEN_RA);
