@@ -77,7 +77,6 @@ public class HoatDongController {
         }
         hoatDongService.deleteHoatDongById(maHoatDong);
         return ResponseEntity.ok(new MessageResponse("đã xóa"));
-
     }
 
     @GetMapping("/lay-danh-sach-nam")
