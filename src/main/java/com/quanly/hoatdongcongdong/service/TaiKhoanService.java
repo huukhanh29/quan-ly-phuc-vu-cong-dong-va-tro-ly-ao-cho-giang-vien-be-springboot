@@ -105,8 +105,8 @@ public class TaiKhoanService {
     }
     @Transactional
     public void themMoiGiangVien(String tenDangNhap, String matKhau, String email, TaiKhoan.Quyen quyen,
-                                 String tenDayDu, TaiKhoan.GioiTinh gioiTinh, ChucDanh chucDanh
-            , String soDienThoai, Date ngaySinh,  String diaChi) {
+                                 String tenDayDu, TaiKhoan.GioiTinh gioiTinh, ChucDanh chucDanh, Khoa khoa,
+             String soDienThoai, Date ngaySinh,  String diaChi) {
         if (existsByTenDangNhap(tenDangNhap)) {
             throw new EntityExistsException("username-exist");
         }
@@ -118,6 +118,7 @@ public class TaiKhoanService {
         taiKhoanRepository.save(taiKhoan);
 
         GiangVien giangVien = new GiangVien();
+        giangVien.setKhoa(khoa);
         giangVien.setTaiKhoan(taiKhoan);
         giangVien.setChucDanh(chucDanh);
         giangVienRepository.save(giangVien);

@@ -7,6 +7,7 @@ import com.quanly.hoatdongcongdong.payload.request.TokenRefreshRequest;
 import com.quanly.hoatdongcongdong.payload.request.TrangThaiTaiKhoanRequest;
 import com.quanly.hoatdongcongdong.payload.response.JwtResponse;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
+import com.quanly.hoatdongcongdong.repository.KhoaRepository;
 import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
 import com.quanly.hoatdongcongdong.service.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -46,6 +47,8 @@ public class TaiKhoanController {
     private RefreshTokenService refreshTokenService;
     @Autowired
     private ChucDanhService chucDanhService;
+    @Autowired
+    private KhoaRepository khoaRepository;
 
     @GetMapping("/thong-tin")
     public ResponseEntity<?> getUserDetails(
@@ -137,9 +140,13 @@ public class TaiKhoanController {
             if (chucDanh.isEmpty()) {
                 return new ResponseEntity<>(new MessageResponse("chucdanh-notfound"), HttpStatus.NOT_FOUND);
             }
+            Optional<Khoa> khoa = khoaRepository.findById(request.getMaKhoa());
+            if (khoa.isEmpty()) {
+                return new ResponseEntity<>(new MessageResponse("khoa-notfound"), HttpStatus.NOT_FOUND);
+            }
             taiKhoanService.themMoiGiangVien(request.getTenDangNhap(), request.getMatKhau(),
                     request.getEmail(), request.getQuyen(), request.getTenDayDu(),
-                    request.getGioiTinh(), chucDanh.get(), request.getSoDienThoai(),
+                    request.getGioiTinh(), chucDanh.get(),khoa.get(), request.getSoDienThoai(),
                     request.getNgaySinh(), request.getDiaChi());
         } else {
             throw new EntityNotFoundException("Quyền tài khoản không hợp lệ");

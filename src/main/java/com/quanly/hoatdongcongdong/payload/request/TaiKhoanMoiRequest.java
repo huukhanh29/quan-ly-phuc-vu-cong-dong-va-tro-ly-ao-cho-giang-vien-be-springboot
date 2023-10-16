@@ -18,6 +18,15 @@ public class TaiKhoanMoiRequest {
     private String diaChi;
     private Year namNhapHoc; // Dùng cho sinh viên
     private Long maChucDanh; // Dùng cho giảng viên
+    private Long maKhoa;
+
+    public Long getMaKhoa() {
+        return maKhoa;
+    }
+
+    public void setMaKhoa(Long maKhoa) {
+        this.maKhoa = maKhoa;
+    }
 
     public String getTenDangNhap() {
         return tenDangNhap;

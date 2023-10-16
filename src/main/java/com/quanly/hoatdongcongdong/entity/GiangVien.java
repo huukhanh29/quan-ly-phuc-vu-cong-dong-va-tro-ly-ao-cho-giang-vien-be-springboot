@@ -17,14 +17,25 @@ public class GiangVien {
     @JoinColumn(name = "maTaiKhoan", referencedColumnName = "maTaiKhoan", insertable = false, updatable = false)
     @MapsId
     private TaiKhoan taiKhoan;
-
+    @ManyToOne
+    @JoinColumn(name = "maKhoa")
+    private Khoa khoa;
     public GiangVien() {
     }
 
-    public GiangVien(Long maTaiKhoan, ChucDanh chucDanh, TaiKhoan taiKhoan) {
+    public GiangVien(Long maTaiKhoan, ChucDanh chucDanh, TaiKhoan taiKhoan, Khoa khoa) {
         this.maTaiKhoan = maTaiKhoan;
         this.chucDanh = chucDanh;
         this.taiKhoan = taiKhoan;
+        this.khoa = khoa;
+    }
+
+    public Khoa getKhoa() {
+        return khoa;
+    }
+
+    public void setKhoa(Khoa khoa) {
+        this.khoa = khoa;
     }
 
     public Long getMaTaiKhoan() {
