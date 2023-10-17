@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LoaiHoatDongRepository extends JpaRepository<LoaiHoatDong, Long> {
-
+        boolean existsByTenLoaiHoatDong(String ten);
 }

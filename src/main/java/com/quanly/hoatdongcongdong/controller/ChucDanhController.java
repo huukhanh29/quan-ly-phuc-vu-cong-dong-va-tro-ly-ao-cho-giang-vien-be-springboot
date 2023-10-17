@@ -1,6 +1,7 @@
 package com.quanly.hoatdongcongdong.controller;
 import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
+import com.quanly.hoatdongcongdong.repository.ChucDanhRepository;
 import com.quanly.hoatdongcongdong.service.ChucDanhService;
 import com.quanly.hoatdongcongdong.service.GiangVienService;
 import com.quanly.hoatdongcongdong.service.GioTichLuyService;
@@ -30,6 +31,8 @@ public class ChucDanhController {
 
     @Autowired
     private GioTichLuyService gioTichLuyService;
+    @Autowired
+    private ChucDanhRepository chucDanhRepository;
 
     @Autowired
     private TaiKhoanService taiKhoanService;
@@ -87,5 +90,55 @@ public class ChucDanhController {
         chartData.put("requiredHours", requiredHours);
         return chartData;
     }
+    @PostMapping("/them")
+    public ResponseEntity<?> themChucDanh(@RequestBody ChucDanh chucDanhRequest) {
+        ChucDanh chucDanh = new ChucDanh();
+        chucDanh.setTenChucDanh(chucDanhRequest.getTenChucDanh());
+        chucDanh.setGioBatBuoc(chucDanhRequest.getGioBatBuoc());
 
+        chucDanhRepository.save(chucDanh);
+        return ResponseEntity.ok(new MessageResponse("Thêm chức danh thành công"));
+    }
+
+    @GetMapping("/lay-tat-ca")
+    public ResponseEntity<List<ChucDanh>> layTatCaChucDanh() {
+        return ResponseEntity.ok(chucDanhRepository.findAll());
+    }
+
+    @GetMapping("/lay/{maChucDanh}")
+    public ResponseEntity<?> layChucDanh(@PathVariable Long maChucDanh) {
+        Optional<ChucDanh> chucDanh = chucDanhRepository.findById(maChucDanh);
+        if (chucDanh.isEmpty()) {
+            return new ResponseEntity<>(new MessageResponse("Chức danh không tồn tại"), HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(chucDanh.get());
+    }
+
+    @PutMapping("/sua/{maChucDanh}")
+    public ResponseEntity<?> suaChucDanh(@PathVariable Long maChucDanh, @RequestBody ChucDanh chucDanhRequest) {
+        Optional<ChucDanh> chucDanhOptional = chucDanhRepository.findById(maChucDanh);
+        if (chucDanhOptional.isEmpty()) {
+            return new ResponseEntity<>(new MessageResponse("Chức danh không tồn tại"), HttpStatus.NOT_FOUND);
+        }
+
+        ChucDanh chucDanh = chucDanhOptional.get();
+        chucDanh.setTenChucDanh(chucDanhRequest.getTenChucDanh());
+        chucDanh.setGioBatBuoc(chucDanhRequest.getGioBatBuoc());
+
+        chucDanhRepository.save(chucDanh);
+        return ResponseEntity.ok(new MessageResponse("Cập nhật chức danh thành công"));
+    }
+
+    @DeleteMapping("/xoa/{maChucDanh}")
+    public ResponseEntity<?> xoaChucDanh(@PathVariable Long maChucDanh) {
+        try {
+            if (!chucDanhRepository.existsById(maChucDanh)) {
+                return new ResponseEntity<>(new MessageResponse("Chức danh không tồn tại"), HttpStatus.NOT_FOUND);
+            }
+            chucDanhRepository.deleteById(maChucDanh);
+            return ResponseEntity.ok(new MessageResponse("Xóa chức danh thành công"));
+        } catch (Exception e) {
+            return new ResponseEntity<>(new MessageResponse("cant-delete"), HttpStatus.OK);
+        }
+    }
 }
