@@ -190,6 +190,11 @@ public class HoatDongService {
         }
         return result;
     }
+    public List<Integer> getYears1() {
+        List<Integer> years = hoatDongRepository.findYears();
+
+        return years;
+    }
     public List<HoatDong> getAllHoatDongs() {
         return hoatDongRepository.findAll();
     }

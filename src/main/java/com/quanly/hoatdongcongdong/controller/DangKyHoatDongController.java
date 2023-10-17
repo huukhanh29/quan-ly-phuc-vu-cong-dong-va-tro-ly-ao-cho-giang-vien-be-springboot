@@ -41,7 +41,7 @@ public class DangKyHoatDongController {
     public Page<DangKyHoatDong> layDanhSachTatCaDangKyHoatDong(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "hoatDong.ngayTao") String sortBy,
+            @RequestParam(defaultValue = "hoatDong.thoiGianBatDau") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDir,
             @RequestParam(required = false, defaultValue = "") String searchTerm,
             @RequestParam(required = false, defaultValue = "") String status,

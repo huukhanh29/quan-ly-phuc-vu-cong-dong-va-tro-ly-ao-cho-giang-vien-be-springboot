@@ -1,8 +1,6 @@
 package com.quanly.hoatdongcongdong.controller;
 import com.quanly.hoatdongcongdong.entity.*;
-import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
-import com.quanly.hoatdongcongdong.repository.*;
 import com.quanly.hoatdongcongdong.service.ChucDanhService;
 import com.quanly.hoatdongcongdong.service.GiangVienService;
 import com.quanly.hoatdongcongdong.service.GioTichLuyService;
@@ -71,7 +69,7 @@ public class ChucDanhController {
         GiangVien giangVien = giangVienService.findById(taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan())
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy giảng viên!"));
 
-        GioTichLuy gioTichLuy = gioTichLuyService.findByGiangVien_MaTaiKhoanAndNamHoc(giangVien.getMaTaiKhoan(), academic);
+        GioTichLuy gioTichLuy = gioTichLuyService.findByGiangVien_MaTaiKhoanAndNam(giangVien.getMaTaiKhoan(), academic);
         int totalHours = 0;
         if (gioTichLuy != null) {
             totalHours = gioTichLuy.getTongSoGio();

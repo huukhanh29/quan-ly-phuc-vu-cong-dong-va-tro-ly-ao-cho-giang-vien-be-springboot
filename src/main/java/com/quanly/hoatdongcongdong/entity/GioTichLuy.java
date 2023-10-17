@@ -11,16 +11,16 @@ public class GioTichLuy {
     @JoinColumn(name = "maGiangVien")
     private GiangVien giangVien;
     private int tongSoGio;
-    private String namHoc;
+    private String nam;
 
     public GioTichLuy() {
     }
 
-    public GioTichLuy(Long maGioTichLuy, GiangVien taiKhoan, int tongSoGio, String namHoc) {
+    public GioTichLuy(Long maGioTichLuy, GiangVien giangVien, int tongSoGio, String nam) {
         this.maGioTichLuy = maGioTichLuy;
         this.giangVien = giangVien;
         this.tongSoGio = tongSoGio;
-        this.namHoc = namHoc;
+        this.nam = nam;
     }
 
     public Long getMaGioTichLuy() {
@@ -47,11 +47,11 @@ public class GioTichLuy {
         this.tongSoGio = tongSoGio;
     }
 
-    public String getNamHoc() {
-        return namHoc;
+    public String getNam() {
+        return nam;
     }
 
-    public void setNamHoc(String namHoc) {
-        this.namHoc = namHoc;
+    public void setNam(String namHoc) {
+        this.nam = namHoc;
     }
 }

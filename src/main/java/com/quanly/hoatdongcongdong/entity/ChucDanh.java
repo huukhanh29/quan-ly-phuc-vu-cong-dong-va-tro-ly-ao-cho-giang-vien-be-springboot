@@ -9,7 +9,7 @@ public class ChucDanh {
     private Long maChucDanh;
 
     private String tenChucDanh;
-//    private String moTa;
+    //private String moTa;
 
 
     private int gioBatBuoc;

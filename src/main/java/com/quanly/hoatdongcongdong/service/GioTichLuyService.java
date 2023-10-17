@@ -27,20 +27,20 @@ public class GioTichLuyService {
         return gioTichLuyRepository.findByGiangVien_MaTaiKhoan(maTk);
     }
 
-    public List<GioTichLuy> findByNamHoc(String namHoc) {
-        return gioTichLuyRepository.findByNamHoc(namHoc);
+    public List<GioTichLuy> findByNam(String nam) {
+        return gioTichLuyRepository.findByNam(nam);
     }
 
-    public GioTichLuy findByGiangVien_MaTaiKhoanAndNamHoc(Long nguoiDungId, String namHoc) {
-        return gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNamHoc(nguoiDungId, namHoc);
+    public GioTichLuy findByGiangVien_MaTaiKhoanAndNam(Long nguoiDungId, String nam) {
+        return gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(nguoiDungId, nam);
     }
 
-    public List<String> findDistinctNamHocByGiangVien(Long maTk) {
-        return gioTichLuyRepository.findDistinctNamHocByGiangVien(maTk);
+    public List<String> findDistinctNamByGiangVien(Long maTk) {
+        return gioTichLuyRepository.findDistinctNamByGiangVien(maTk);
     }
 
-    public GioTichLuy findByNamHocAndGiangVien_MaTaiKhoan(String namHoc, Long maTk) {
-        return gioTichLuyRepository.findByNamHocAndGiangVien_MaTaiKhoan(namHoc, maTk);
+    public GioTichLuy findByNamAndGiangVien_MaTaiKhoan(String nam, Long maTk) {
+        return gioTichLuyRepository.findByNamAndGiangVien_MaTaiKhoan(nam, maTk);
     }
 }
 

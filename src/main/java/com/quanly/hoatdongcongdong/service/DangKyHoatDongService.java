@@ -2,12 +2,9 @@ package com.quanly.hoatdongcongdong.service;
 
 import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.payload.request.HuyHoatDongRequest;
-import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.DangKyHoatDongRepository;
 import com.quanly.hoatdongcongdong.repository.GioTichLuyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -92,18 +89,24 @@ public class DangKyHoatDongService {
                     criteriaBuilder.lessThanOrEqualTo(root.get("hoatDong").get("thoiGianKetThuc"), endTimes));
         }
         if (!Objects.equals(year, "") || !year.isEmpty()) {
-            // Tách chuỗi year thành hai phần và chuyển đổi thành số
-            String[] years = year.split("-");
-            int startYear = Integer.parseInt(years[0]);
-            int endYear = Integer.parseInt(years[1]);
+            spec = spec.and((root, query, criteriaBuilder) -> {
+                LocalDateTime startOfYear = LocalDateTime.of(Integer.parseInt(year), 1, 1, 0, 0, 0);
+                LocalDateTime endOfYear = LocalDateTime.of(Integer.parseInt(year), 12, 31, 23, 59, 59);
+                return criteriaBuilder.between(root.get("hoatDong").get("thoiGianBatDau"), startOfYear, endOfYear);
+            });
 
-            // Tạo LocalDateTime cho tháng 7 ngày 1 của năm bắt đầu và tháng 7 ngày 1 của năm kết thúc
-            LocalDateTime startOfYear = LocalDateTime.of(startYear, 7, 1, 0, 0, 0);
-            LocalDateTime endOfYear = LocalDateTime.of(endYear, 7, 1, 0, 0, 0);
-
-            // Thêm điều kiện lọc vào Specification
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.between(root.get("hoatDong").get("thoiGianBatDau"), startOfYear, endOfYear));
+//            // Tách chuỗi year thành hai phần và chuyển đổi thành số
+//            String[] years = year.split("-");
+//            int startYear = Integer.parseInt(years[0]);
+//            int endYear = Integer.parseInt(years[1]);
+//
+//            // Tạo LocalDateTime cho tháng 7 ngày 1 của năm bắt đầu và tháng 7 ngày 1 của năm kết thúc
+//            LocalDateTime startOfYear = LocalDateTime.of(startYear, 7, 1, 0, 0, 0);
+//            LocalDateTime endOfYear = LocalDateTime.of(endYear, 7, 1, 0, 0, 0);
+//
+//            // Thêm điều kiện lọc vào Specification
+//            spec = spec.and((root, query, criteriaBuilder) ->
+//                    criteriaBuilder.between(root.get("hoatDong").get("thoiGianBatDau"), startOfYear, endOfYear));
         }
 
         if (username != null) {
@@ -145,17 +148,17 @@ public class DangKyHoatDongService {
 
         GiangVien giangVien = dangKyHoatDong.getGiangVien();
         LocalDateTime thoiGianBatDau = dangKyHoatDong.getHoatDong().getThoiGianBatDau();
-        int namBatDau = thoiGianBatDau.getYear();
-        int namKetThuc;
-
-        // Determine namKetThuc based on thoiGianBatDau
-        if (thoiGianBatDau.getMonthValue() >= 7) {
-            namKetThuc = namBatDau + 1;
-        } else {
-            namKetThuc = namBatDau;
-            namBatDau = namKetThuc - 1;
-        }
-        String namHoc = namBatDau + "-" + namKetThuc;
+        String namHoc = String.valueOf(thoiGianBatDau.getYear());
+//        int namKetThuc;
+//
+//        // Determine namKetThuc based on thoiGianBatDau
+//        if (thoiGianBatDau.getMonthValue() >= 7) {
+//            namKetThuc = namBatDau + 1;
+//        } else {
+//            namKetThuc = namBatDau;
+//            namBatDau = namKetThuc - 1;
+//        }
+//        String namHoc = namBatDau + "-" + namKetThuc;
 
         // Update gioTichLuy for the giangVien
         int gioTichLuyThamGia = dangKyHoatDong.getHoatDong().getGioTichLuyThamGia();
@@ -165,7 +168,7 @@ public class DangKyHoatDongService {
             gioTichLuy = new GioTichLuy();
             gioTichLuy.setGiangVien(giangVien);
             gioTichLuy.setTongSoGio(gioTichLuyThamGia);
-            gioTichLuy.setNamHoc(namHoc);
+            gioTichLuy.setNam(namHoc);
         } else {
             gioTichLuy.setTongSoGio(gioTichLuy.getTongSoGio() + gioTichLuyThamGia);
         }
@@ -182,7 +185,7 @@ public class DangKyHoatDongService {
                 gioTichLuyToChucEntity = new GioTichLuy();
                 gioTichLuyToChucEntity.setGiangVien(giangVienToChuc);
                 gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChuc);
-                gioTichLuyToChucEntity.setNamHoc(namHoc);
+                gioTichLuyToChucEntity.setNam(namHoc);
             } else {
                 gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChucEntity.getTongSoGio() + gioTichLuyToChuc);
             }

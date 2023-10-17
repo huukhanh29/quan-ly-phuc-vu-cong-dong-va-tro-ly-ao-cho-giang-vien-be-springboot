@@ -69,21 +69,23 @@ public class HoatDongController {
         hoatDongService.updateHoatDong(maHoatDong, hoatDongResponse);
         return ResponseEntity.ok(new MessageResponse("đã cập nhật"));
     }
-
     @DeleteMapping("/xoa/{maHoatDong}")
     public ResponseEntity<?> deleteHoatDong(@PathVariable Long maHoatDong) {
         if (dangKyHoatDongService.existsByHoatDong_MaHoatDong(maHoatDong)) {
-            return new ResponseEntity<>(new MessageResponse("cant-delete"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new MessageResponse("cant-delete"), HttpStatus.OK);
         }
         hoatDongService.deleteHoatDongById(maHoatDong);
         return ResponseEntity.ok(new MessageResponse("đã xóa"));
     }
-
-    @GetMapping("/lay-danh-sach-nam")
+    //năm học
+    @GetMapping("/lay-danh-sach-nam1")
     public List<String> getYears() {
         return hoatDongService.getYears();
     }
-
+    @GetMapping("/lay-danh-sach-nam")
+    public List<Integer> getYears1() {
+        return hoatDongService.getYears1();
+    }
     @GetMapping("/so-hoat-dong-chua-dien-ra")
     public Long countUpcomingActivities() {
         return hoatDongService.countUpcomingActivities();

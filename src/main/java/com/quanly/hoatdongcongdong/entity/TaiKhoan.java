@@ -28,7 +28,6 @@ public class TaiKhoan {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Quyen quyen;
-    private String anhDaiDien= "user.png";
     @Column(nullable = false)
     private String tenDayDu;
 
@@ -93,7 +92,7 @@ public class TaiKhoan {
     }
 
     public TaiKhoan(Long maTaiKhoan, String tenDangNhap, String matKhau,
-                    String email, Quyen quyen, String anhDaiDien, String tenDayDu,
+                    String email, Quyen quyen, String tenDayDu,
                     String soDienThoai, Date ngaySinh, GioiTinh gioiTinh, String diaChi,
                     TrangThai trangthai, LocalDateTime ngayTao, LocalDateTime ngayCapNhat) {
         this.maTaiKhoan = maTaiKhoan;
@@ -101,7 +100,7 @@ public class TaiKhoan {
         this.matKhau = matKhau;
         this.email = email;
         this.quyen = quyen;
-        this.anhDaiDien = anhDaiDien;
+
         this.tenDayDu = tenDayDu;
         this.soDienThoai = soDienThoai;
         this.ngaySinh = ngaySinh;
@@ -113,14 +112,14 @@ public class TaiKhoan {
     }
 
     public TaiKhoan(Long maTaiKhoan, String tenDangNhap, String matKhau,
-                    String email, Quyen quyen, String anhDaiDien, String tenDayDu,
+                    String email, Quyen quyen,  String tenDayDu,
                     String soDienThoai, GioiTinh gioiTinh, TrangThai trangthai) {
         this.maTaiKhoan = maTaiKhoan;
         this.tenDangNhap = tenDangNhap;
         this.matKhau = matKhau;
         this.email = email;
         this.quyen = quyen;
-        this.anhDaiDien = anhDaiDien;
+
         this.tenDayDu = tenDayDu;
         this.soDienThoai = soDienThoai;
         this.gioiTinh = gioiTinh;
@@ -137,13 +136,7 @@ public class TaiKhoan {
         this.trangThai = TrangThai.Mo;
     }
 
-    public String getAnhdaidien() {
-        return anhDaiDien;
-    }
 
-    public void setAnhdaidien(String anhDaiDien) {
-        this.anhDaiDien = anhDaiDien;
-    }
 
     public TrangThai getTrangThai() {
         return trangThai;
@@ -249,11 +242,5 @@ public class TaiKhoan {
         this.diaChi = diaChi;
     }
 
-    public String getAnhDaiDien() {
-        return anhDaiDien;
-    }
 
-    public void setAnhDaiDien(String anhDaiDien) {
-        this.anhDaiDien = anhDaiDien;
-    }
 }

@@ -11,10 +11,10 @@ import java.util.List;
 
 public interface GioTichLuyRepository extends JpaRepository<GioTichLuy, Long> {
     GioTichLuy findByGiangVien_MaTaiKhoan(Long maTk);
-    List<GioTichLuy> findByNamHoc(String namHoc);
-    GioTichLuy findByGiangVien_MaTaiKhoanAndNamHoc(Long nguoiDungId, String namHoc);
+    List<GioTichLuy> findByNam(String namHoc);
+    GioTichLuy findByGiangVien_MaTaiKhoanAndNam(Long nguoiDungId, String nam);
 
-    @Query("SELECT DISTINCT gio.namHoc FROM GioTichLuy gio WHERE gio.giangVien.taiKhoan.maTaiKhoan = :maTk ORDER BY gio.namHoc asc ")
-    List<String> findDistinctNamHocByGiangVien(@Param("maTk") Long maTk);
-    GioTichLuy findByNamHocAndGiangVien_MaTaiKhoan(String namHoc, Long maTk);
+    @Query("SELECT DISTINCT gio.nam FROM GioTichLuy gio WHERE gio.giangVien.taiKhoan.maTaiKhoan = :maTk ORDER BY gio.nam asc ")
+    List<String> findDistinctNamByGiangVien(@Param("maTk") Long maTk);
+    GioTichLuy findByNamAndGiangVien_MaTaiKhoan(String nam, Long maTk);
 }

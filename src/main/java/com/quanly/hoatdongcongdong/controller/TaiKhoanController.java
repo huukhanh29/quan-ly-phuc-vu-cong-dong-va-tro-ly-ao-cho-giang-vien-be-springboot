@@ -219,7 +219,7 @@ public class TaiKhoanController {
     @GetMapping("/danh-sach-nam-dang-ky-hoat-dong")
     public ResponseEntity<?> getAcademicYearsByUser(HttpServletRequest httpServletRequest) {
         Long maGv = taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
-        List<String> academicYears = gioTichLuyService.findDistinctNamHocByGiangVien(maGv);
+        List<String> academicYears = gioTichLuyService.findDistinctNamByGiangVien(maGv);
         return ResponseEntity.ok(academicYears);
     }
     @PostMapping("/dang-xuat")
@@ -230,18 +230,18 @@ public class TaiKhoanController {
     }
     @GetMapping("/ds-giang-vien-khen-thuong-hoac-khien-trach")
     public List<Map<String, Object>> getGiangVien(HttpServletRequest httpServletRequest,
-            @RequestParam(required = false) String namHoc,
+            @RequestParam(required = false) String nam,
                                                   @RequestParam(defaultValue = "Khen thưởng") String loai) {
         Long maGv = taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
-        List<String> academicYears = gioTichLuyService.findDistinctNamHocByGiangVien(maGv);
-        if (namHoc == null || namHoc.isEmpty()) {
+        List<String> academicYears = gioTichLuyService.findDistinctNamByGiangVien(maGv);
+        if (nam == null || nam.isEmpty()) {
             if (!academicYears.isEmpty()) {
-                namHoc = academicYears.get(0);
+                nam = academicYears.get(0);
             }else{
                 return null;
             }
         }
-        List<GioTichLuy> danhSachGioTichLuyCuaGiangVien = gioTichLuyService.findByNamHoc(namHoc);
+        List<GioTichLuy> danhSachGioTichLuyCuaGiangVien = gioTichLuyService.findByNam(nam);
         List<GiangVien> danhSachGiangVien = giangVienService.findAll();
         List<GiangVien> giangVienKetQua = new ArrayList<>();
         if (loai.equals("Khen thưởng")) {
@@ -264,7 +264,8 @@ public class TaiKhoanController {
         for (GiangVien giangVien : giangVienKetQua) {
             Map<String, Object> thongTinGiangVien = new HashMap<>();
             int tongSoGio = 0;
-            GioTichLuy gioTichLuyCuaGiangVien = gioTichLuyService.findByGiangVien_MaTaiKhoanAndNamHoc(giangVien.getMaTaiKhoan(),namHoc);
+            GioTichLuy gioTichLuyCuaGiangVien =
+                    gioTichLuyService.findByGiangVien_MaTaiKhoanAndNam(giangVien.getMaTaiKhoan(),nam);
             if (gioTichLuyCuaGiangVien != null) {
                 tongSoGio = gioTichLuyCuaGiangVien.getTongSoGio();
             }
