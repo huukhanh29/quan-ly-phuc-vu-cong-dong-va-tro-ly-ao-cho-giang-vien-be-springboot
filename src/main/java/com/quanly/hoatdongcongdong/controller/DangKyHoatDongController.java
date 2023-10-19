@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import com.quanly.hoatdongcongdong.entity.*;
 
 import org.springframework.data.domain.Page;
+
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -27,7 +29,8 @@ import java.util.Optional;
 public class DangKyHoatDongController {
 
     @Autowired
-    private DangKyHoatDongService dangKyHoatDongService;
+    private DangKyHoatDongService dangKyHoatDongService;@Autowired
+    private DangKyHoatDongRepository dangKyHoatDongRepository;
     @Autowired
     private HoatDongService hoatDongService;
     @Autowired
@@ -162,5 +165,10 @@ public class DangKyHoatDongController {
             return new ResponseEntity<>(new MessageResponse("false"), HttpStatus.OK);
         }
         return new ResponseEntity<>(new MessageResponse("unknown"), HttpStatus.OK);
+    }
+    @GetMapping("/hoat-dong/{ten}")
+    public ResponseEntity<?> getHoatDongsByGiangVien(@PathVariable String ten) {
+        List<HoatDong> hoatDongs = dangKyHoatDongRepository.findHoatDongsByGiangVien(ten);
+        return ResponseEntity.ok(hoatDongs);
     }
 }
