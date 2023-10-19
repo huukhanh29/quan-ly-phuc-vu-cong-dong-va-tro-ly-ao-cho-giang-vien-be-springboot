@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface HoatDongNgoaiTruongRepository extends JpaRepository<HoatDongNgoaiTruong, Long>, JpaSpecificationExecutor<HoatDong> {
-
+public interface HoatDongNgoaiTruongRepository extends JpaRepository<HoatDongNgoaiTruong, Long>, JpaSpecificationExecutor<HoatDongNgoaiTruong> {
+    @Query("SELECT DISTINCT YEAR(a.thoiGianBatDau) FROM HoatDongNgoaiTruong a ORDER BY YEAR(a.thoiGianBatDau) ASC")
+    List<Integer> findYears();
 }

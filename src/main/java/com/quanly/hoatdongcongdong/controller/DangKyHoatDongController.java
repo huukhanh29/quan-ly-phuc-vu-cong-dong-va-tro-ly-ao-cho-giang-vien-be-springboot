@@ -48,7 +48,7 @@ public class DangKyHoatDongController {
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String username,
-            @RequestParam(required = false, defaultValue = "") String year
+            @RequestParam(required = false) String year
     ) {
         return dangKyHoatDongService.getDanhSachDangKyHoatDong(page, size,
                 sortBy, sortDir, searchTerm, status, startTime, endTime, year, username);
@@ -123,6 +123,14 @@ public class DangKyHoatDongController {
         }
         if (!huyHoatDongRequest.getLyDoHuy().equals("")) {
             dangKyHoatDongService.huyDangKyHoatDong(dangKyHoatDong.get(), huyHoatDongRequest);
+            String tieuDe = "Hủy đăng ký hoạt động";
+            String nDung = "Xác nhận tham gia hoạt động " +
+                    dangKyHoatDong.get().getHoatDong().getTenHoatDong() + " của bạn đã bị hủy.";
+            ThongBao thongBao = thongBaoService.taoMoiThongBao(
+                    dangKyHoatDong.get().getGiangVien().getTaiKhoan(),
+                    tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
+            );
+            thongBaoService.luuThongBao(thongBao);
         } else {
             return new ResponseEntity<>(new MessageResponse("lydo-notempty"), HttpStatus.OK);
         }

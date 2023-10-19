@@ -44,7 +44,7 @@ public class HoatDongService {
         this.hoatDongRepository = hoatDongRepository;
         this.loaiHoatDongRepository = loaiHoatDongRepository;
         this.giangVienRepository = giangVienRepository;
-        this.dangKyHoatDongRepository =dangKyHoatDongRepository;
+        this.dangKyHoatDongRepository = dangKyHoatDongRepository;
     }
 
     public List<Integer> findYears() {
@@ -58,6 +58,7 @@ public class HoatDongService {
     public Optional<HoatDong> findById(Long maHoatDong) {
         return hoatDongRepository.findById(maHoatDong);
     }
+
     public Page<HoatDong> getAllHoatDong(
             int page,
             int size,
@@ -81,7 +82,7 @@ public class HoatDongService {
                             criteriaBuilder.like(root.get("moTa"), "%" + searchTerm + "%")
                     ));
         }
-        if (status != null ) {
+        if (status != null) {
             spec = spec.and((root, criteriaQuery, criteriaBuilder)
                     -> criteriaBuilder.equal(root.get("trangThaiHoatDong"), status));
         }
@@ -106,13 +107,13 @@ public class HoatDongService {
         return hoatDongRepository.findAll(spec, paging);
     }
 
-    public void addHoatDong(HoatDongResponse hoatDongResponse) {
+    public HoatDong addHoatDong(HoatDongResponse hoatDongResponse) {
 
         // Kiểm tra nếu loại hoạt động không tồn tại
         Optional<LoaiHoatDong> loaiHoatDong = loaiHoatDongRepository.findById(hoatDongResponse.getMaLoaiHoatDong());
         if (loaiHoatDong.isEmpty()) {
             new ResponseEntity<>(new MessageResponse("hoatdong-notfound"), HttpStatus.NOT_FOUND);
-            return;
+            return null;
         }
 
         HoatDong hoatDong = new HoatDong();
@@ -130,25 +131,27 @@ public class HoatDongService {
         hoatDong.setTenQuyetDinh(hoatDongResponse.getTenQuyetDinh());
         hoatDong.setSoQuyetDinh(hoatDongResponse.getSoQuyetDinh());
         hoatDong.setCapToChuc(hoatDongResponse.getCapToChuc());
-        hoatDong.setFileQuyetDinh(hoatDongResponse.getFileQuyetDinh());
+
         hoatDong.setNguoiKyQuyetDinh(hoatDongResponse.getNguoiKyQuyetDinh());
 
         hoatDongRepository.save(hoatDong);
+        return hoatDong;
     }
-    public void updateHoatDong(Long maHoatDong, HoatDongResponse hoatDongResponse) {
+
+    public HoatDong updateHoatDong(Long maHoatDong, HoatDongResponse hoatDongResponse) {
 
         // Kiểm tra hoạt động có tồn tại không
         Optional<HoatDong> existingHoatDong = hoatDongRepository.findById(maHoatDong);
         if (existingHoatDong.isEmpty()) {
             new ResponseEntity<>(new MessageResponse("hoatdong-notfound"), HttpStatus.NOT_FOUND);
-            return;
+            return null;
         }
 
         // Kiểm tra nếu loại hoạt động không tồn tại
         Optional<LoaiHoatDong> loaiHoatDong = loaiHoatDongRepository.findById(hoatDongResponse.getMaLoaiHoatDong());
         if (loaiHoatDong.isEmpty()) {
             new ResponseEntity<>(new MessageResponse("hoatdong-exist"), HttpStatus.OK);
-            return;
+            return null;
         }
 
         HoatDong hoatDong = existingHoatDong.get();
@@ -166,12 +169,12 @@ public class HoatDongService {
         hoatDong.setTenQuyetDinh(hoatDongResponse.getTenQuyetDinh());
         hoatDong.setSoQuyetDinh(hoatDongResponse.getSoQuyetDinh());
         hoatDong.setCapToChuc(hoatDongResponse.getCapToChuc());
-        hoatDong.setFileQuyetDinh(hoatDongResponse.getFileQuyetDinh());
         hoatDong.setNguoiKyQuyetDinh(hoatDongResponse.getNguoiKyQuyetDinh());
 
         hoatDongRepository.save(hoatDong);
-
+        return hoatDong;
     }
+
     public void deleteHoatDongById(Long maHoatDong) {
 
         Optional<HoatDong> hoatDong = hoatDongRepository.findById(maHoatDong);
@@ -182,19 +185,22 @@ public class HoatDongService {
         }
 
     }
+
     public List<String> getYears() {
         List<Integer> years = hoatDongRepository.findYears();
         List<String> result = new ArrayList<>();
-        for(Integer year: years) {
+        for (Integer year : years) {
             result.add(year + "-" + (year + 1));
         }
         return result;
     }
+
     public List<Integer> getYears1() {
         List<Integer> years = hoatDongRepository.findYears();
 
         return years;
     }
+
     public List<HoatDong> getAllHoatDongs() {
         return hoatDongRepository.findAll();
     }

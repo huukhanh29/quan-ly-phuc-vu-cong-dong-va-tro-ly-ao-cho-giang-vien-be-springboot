@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public class HoatDongNgoaiTruongRequest {
 
     private Long maGiangVien;
+    private String tenDangNhap;
     private String tenHoatDong;
     private String banToChuc;
     private String moTa;
@@ -16,6 +17,14 @@ public class HoatDongNgoaiTruongRequest {
     private LocalDateTime thoiGianKetThuc;
     private String fileMinhChung;
     private HoatDongNgoaiTruong.TrangThai trangThai;
+
+    public String getTenDangNhap() {
+        return tenDangNhap;
+    }
+
+    public void setTenDangNhap(String tenDangNhap) {
+        this.tenDangNhap = tenDangNhap;
+    }
 
     public Long getMaGiangVien() {
         return maGiangVien;

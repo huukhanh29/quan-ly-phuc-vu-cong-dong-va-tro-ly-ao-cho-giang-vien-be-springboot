@@ -88,7 +88,7 @@ public class DangKyHoatDongService {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.lessThanOrEqualTo(root.get("hoatDong").get("thoiGianKetThuc"), endTimes));
         }
-        if (!Objects.equals(year, "") || !year.isEmpty()) {
+        if (year != null) {
             spec = spec.and((root, query, criteriaBuilder) -> {
                 LocalDateTime startOfYear = LocalDateTime.of(Integer.parseInt(year), 1, 1, 0, 0, 0);
                 LocalDateTime endOfYear = LocalDateTime.of(Integer.parseInt(year), 12, 31, 23, 59, 59);

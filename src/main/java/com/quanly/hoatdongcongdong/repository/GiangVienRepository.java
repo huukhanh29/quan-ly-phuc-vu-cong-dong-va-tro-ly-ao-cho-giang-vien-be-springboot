@@ -14,5 +14,6 @@ import java.util.List;
 public interface GiangVienRepository extends JpaRepository<GiangVien, Long> , JpaSpecificationExecutor<GiangVien> {
     List<GiangVien> findByMaTaiKhoanIn(List<Long> maTaiKhoanList);
     List<GiangVien> findByTaiKhoan_TenDangNhapIn(List<String> tenDn);
+    GiangVien findByTaiKhoan_TenDangNhap(String tenDn);
     Page<GiangVien> findAll(Specification<GiangVien> spec, Pageable pageable);
 }

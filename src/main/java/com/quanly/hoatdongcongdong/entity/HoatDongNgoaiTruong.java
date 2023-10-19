@@ -33,7 +33,7 @@ public class HoatDongNgoaiTruong {
     @Enumerated(EnumType.STRING)
     private TrangThai trangThai;
     public enum TrangThai {
-        CHUA_DUYET, DA_DUYET
+        Chua_Duyet, Da_Duyet
     }
     @CreationTimestamp
     private LocalDateTime ngayTao;
