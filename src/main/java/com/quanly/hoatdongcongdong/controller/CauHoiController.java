@@ -4,13 +4,16 @@ import com.quanly.hoatdongcongdong.entity.*;
 import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
 import com.quanly.hoatdongcongdong.payload.request.CauHoiRequest;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
+import com.quanly.hoatdongcongdong.repository.FilesStorageService;
 import com.quanly.hoatdongcongdong.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +38,8 @@ public class CauHoiController {
     private final LichSuService lichSuService;
     private final SinhVienService sinhVienService;
     private final TaiKhoanService taiKhoanService;
+    @Autowired
+    private FilesStorageService storageService;
 
     @Autowired
     public CauHoiController(CauHoiService cauHoiService, PhanHoiService phanHoiService,
@@ -191,6 +196,22 @@ public class CauHoiController {
             e.printStackTrace();
             return new ResponseEntity<>(new MessageResponse("error"), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/file-mau/download")
+    public ResponseEntity<?> downloadFile() {
+        try {
+            String fileName = "mau-tep-them-bo-du-lieu.docx";
+
+            Resource file = storageService.load(fileName); // Giả định storageService có một hàm load() để lấy file dựa trên tên
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
+                    .body(file);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(null);
+        }
+
     }
 }
 

@@ -50,6 +50,9 @@ public class TaiKhoanService {
     public Boolean isMatKhauHopLe(String matKhau, String encodedMatKhau) {
         return encoder.matches(matKhau, encodedMatKhau);
     }
+    public Optional<TaiKhoan> findById(Long id) {
+        return taiKhoanRepository.findById(id);
+    }
     public void capNhatThongTinNguoiDung(Long id, String soDienThoai, Date ngaySinh,
                                          TaiKhoan.GioiTinh gioiTinh, String diaChi) {
         TaiKhoan taiKhoan = taiKhoanRepository.findById(id)

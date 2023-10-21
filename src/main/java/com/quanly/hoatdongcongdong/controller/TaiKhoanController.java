@@ -7,6 +7,7 @@ import com.quanly.hoatdongcongdong.payload.request.TokenRefreshRequest;
 import com.quanly.hoatdongcongdong.payload.request.TrangThaiTaiKhoanRequest;
 import com.quanly.hoatdongcongdong.payload.response.JwtResponse;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
+import com.quanly.hoatdongcongdong.repository.GioTichLuyRepository;
 import com.quanly.hoatdongcongdong.repository.KhoaRepository;
 import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
 import com.quanly.hoatdongcongdong.service.*;
@@ -39,6 +40,8 @@ public class TaiKhoanController {
     private JwtUtils jwtUtils;
     @Autowired
     private GioTichLuyService gioTichLuyService;
+    @Autowired
+    private GioTichLuyRepository gioTichLuyRepository;
     @Autowired
     private GiangVienService giangVienService;
     @Autowired
@@ -80,11 +83,17 @@ public class TaiKhoanController {
                         .orElseThrow(() -> new EntityNotFoundException("HocVien not found"));
                 return ResponseEntity.ok(hocVien);
             }
+            case QuanTriVien -> {
+                TaiKhoan quantri = taiKhoanService.findById(queriedUser.getMaTaiKhoan())
+                        .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
+                return ResponseEntity.ok(quantri);
+            }
             default -> {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Quyền không hợp lệ");
             }
         }
     }
+
     @GetMapping("/tat-ca-giang-vien")
     public ResponseEntity<List<GiangVien>> getAllGiangVien() {
         List<GiangVien> giangVienList = giangVienService.getAllGiangVien();
@@ -146,13 +155,14 @@ public class TaiKhoanController {
             }
             taiKhoanService.themMoiGiangVien(request.getTenDangNhap(), request.getMatKhau(),
                     request.getEmail(), request.getQuyen(), request.getTenDayDu(),
-                    request.getGioiTinh(), chucDanh.get(),khoa.get(), request.getSoDienThoai(),
+                    request.getGioiTinh(), chucDanh.get(), khoa.get(), request.getSoDienThoai(),
                     request.getNgaySinh(), request.getDiaChi());
         } else {
             throw new EntityNotFoundException("Quyền tài khoản không hợp lệ");
         }
         return ResponseEntity.ok(new MessageResponse("Thêm tài khoản thành công!"));
     }
+
     @PutMapping("/cap-nhat-trang-thai")
     public ResponseEntity<?> updateStatus(
             @RequestBody TrangThaiTaiKhoanRequest trangThaiTaiKhoanRequest,
@@ -174,6 +184,7 @@ public class TaiKhoanController {
         }
         return new ResponseEntity<>(new MessageResponse("OK"), HttpStatus.OK);
     }
+
     @PutMapping("/cap-nhat-thong-tin")
     public ResponseEntity<?> updateUserProfile(@RequestBody TaiKhoan request,
                                                HttpServletRequest httpServletRequest) {
@@ -189,6 +200,7 @@ public class TaiKhoanController {
             return new ResponseEntity<>(new MessageResponse("taikhoan-notfound"), HttpStatus.NOT_FOUND);
         }
     }
+
     @PutMapping("/doi-mat-khau")
     public ResponseEntity<?> doiMatKhau(@Valid @RequestBody MatKhauMoiRequest matKhauMoiRequest,
                                         HttpServletRequest httpServletRequest) {
@@ -208,13 +220,14 @@ public class TaiKhoanController {
             String jwt = jwtUtils.generateJwtToken(authentication);
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-            Long expirationDate = jwtUtils.getExpirationDateFromJwtToken(jwt).getTime()/1000;
+            Long expirationDate = jwtUtils.getExpirationDateFromJwtToken(jwt).getTime() / 1000;
             JwtResponse response = new JwtResponse(jwt, refreshToken.getRefreshtoken(), userDetails.getUsername(), userDetails.getAuthority().getAuthority(), expirationDate);
             return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy người dùng");
         }
     }
+
     //lấy danh sách năm đã đăng ký hoạt động của mot giang vien
     @GetMapping("/danh-sach-nam-dang-ky-hoat-dong")
     public ResponseEntity<?> getAcademicYearsByUser(HttpServletRequest httpServletRequest) {
@@ -222,34 +235,37 @@ public class TaiKhoanController {
         List<String> academicYears = gioTichLuyService.findDistinctNamByGiangVien(maGv);
         return ResponseEntity.ok(academicYears);
     }
+
     @PostMapping("/dang-xuat")
     public ResponseEntity<?> logoutUser(@Valid @RequestBody TokenRefreshRequest request,
                                         HttpServletRequest httpServletRequest) {
         refreshTokenService.deleteByRf(request.getRefreshToken());
         return ResponseEntity.ok(new MessageResponse("Log out successful!"));
     }
+
     @GetMapping("/ds-giang-vien-khen-thuong-hoac-khien-trach")
-    public List<Map<String, Object>> getGiangVien(HttpServletRequest httpServletRequest,
+    public List<Map<String, Object>> getGiangVienKhenThuongHoacKienTrach(
             @RequestParam(required = false) String nam,
-                                                  @RequestParam(defaultValue = "Khen thưởng") String loai) {
-        Long maGv = taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
-        List<String> academicYears = gioTichLuyService.findDistinctNamByGiangVien(maGv);
-        if (nam == null || nam.isEmpty()) {
-            if (!academicYears.isEmpty()) {
-                nam = academicYears.get(0);
-            }else{
-                return null;
-            }
-        }
+            @RequestParam(defaultValue = "Chưa hoàn thành") String loai,
+            @RequestParam(required = false) Long khoa
+    ) {
         List<GioTichLuy> danhSachGioTichLuyCuaGiangVien = gioTichLuyService.findByNam(nam);
         List<GiangVien> danhSachGiangVien = giangVienService.findAll();
+
+        // Bộ lọc giảng viên theo khoa và trường
+        if (khoa != null) {
+            danhSachGiangVien = danhSachGiangVien.stream()
+                    .filter(giangVien -> giangVien.getKhoa().getMaKhoa().equals(khoa))
+                    .collect(Collectors.toList());
+        }
+
         List<GiangVien> giangVienKetQua = new ArrayList<>();
-        if (loai.equals("Khen thưởng")) {
+        if (loai.equals("Hoàn thành")) {
             giangVienKetQua = danhSachGioTichLuyCuaGiangVien.stream()
                     .filter(gioTichLuy -> gioTichLuy.getTongSoGio() >= gioTichLuy.getGiangVien().getChucDanh().getGioBatBuoc())
                     .map(GioTichLuy::getGiangVien)
                     .collect(Collectors.toList());
-        } else if (loai.equals("Khiển trách")) {
+        } else if (loai.equals("Chưa hoàn thành")) {
             giangVienKetQua = danhSachGiangVien.stream()
                     .filter(giangVien -> {
                         GioTichLuy gioTichLuyCuaGiangVien = danhSachGioTichLuyCuaGiangVien.stream()
@@ -265,11 +281,12 @@ public class TaiKhoanController {
             Map<String, Object> thongTinGiangVien = new HashMap<>();
             int tongSoGio = 0;
             GioTichLuy gioTichLuyCuaGiangVien =
-                    gioTichLuyService.findByGiangVien_MaTaiKhoanAndNam(giangVien.getMaTaiKhoan(),nam);
+                    gioTichLuyService.findByGiangVien_MaTaiKhoanAndNam(giangVien.getMaTaiKhoan(), nam);
             if (gioTichLuyCuaGiangVien != null) {
                 tongSoGio = gioTichLuyCuaGiangVien.getTongSoGio();
             }
             thongTinGiangVien.put("hoTen", giangVien.getTaiKhoan().getTenDayDu());
+            thongTinGiangVien.put("giangVien", giangVien);
             thongTinGiangVien.put("tenDangNhap", giangVien.getTaiKhoan().getTenDangNhap());
             thongTinGiangVien.put("email", giangVien.getTaiKhoan().getEmail());
             thongTinGiangVien.put("chucDanh", giangVien.getChucDanh().getTenChucDanh());

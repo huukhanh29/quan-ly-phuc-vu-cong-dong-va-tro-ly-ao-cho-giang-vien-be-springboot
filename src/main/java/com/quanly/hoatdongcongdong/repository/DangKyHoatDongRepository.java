@@ -1,6 +1,7 @@
 package com.quanly.hoatdongcongdong.repository;
 
 import com.quanly.hoatdongcongdong.entity.DangKyHoatDong;
+import com.quanly.hoatdongcongdong.entity.GiangVien;
 import com.quanly.hoatdongcongdong.entity.HoatDong;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -18,4 +19,6 @@ public interface DangKyHoatDongRepository extends JpaRepository<DangKyHoatDong, 
     boolean existsByGiangVien_TaiKhoan_TenDangNhapAndHoatDong_MaHoatDong(String ten, Long ma);
     @Query("SELECT dk.hoatDong FROM DangKyHoatDong dk WHERE dk.giangVien.taiKhoan.tenDangNhap = :ten")
     List<HoatDong> findHoatDongsByGiangVien(@Param("ten") String ten);
+    @Query("SELECT d.giangVien FROM DangKyHoatDong d WHERE d.hoatDong.maHoatDong = :maHoatDong AND d.trangThaiDangKy = 'Da_Duyet'")
+    List<GiangVien> findGiangViensByHoatDong(@Param("maHoatDong") Long maHoatDong);
 }

@@ -29,8 +29,13 @@ import java.util.Optional;
 public class DangKyHoatDongController {
 
     @Autowired
-    private DangKyHoatDongService dangKyHoatDongService;@Autowired
+    private DangKyHoatDongService dangKyHoatDongService;
+    @Autowired
     private DangKyHoatDongRepository dangKyHoatDongRepository;
+    @Autowired
+    private GiangVienRepository giangVienRepository;
+    @Autowired
+    private HoatDongRepository hoatDongRepository;
     @Autowired
     private HoatDongService hoatDongService;
     @Autowired
@@ -80,7 +85,6 @@ public class DangKyHoatDongController {
         }
 
         dangKyHoatDongService.dangKyHoatDong(hoatDong, giangVien.get());
-
         return new ResponseEntity<>(new MessageResponse("Đăng ký thành công!"), HttpStatus.OK);
     }
 
@@ -168,7 +172,20 @@ public class DangKyHoatDongController {
     }
     @GetMapping("/hoat-dong/{ten}")
     public ResponseEntity<?> getHoatDongsByGiangVien(@PathVariable String ten) {
+        GiangVien giangVien = giangVienRepository.findByTaiKhoan_TenDangNhap(ten);
+        if(giangVien == null){
+            return new ResponseEntity<>(new MessageResponse("Không tìm thấy giảng viên với tên đăng nhập " +ten), HttpStatus.NOT_FOUND);
+        }
         List<HoatDong> hoatDongs = dangKyHoatDongRepository.findHoatDongsByGiangVien(ten);
         return ResponseEntity.ok(hoatDongs);
+    }
+    @GetMapping("/giang-vien-tham-gia/{maHoatDong}")
+    public ResponseEntity<?> getGiangViensByHoatDong(@PathVariable Long maHoatDong) {
+        Optional<HoatDong> hoatDong = hoatDongRepository.findById(maHoatDong);
+        if(hoatDong == null){
+            return new ResponseEntity<>(new MessageResponse("Không tìm thấy hoatdong với mã " +maHoatDong), HttpStatus.NOT_FOUND);
+        }
+        List<GiangVien> giangVien = dangKyHoatDongRepository.findGiangViensByHoatDong(maHoatDong);
+        return ResponseEntity.ok(giangVien);
     }
 }
