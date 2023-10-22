@@ -159,7 +159,6 @@ public class CauHoiController {
             for (XWPFParagraph paragraph : document.getParagraphs()) {
                 paragraphCount++; // Tăng biến đếm cho mỗi đoạn được xử lý
                 String text = paragraph.getText();
-                System.out.println("Paragraph content: " + text);
                 String[] lines = text.split("\\n");
 
                 // Kiểm tra số lượng dòng và định dạng của từng dòng
@@ -169,9 +168,6 @@ public class CauHoiController {
 
                     String tuKhoa = lines[0].replaceFirst("^\\d+\\.\\s*Từ\\s*khóa:\\s*", "").trim();
                     String cauTraLoi = lines[1].replaceFirst("Câu\\s*trả\\s*lời:\\s*", "").trim();
-
-                    System.out.println("Keyword: " + tuKhoa);
-                    System.out.println("Answer: " + cauTraLoi);
 
                     // Kiểm tra câu hỏi đã tồn tại trong cơ sở dữ liệu hay chưa
                     if (!cauHoiService.existsByCauHoi(tuKhoa)) {

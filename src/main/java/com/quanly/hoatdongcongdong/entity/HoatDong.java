@@ -29,6 +29,7 @@ public class HoatDong {
     private String tenQuyetDinh;
     private String soQuyetDinh;
     private String nguoiKyQuyetDinh;
+    @Column(columnDefinition = "TEXT")
     private String fileQuyetDinh;
     public enum CapToChuc {
         KHOA, TRUONG, BOMON, CANHAN
