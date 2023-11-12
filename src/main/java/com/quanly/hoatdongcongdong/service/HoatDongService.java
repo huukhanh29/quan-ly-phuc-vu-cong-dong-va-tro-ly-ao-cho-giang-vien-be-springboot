@@ -1,14 +1,11 @@
 package com.quanly.hoatdongcongdong.service;
 
-import com.quanly.hoatdongcongdong.entity.GiangVien;
-import com.quanly.hoatdongcongdong.entity.HoatDong;
-import com.quanly.hoatdongcongdong.entity.LoaiHoatDong;
+import com.quanly.hoatdongcongdong.entity.*;
+import com.quanly.hoatdongcongdong.payload.response.HoatDongDTO;
 import com.quanly.hoatdongcongdong.payload.response.HoatDongResponse;
+import com.quanly.hoatdongcongdong.payload.response.HoatDongTongHopResponse;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
-import com.quanly.hoatdongcongdong.repository.DangKyHoatDongRepository;
-import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
-import com.quanly.hoatdongcongdong.repository.HoatDongRepository;
-import com.quanly.hoatdongcongdong.repository.LoaiHoatDongRepository;
+import com.quanly.hoatdongcongdong.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,23 +25,29 @@ import java.util.Optional;
 
 @Service
 public class HoatDongService {
+    @Autowired
+    private GioTichLuyRepository gioTichLuyRepository;
+    @Autowired
+    private ChucDanhRepository chucDanhRepository;
 
     private final HoatDongRepository hoatDongRepository;
     private final LoaiHoatDongRepository loaiHoatDongRepository;
     private final GiangVienRepository giangVienRepository;
     private final DangKyHoatDongRepository dangKyHoatDongRepository;
-
+    private final HoatDongNgoaiTruongRepository hoatDongNgoaiTruongRepository;
     @Autowired
     public HoatDongService(
             HoatDongRepository hoatDongRepository,
             LoaiHoatDongRepository loaiHoatDongRepository,
             GiangVienRepository giangVienRepository,
-            DangKyHoatDongRepository dangKyHoatDongRepository
+            DangKyHoatDongRepository dangKyHoatDongRepository,
+            HoatDongNgoaiTruongRepository hoatDongNgoaiTruongRepository
     ) {
         this.hoatDongRepository = hoatDongRepository;
         this.loaiHoatDongRepository = loaiHoatDongRepository;
         this.giangVienRepository = giangVienRepository;
         this.dangKyHoatDongRepository = dangKyHoatDongRepository;
+        this.hoatDongNgoaiTruongRepository =hoatDongNgoaiTruongRepository;
     }
 
     public List<Integer> findYears() {
@@ -207,6 +210,94 @@ public class HoatDongService {
 
     public Long countUpcomingActivities() {
         return hoatDongRepository.countByTrangThaiHoatDong(HoatDong.TrangThaiHoatDong.SAP_DIEN_RA);
+    }
+    public List<HoatDong> layDanhSachHoatDongTocChucCuaGiangVien(Long maTaiKhoan, int nam) {
+        return hoatDongRepository.findHoatDongTocChucByGiangVienAndYear(maTaiKhoan, nam);
+    }
+    public HoatDongTongHopResponse getHoatDongInfo(Long maGiangVien, int nam) {
+        HoatDongTongHopResponse response = new HoatDongTongHopResponse();
+
+        List<HoatDong> hoatDongs = dangKyHoatDongRepository.findHoatDongByGiangVienAndYear(maGiangVien, nam);
+        List<HoatDongNgoaiTruong> hoatDongNgoaiTruongs = hoatDongNgoaiTruongRepository.findHoatDongNgoaiTruongByGiangVienAndYear(maGiangVien, nam);
+        List<HoatDong> hoatDongTocChucs = hoatDongRepository.findHoatDongTocChucByGiangVienAndYear(maGiangVien, nam);
+
+        List<HoatDongDTO> hoatDongDTOs = new ArrayList<>();
+
+        for (HoatDong hd : hoatDongs) {
+            HoatDongDTO dto = new HoatDongDTO();
+            dto.setTenHoatDong(hd.getTenHoatDong());
+            dto.setDiaDiem(hd.getDiaDiem());
+            dto.setSoGioTichLuy(hd.getGioTichLuyThamGia());
+            dto.setLoaiHoatDong("Trong trường");
+            dto.setVaiTro("Tham gia");
+            dto.setThoiGianBatDau(hd.getThoiGianBatDau());
+            dto.setThoiGianKetThuc(hd.getThoiGianKetThuc());
+            hoatDongDTOs.add(dto);
+        }
+
+        for (HoatDongNgoaiTruong hdn : hoatDongNgoaiTruongs) {
+            HoatDongDTO dto = new HoatDongDTO();
+            dto.setTenHoatDong(hdn.getTenHoatDong());
+            dto.setDiaDiem(hdn.getDiaDiem());
+            dto.setSoGioTichLuy(hdn.getGioTichLuyThamGia());
+            dto.setLoaiHoatDong("Ngoài trường");
+            dto.setVaiTro("Tham gia");
+            dto.setThoiGianBatDau(hdn.getThoiGianBatDau());
+            dto.setThoiGianKetThuc(hdn.getThoiGianKetThuc());
+            hoatDongDTOs.add(dto);
+        }
+
+        for (HoatDong hd : hoatDongTocChucs) {
+            HoatDongDTO dto = new HoatDongDTO();
+            dto.setTenHoatDong(hd.getTenHoatDong());
+            dto.setDiaDiem(hd.getDiaDiem());
+            dto.setSoGioTichLuy(hd.getGioTichLuyToChuc());
+            dto.setLoaiHoatDong("Trong trường");
+            dto.setVaiTro("Tổ chức");
+            hoatDongDTOs.add(dto);
+            dto.setThoiGianBatDau(hd.getThoiGianBatDau());
+            dto.setThoiGianKetThuc(hd.getThoiGianKetThuc());
+        }
+
+        response.setDanhSachHoatDong(hoatDongDTOs);
+
+        // Lấy tongSoGio và gioBatBuoc
+        GiangVien giangVien = giangVienRepository.findById(maGiangVien).orElse(null);
+        if (giangVien != null) {
+
+            GioTichLuy gioTichLuy= gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(maGiangVien, String.valueOf(nam));
+            int tongSoGio = 0;
+            if (gioTichLuy != null) {
+                 tongSoGio = gioTichLuy.getTongSoGio();
+            };
+            int gioBatBuoc = giangVien.getChucDanh().getGioBatBuoc();
+            response.setTongSoGio(tongSoGio);
+            response.setGioBatBuoc(gioBatBuoc);
+        }
+        response.setGioHk2(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 2, 1).atStartOfDay(), LocalDate.of(nam, 6, 30).atTime(23, 59, 59)));
+        response.setGioHk3(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 7, 1).atStartOfDay(), LocalDate.of(nam, 8, 31).atTime(23, 59, 59)));
+        response.setGioHk1(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 9, 1).atStartOfDay(), LocalDate.of(nam + 1, 1, 31).atTime(23, 59, 59)));
+
+        return response;
+    }
+    private int calculateGioForPeriod(Long maGiangVien, LocalDateTime startDate, LocalDateTime endDate) {
+        int totalGio = 0;
+
+        List<HoatDong> hoatDongsThamGia = hoatDongRepository.findHoatDongByGiangVienAndPeriod(maGiangVien, startDate, endDate);
+        List<HoatDong> hoatDongsToChuc = hoatDongRepository.findHoatDongTocChucByGiangVienAndPeriod(maGiangVien, startDate, endDate);
+        List<HoatDongNgoaiTruong> hoatDongNgoaiTruongs = hoatDongNgoaiTruongRepository.findHoatDongNgoaiTruongByGiangVienAndPeriod(maGiangVien, startDate, endDate);
+
+        for (HoatDong hd : hoatDongsThamGia) {
+            totalGio += hd.getGioTichLuyThamGia();
+        }
+        for (HoatDong hd : hoatDongsToChuc) {
+            totalGio += hd.getGioTichLuyToChuc();
+        }
+        for (HoatDongNgoaiTruong hdn : hoatDongNgoaiTruongs) {
+            totalGio += hdn.getGioTichLuyThamGia();
+        }
+
+        return totalGio;
     }
 }
 

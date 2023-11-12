@@ -152,8 +152,10 @@ public class HoatDongNgoaiTruongController {
         hoatDongNgoaiTruong.setGioTichLuyThamGia(hoatDongNgoaiTruongRequest.getGioTichLuyThamGia());
         hoatDongNgoaiTruong.setTrangThai(HoatDongNgoaiTruong.TrangThai.Da_Duyet);
         hoatDongNgoaiTruongRepository.save(hoatDongNgoaiTruong);
+        String nam = String.valueOf(hoatDongNgoaiTruong.getThoiGianBatDau().getYear());
         int gioTichLuyThamGia = hoatDongNgoaiTruong.getGioTichLuyThamGia();
-        GioTichLuy gioTichLuy = gioTichLuyRepository.findByGiangVien_MaTaiKhoan(hoatDongNgoaiTruong.getGiangVien().getMaTaiKhoan());
+        GioTichLuy gioTichLuy = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(hoatDongNgoaiTruong.getGiangVien().getMaTaiKhoan(), nam);
+
         LocalDateTime thoiGianBatDau = hoatDongNgoaiTruong.getThoiGianBatDau();
         String namHoc = String.valueOf(thoiGianBatDau.getYear());
         if (gioTichLuy == null) {
@@ -161,7 +163,9 @@ public class HoatDongNgoaiTruongController {
             gioTichLuy.setGiangVien(hoatDongNgoaiTruong.getGiangVien());
             gioTichLuy.setTongSoGio(gioTichLuyThamGia);
             gioTichLuy.setNam(namHoc);
+            System.out.println(gioTichLuy.getNam());
         } else {
+            System.out.println(gioTichLuy.getNam());
             gioTichLuy.setTongSoGio(gioTichLuy.getTongSoGio() + gioTichLuyThamGia);
         }
         gioTichLuyRepository.save(gioTichLuy);

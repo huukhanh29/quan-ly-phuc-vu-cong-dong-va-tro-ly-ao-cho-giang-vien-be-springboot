@@ -188,4 +188,13 @@ public class DangKyHoatDongController {
         List<GiangVien> giangVien = dangKyHoatDongRepository.findGiangViensByHoatDong(maHoatDong);
         return ResponseEntity.ok(giangVien);
     }
+    //lấy danh sách hoạt động của một giảng viên theo năm
+    @GetMapping("/dang-ky")
+    public ResponseEntity<List<HoatDong>> getDangKyHoatDongByGiangVienAndYear(
+            @RequestParam("maTaiKhoan") Long maTaiKhoan,
+            @RequestParam("nam") int nam) {
+
+        List<HoatDong> hoatDongs = dangKyHoatDongService.getHoatDongDangKyByGiangVien(maTaiKhoan, nam);
+        return ResponseEntity.ok(hoatDongs);
+    }
 }

@@ -17,4 +17,6 @@ public interface GioTichLuyRepository extends JpaRepository<GioTichLuy, Long> {
     @Query("SELECT DISTINCT gio.nam FROM GioTichLuy gio WHERE gio.giangVien.taiKhoan.maTaiKhoan = :maTk ORDER BY gio.nam asc ")
     List<String> findDistinctNamByGiangVien(@Param("maTk") Long maTk);
     GioTichLuy findByNamAndGiangVien_MaTaiKhoan(String nam, Long maTk);
+
+
 }

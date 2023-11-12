@@ -21,4 +21,7 @@ public interface DangKyHoatDongRepository extends JpaRepository<DangKyHoatDong, 
     List<HoatDong> findHoatDongsByGiangVien(@Param("ten") String ten);
     @Query("SELECT d.giangVien FROM DangKyHoatDong d WHERE d.hoatDong.maHoatDong = :maHoatDong AND d.trangThaiDangKy = 'Da_Duyet'")
     List<GiangVien> findGiangViensByHoatDong(@Param("maHoatDong") Long maHoatDong);
+    @Query("SELECT dk.hoatDong FROM DangKyHoatDong dk WHERE dk.giangVien.maTaiKhoan = :maTaiKhoan AND dk.trangThaiDangKy = 'Da_Duyet' AND YEAR(dk.hoatDong.thoiGianBatDau) = :nam")
+    List<HoatDong> findHoatDongByGiangVienAndYear(@Param("maTaiKhoan") Long maTaiKhoan, @Param("nam") int nam);
+
 }

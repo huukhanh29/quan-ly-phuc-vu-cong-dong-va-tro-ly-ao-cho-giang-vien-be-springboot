@@ -42,7 +42,9 @@ public class DangKyHoatDongService {
     public boolean existsByHoatDong_MaHoatDong(Long maHoatDong) {
         return dangKyHoatDongRepository.existsByHoatDong_MaHoatDong(maHoatDong);
     }
-
+    public List<HoatDong> getHoatDongDangKyByGiangVien(Long maTaiKhoan, int nam) {
+        return dangKyHoatDongRepository.findHoatDongByGiangVienAndYear(maTaiKhoan, nam);
+    }
     public boolean existsByGiangVien_MaTaiKhoanAndHoatDong_MaHoatDong(Long maTaiKhoan, Long maHoatDong) {
         return dangKyHoatDongRepository.existsByGiangVien_MaTaiKhoanAndHoatDong_MaHoatDong(maTaiKhoan, maHoatDong);
     }
