@@ -93,7 +93,37 @@ public class TaiKhoanController {
             }
         }
     }
+    @GetMapping("/thong-tin/{maGv}")
+    public ResponseEntity<?> getGv(
+            @PathVariable Long maGv) {
 
+        Optional<TaiKhoan> queriedUserOptinal= taiKhoanService.findById(maGv);
+        if (queriedUserOptinal.isEmpty()) {
+            return new ResponseEntity<>(new MessageResponse("gv-notfound"), HttpStatus.NOT_FOUND);
+        }
+        TaiKhoan queriedUser = queriedUserOptinal.get();
+
+        switch (queriedUser.getQuyen()) {
+            case GiangVien -> {
+                GiangVien giaoVien = giangVienService.findById(queriedUser.getMaTaiKhoan())
+                        .orElseThrow(() -> new EntityNotFoundException("GiaoVien not found"));
+                return ResponseEntity.ok(giaoVien);
+            }
+            case SinhVien -> {
+                SinhVien hocVien = sinhVienService.findById(queriedUser.getMaTaiKhoan())
+                        .orElseThrow(() -> new EntityNotFoundException("HocVien not found"));
+                return ResponseEntity.ok(hocVien);
+            }
+            case QuanTriVien -> {
+                TaiKhoan quantri = taiKhoanService.findById(queriedUser.getMaTaiKhoan())
+                        .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
+                return ResponseEntity.ok(quantri);
+            }
+            default -> {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Quyền không hợp lệ");
+            }
+        }
+    }
     @GetMapping("/tat-ca-giang-vien")
     public ResponseEntity<List<GiangVien>> getAllGiangVien() {
         List<GiangVien> giangVienList = giangVienService.getAllGiangVien();

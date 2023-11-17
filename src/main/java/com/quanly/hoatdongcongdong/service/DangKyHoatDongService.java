@@ -224,6 +224,7 @@ public class DangKyHoatDongService {
                 }
             }
         }
+        messagingTemplate.convertAndSendToUser(dangKyHoatDong.getGiangVien().getTaiKhoan().getTenDangNhap(), "/queue/messages", "destroy-activity");
         dangKyHoatDongRepository.save(dangKyHoatDong);
     }
 }

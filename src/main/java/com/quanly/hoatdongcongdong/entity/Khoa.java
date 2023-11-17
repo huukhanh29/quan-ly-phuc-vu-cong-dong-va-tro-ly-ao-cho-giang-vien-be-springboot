@@ -10,17 +10,16 @@ public class Khoa {
 
     private String tenKhoa;
 
-    @ManyToOne
-    @JoinColumn(name = "maTruong")
-    private Truong truong;
+//    @ManyToOne
+//    @JoinColumn(name = "maTruong")
+//    private Truong truong;
 
     public Khoa() {
     }
 
-    public Khoa(Long maKhoa, String tenKhoa, Truong truong) {
+    public Khoa(Long maKhoa, String tenKhoa) {
         this.maKhoa = maKhoa;
         this.tenKhoa = tenKhoa;
-        this.truong = truong;
     }
 
     public Long getMaKhoa() {
@@ -39,11 +38,4 @@ public class Khoa {
         this.tenKhoa = tenKhoa;
     }
 
-    public Truong getTruong() {
-        return truong;
-    }
-
-    public void setTruong(Truong truong) {
-        this.truong = truong;
-    }
 }

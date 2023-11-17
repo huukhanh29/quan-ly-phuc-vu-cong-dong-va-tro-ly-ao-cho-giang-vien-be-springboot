@@ -2,11 +2,9 @@ package com.quanly.hoatdongcongdong.controller;
 
 
 import com.quanly.hoatdongcongdong.entity.Khoa;
-import com.quanly.hoatdongcongdong.entity.Truong;
 import com.quanly.hoatdongcongdong.payload.request.KhoaRequest;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.KhoaRepository;
-import com.quanly.hoatdongcongdong.repository.TruongRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,24 +20,28 @@ public class KhoaController {
 
     @Autowired
     private KhoaRepository khoaRepository;
-    @Autowired
-    private TruongRepository truongRepository;
+//    @Autowired
+//    private TruongRepository truongRepository;
 
     @PostMapping("/them")
     public ResponseEntity<?> themKhoa(@RequestBody KhoaRequest khoaRequest) {
-        Optional<Truong> truong = truongRepository.findById(khoaRequest.getMaTruong());
-        if (truong.isEmpty()) {
-            Khoa khoa = new Khoa();
-            khoa.setTenKhoa(khoaRequest.getTenKhoa());
-            khoaRepository.save(khoa);
-            return ResponseEntity.ok(new MessageResponse("Thêm khoa không có trường thành công"));
-        }else {
-            Khoa khoa = new Khoa();
-            khoa.setTruong(truong.get());
-            khoa.setTenKhoa(khoaRequest.getTenKhoa());
-            khoaRepository.save(khoa);
-            return ResponseEntity.ok(new MessageResponse("Thêm khoa thành công"));
-        }
+//        Optional<Truong> truong = truongRepository.findById(khoaRequest.getMaTruong());
+//        if (truong.isEmpty()) {
+//            Khoa khoa = new Khoa();
+//            khoa.setTenKhoa(khoaRequest.getTenKhoa());
+//            khoaRepository.save(khoa);
+//            return ResponseEntity.ok(new MessageResponse("Thêm khoa không có trường thành công"));
+//        }else {
+//            Khoa khoa = new Khoa();
+//            khoa.setTruong(truong.get());
+//            khoa.setTenKhoa(khoaRequest.getTenKhoa());
+//            khoaRepository.save(khoa);
+//            return ResponseEntity.ok(new MessageResponse("Thêm khoa thành công"));
+//        }
+        Khoa khoa = new Khoa();
+        khoa.setTenKhoa(khoaRequest.getTenKhoa());
+        khoaRepository.save(khoa);
+        return ResponseEntity.ok(new MessageResponse("Thêm khoa thành công"));
 
     }
 
@@ -64,24 +66,24 @@ public class KhoaController {
             return new ResponseEntity<>(new MessageResponse("Khoa không tồn tại"), HttpStatus.NOT_FOUND);
         }
 
-        Optional<Truong> truong = truongRepository.findById(khoaRequest.getMaTruong());
-        if (truong.isEmpty()) {
-            return new ResponseEntity<>(new MessageResponse("Trường không tồn tại"), HttpStatus.NOT_FOUND);
-        }
+//        Optional<Truong> truong = truongRepository.findById(khoaRequest.getMaTruong());
+//        if (truong.isEmpty()) {
+//            return new ResponseEntity<>(new MessageResponse("Trường không tồn tại"), HttpStatus.NOT_FOUND);
+//        }
 
         Khoa khoa = khoaOptional.get();
-        khoa.setTruong(truong.get());
+       // khoa.setTruong(truong.get());
         khoa.setTenKhoa(khoaRequest.getTenKhoa());
 
         khoaRepository.save(khoa);
         return ResponseEntity.ok(new MessageResponse("Cập nhật khoa thành công"));
     }
 
-    @GetMapping("/lay-theo-truong/{maTruong}")
-    public ResponseEntity<?> layKhoaTheoTruong(@PathVariable Long maTruong) {
-        List<Khoa> khoaTheoTruong = khoaRepository.findByTruong_MaTruong(maTruong);
-        return ResponseEntity.ok(khoaTheoTruong);
-    }
+//    @GetMapping("/lay-theo-truong/{maTruong}")
+//    public ResponseEntity<?> layKhoaTheoTruong(@PathVariable Long maTruong) {
+//        List<Khoa> khoaTheoTruong = khoaRepository.findByTruong_MaTruong(maTruong);
+//        return ResponseEntity.ok(khoaTheoTruong);
+//    }
 
     @DeleteMapping("/xoa/{maKhoa}")
     public ResponseEntity<?> xoaKhoa(@PathVariable Long maKhoa) {

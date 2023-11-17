@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,6 +46,8 @@ public class HoatDongNgoaiTruongController {
     private ThongBaoService thongBaoService;
     @Autowired
     private GioTichLuyRepository gioTichLuyRepository;
+    @Autowired
+    private SimpMessageSendingOperations messagingTemplate;
 
     @PostMapping("/them")
     public ResponseEntity<?> themHoatDongNgoaiTruong(
@@ -147,7 +150,7 @@ public class HoatDongNgoaiTruongController {
         if (hoatDongNgoaiTruongOptional.get().getTrangThai() == HoatDongNgoaiTruong.TrangThai.Da_Duyet) {
             return new ResponseEntity<>(new MessageResponse("daduyet"), HttpStatus.OK);
         }
-
+        messagingTemplate.convertAndSendToUser(hoatDongNgoaiTruongOptional.get().getGiangVien().getTaiKhoan().getTenDangNhap(), "/queue/messages", "approve-activity");
         HoatDongNgoaiTruong hoatDongNgoaiTruong = hoatDongNgoaiTruongOptional.get();
         hoatDongNgoaiTruong.setGioTichLuyThamGia(hoatDongNgoaiTruongRequest.getGioTichLuyThamGia());
         hoatDongNgoaiTruong.setTrangThai(HoatDongNgoaiTruong.TrangThai.Da_Duyet);
@@ -243,6 +246,8 @@ public class HoatDongNgoaiTruongController {
             if (hoatDongNgoaiTruongOptional.isEmpty()) {
                 return new ResponseEntity<>(new MessageResponse("Hoạt động ngoài trường không tồn tại"), HttpStatus.NOT_FOUND);
             }
+            messagingTemplate.convertAndSendToUser(hoatDongNgoaiTruongOptional.get().getGiangVien().getTaiKhoan().getTenDangNhap(), "/queue/messages", "destroy-activity");
+
             String tieuDe = "Hủy đăng ký hoạt động ngoài trường";
             String nDung = "Xác nhận tham gia hoạt động " +
                     hoatDongNgoaiTruongOptional.get().getTenHoatDong() +

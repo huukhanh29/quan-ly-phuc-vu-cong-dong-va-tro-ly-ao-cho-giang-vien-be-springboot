@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface KhoaRepository extends JpaRepository<Khoa, Long> {
-    List<Khoa> findByTruong_MaTruong(Long ma);
+//    List<Khoa> findByTruong_MaTruong(Long ma);
 }
