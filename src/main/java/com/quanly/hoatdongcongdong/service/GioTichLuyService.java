@@ -23,9 +23,7 @@ public class GioTichLuyService {
         this.gioTichLuyRepository = gioTichLuyRepository;
     }
 
-    public GioTichLuy findByGiangVien_MaTaiKhoan(Long maTk) {
-        return gioTichLuyRepository.findByGiangVien_MaTaiKhoan(maTk);
-    }
+
 
     public List<GioTichLuy> findByNam(String nam) {
         return gioTichLuyRepository.findByNam(nam);

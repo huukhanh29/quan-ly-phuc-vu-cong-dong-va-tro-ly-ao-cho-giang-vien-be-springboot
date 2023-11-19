@@ -74,19 +74,28 @@ public class DangKyHoatDongController {
         }
         HoatDong hoatDong = optionalHoatDong.get();
 
+        // Kiểm tra trạng thái của hoạt động
         if (hoatDong.getTrangThaiHoatDong() != HoatDong.TrangThaiHoatDong.SAP_DIEN_RA) {
             return new ResponseEntity<>(new MessageResponse("expired-register"), HttpStatus.OK);
         }
 
-        Optional<GiangVien> giangVien = giangVienService.findById(currentUser.getMaTaiKhoan());
+        Optional<GiangVien> optionalGiangVien = giangVienService.findById(currentUser.getMaTaiKhoan());
 
+        // Kiểm tra xem giảng viên có phải là người tổ chức hoạt động này không
+        if (hoatDong.getGiangVienToChucs().contains(optionalGiangVien.get())) {
+            return new ResponseEntity<>(new MessageResponse("registration-not-allowed"), HttpStatus.OK);
+        }
+
+        // Kiểm tra xem giảng viên đã đăng ký hoạt động này chưa
         if (dangKyHoatDongService.existsByGiangVien_MaTaiKhoanAndHoatDong_MaHoatDong(currentUser.getMaTaiKhoan(), maHoatDong)) {
             return new ResponseEntity<>(new MessageResponse("dangky-exist"), HttpStatus.OK);
         }
 
-        dangKyHoatDongService.dangKyHoatDong(hoatDong, giangVien.get());
+        // Tiến hành đăng ký hoạt động
+        dangKyHoatDongService.dangKyHoatDong(hoatDong, optionalGiangVien.get());
         return new ResponseEntity<>(new MessageResponse("Đăng ký thành công!"), HttpStatus.OK);
     }
+
 
     @PutMapping("/duyet-dang-ky/{maDangKy}")
     public ResponseEntity<?> approveDangKyHoatDong(

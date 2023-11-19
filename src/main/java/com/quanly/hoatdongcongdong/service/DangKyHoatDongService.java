@@ -164,7 +164,8 @@ public class DangKyHoatDongService {
 
         // Update gioTichLuy for the giangVien
         int gioTichLuyThamGia = dangKyHoatDong.getHoatDong().getGioTichLuyThamGia();
-        GioTichLuy gioTichLuy = gioTichLuyRepository.findByGiangVien_MaTaiKhoan(giangVien.getMaTaiKhoan());
+        String nam = String.valueOf(dangKyHoatDong.getHoatDong().getThoiGianBatDau().getYear());
+        GioTichLuy gioTichLuy = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(dangKyHoatDong.getGiangVien().getMaTaiKhoan(), nam);
 
         if (gioTichLuy == null) {
             gioTichLuy = new GioTichLuy();
@@ -181,7 +182,7 @@ public class DangKyHoatDongService {
 
         for (GiangVien giangVienToChuc : giangVienToChucs) {
             int gioTichLuyToChuc = dangKyHoatDong.getHoatDong().getGioTichLuyToChuc();
-            GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoan(giangVienToChuc.getMaTaiKhoan());
+            GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVienToChuc.getMaTaiKhoan(), nam);
 
             if (gioTichLuyToChucEntity == null) {
                 gioTichLuyToChucEntity = new GioTichLuy();
@@ -202,11 +203,12 @@ public class DangKyHoatDongService {
         } else if (dangKyHoatDong.getTrangThaiDangKy() == DangKyHoatDong.TrangThaiDangKy.Da_Duyet) {
             dangKyHoatDong.setTrangThaiDangKy(DangKyHoatDong.TrangThaiDangKy.Da_Huy);
             dangKyHoatDong.setLyDoHuy(huyHoatDongRequest.getLyDoHuy());
+            String nam = String.valueOf(dangKyHoatDong.getHoatDong().getThoiGianBatDau().getYear());
             // Xử lý trừ giờ tích lũy cho giảng viên
             GiangVien giangVien = dangKyHoatDong.getGiangVien();
             if (giangVien != null) {
                 int gioTichLuyThamGia = dangKyHoatDong.getHoatDong().getGioTichLuyThamGia();
-                GioTichLuy gioTichLuy = gioTichLuyRepository.findByGiangVien_MaTaiKhoan(giangVien.getMaTaiKhoan());
+                GioTichLuy gioTichLuy = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVien.getMaTaiKhoan(), nam);
                 if (gioTichLuy != null && gioTichLuy.getTongSoGio() >= gioTichLuyThamGia) {
                     gioTichLuy.setTongSoGio(gioTichLuy.getTongSoGio() - gioTichLuyThamGia);
                     gioTichLuyRepository.save(gioTichLuy);
@@ -216,7 +218,7 @@ public class DangKyHoatDongService {
             List<GiangVien> giangVienToChucs = dangKyHoatDong.getHoatDong().getGiangVienToChucs();
             for (GiangVien giangVienToChuc : giangVienToChucs) {
                 int gioTichLuyToChuc = dangKyHoatDong.getHoatDong().getGioTichLuyToChuc();
-                GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoan(giangVienToChuc.getMaTaiKhoan());
+                GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVienToChuc.getMaTaiKhoan(), nam);
 
                 if (gioTichLuyToChucEntity != null && gioTichLuyToChucEntity.getTongSoGio() >= gioTichLuyToChuc) {
                     gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChucEntity.getTongSoGio() - gioTichLuyToChuc);

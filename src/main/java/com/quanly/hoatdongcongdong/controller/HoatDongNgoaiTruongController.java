@@ -155,8 +155,9 @@ public class HoatDongNgoaiTruongController {
         hoatDongNgoaiTruong.setGioTichLuyThamGia(hoatDongNgoaiTruongRequest.getGioTichLuyThamGia());
         hoatDongNgoaiTruong.setTrangThai(HoatDongNgoaiTruong.TrangThai.Da_Duyet);
         hoatDongNgoaiTruongRepository.save(hoatDongNgoaiTruong);
-        String nam = String.valueOf(hoatDongNgoaiTruong.getThoiGianBatDau().getYear());
+
         int gioTichLuyThamGia = hoatDongNgoaiTruong.getGioTichLuyThamGia();
+        String nam = String.valueOf(hoatDongNgoaiTruong.getThoiGianBatDau().getYear());
         GioTichLuy gioTichLuy = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(hoatDongNgoaiTruong.getGiangVien().getMaTaiKhoan(), nam);
 
         LocalDateTime thoiGianBatDau = hoatDongNgoaiTruong.getThoiGianBatDau();
