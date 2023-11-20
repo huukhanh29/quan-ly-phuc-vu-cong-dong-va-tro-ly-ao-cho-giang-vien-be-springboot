@@ -6,6 +6,7 @@ import com.quanly.hoatdongcongdong.payload.response.HoatDongResponse;
 import com.quanly.hoatdongcongdong.payload.response.HoatDongTongHopResponse;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.*;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,7 +31,8 @@ public class HoatDongService {
     private GioTichLuyRepository gioTichLuyRepository;
     @Autowired
     private ChucDanhRepository chucDanhRepository;
-
+    @Autowired
+    private FilesStorageService storageService;
     private final HoatDongRepository hoatDongRepository;
     private final LoaiHoatDongRepository loaiHoatDongRepository;
     private final GiangVienRepository giangVienRepository;
@@ -109,7 +112,7 @@ public class HoatDongService {
 
         return hoatDongRepository.findAll(spec, paging);
     }
-
+    @Transactional
     public HoatDong addHoatDong(HoatDongResponse hoatDongResponse) {
 
         // Kiểm tra nếu loại hoạt động không tồn tại
@@ -118,7 +121,10 @@ public class HoatDongService {
             new ResponseEntity<>(new MessageResponse("hoatdong-notfound"), HttpStatus.NOT_FOUND);
             return null;
         }
-
+        Optional<HoatDong> existingHoatDong = hoatDongRepository.findByTenHoatDong(hoatDongResponse.getTenHoatDong());
+        if (existingHoatDong.isPresent()) {
+            throw new EntityExistsException("hoatdong-exist");
+        }
         HoatDong hoatDong = new HoatDong();
         hoatDong.setTenHoatDong(hoatDongResponse.getTenHoatDong());
         hoatDong.setMoTa(hoatDongResponse.getMoTa());
@@ -138,6 +144,23 @@ public class HoatDongService {
         hoatDong.setNguoiKyQuyetDinh(hoatDongResponse.getNguoiKyQuyetDinh());
 
         hoatDongRepository.save(hoatDong);
+        // cập nhật giờ tích lu tổ chuc cho giảng viên
+        List<GiangVien> dsGiangVienToChucs = hoatDong.getGiangVienToChucs();
+        String namHoc = String.valueOf(hoatDong.getThoiGianBatDau().getYear());
+        for (GiangVien giangVienToChuc : dsGiangVienToChucs) {
+            int gioTichLuyToChuc = hoatDong.getGioTichLuyToChuc();
+            GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVienToChuc.getMaTaiKhoan(), namHoc);
+
+            if (gioTichLuyToChucEntity == null) {
+                gioTichLuyToChucEntity = new GioTichLuy();
+                gioTichLuyToChucEntity.setGiangVien(giangVienToChuc);
+                gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChuc);
+                gioTichLuyToChucEntity.setNam(namHoc);
+            } else {
+                gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChucEntity.getTongSoGio() + gioTichLuyToChuc);
+            }
+            gioTichLuyRepository.save(gioTichLuyToChucEntity);
+        }
         return hoatDong;
     }
 
@@ -153,11 +176,23 @@ public class HoatDongService {
         // Kiểm tra nếu loại hoạt động không tồn tại
         Optional<LoaiHoatDong> loaiHoatDong = loaiHoatDongRepository.findById(hoatDongResponse.getMaLoaiHoatDong());
         if (loaiHoatDong.isEmpty()) {
-            new ResponseEntity<>(new MessageResponse("hoatdong-exist"), HttpStatus.OK);
+            new ResponseEntity<>(new MessageResponse("loaihoatdong-notfound"), HttpStatus.OK);
             return null;
         }
-
+        Optional<HoatDong> existingHoatDong1 = hoatDongRepository.findByTenHoatDong(hoatDongResponse.getTenHoatDong());
+        if (existingHoatDong1.isPresent()) {
+            throw new EntityExistsException("hoatdong-exist");
+        }
         HoatDong hoatDong = existingHoatDong.get();
+        // cập nhật giờ tích lu tổ chuc cho giảng viên cũ
+        List<GiangVien> dsGiangVienToChucCu = hoatDong.getGiangVienToChucs();
+        String namHoc = String.valueOf(hoatDong.getThoiGianBatDau().getYear());
+        for (GiangVien giangVienToChuc : dsGiangVienToChucCu) {
+            int gioTichLuyToChuc = hoatDong.getGioTichLuyToChuc();
+            GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVienToChuc.getMaTaiKhoan(), namHoc);
+            gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChucEntity.getTongSoGio() - gioTichLuyToChuc);
+            gioTichLuyRepository.save(gioTichLuyToChucEntity);
+        }
         hoatDong.setTenHoatDong(hoatDongResponse.getTenHoatDong());
         hoatDong.setMoTa(hoatDongResponse.getMoTa());
         hoatDong.setDiaDiem(hoatDongResponse.getDiaDiem());
@@ -175,13 +210,44 @@ public class HoatDongService {
         hoatDong.setNguoiKyQuyetDinh(hoatDongResponse.getNguoiKyQuyetDinh());
 
         hoatDongRepository.save(hoatDong);
+        // cập nhật giờ tích lu tổ chuc cho giảng viên
+        List<GiangVien> dsGiangVienToChucMoi = hoatDong.getGiangVienToChucs();
+        String nam = String.valueOf(hoatDong.getThoiGianBatDau().getYear());
+        for (GiangVien giangVienToChuc : dsGiangVienToChucMoi) {
+            int gioTichLuyToChuc = hoatDong.getGioTichLuyToChuc();
+            GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVienToChuc.getMaTaiKhoan(), nam);
+
+            if (gioTichLuyToChucEntity == null) {
+                gioTichLuyToChucEntity = new GioTichLuy();
+                gioTichLuyToChucEntity.setGiangVien(giangVienToChuc);
+                gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChuc);
+                gioTichLuyToChucEntity.setNam(namHoc);
+            } else {
+                gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChucEntity.getTongSoGio() + gioTichLuyToChuc);
+            }
+            gioTichLuyRepository.save(gioTichLuyToChucEntity);
+        }
         return hoatDong;
     }
 
     public void deleteHoatDongById(Long maHoatDong) {
-
-        Optional<HoatDong> hoatDong = hoatDongRepository.findById(maHoatDong);
-        if (hoatDong.isPresent()) {
+        Optional<HoatDong> hoatDongOptional = hoatDongRepository.findById(maHoatDong);
+        if (hoatDongOptional.isPresent()) {
+            HoatDong hoatDong = hoatDongOptional.get();
+            // cập nhật giờ tích lu tổ chuc cho giảng viên
+            List<GiangVien> dsGiangVienToChucs = hoatDong.getGiangVienToChucs();
+            String namHoc = String.valueOf(hoatDong.getThoiGianBatDau().getYear());
+            for (GiangVien giangVienToChuc : dsGiangVienToChucs) {
+                int gioTichLuyToChuc = hoatDong.getGioTichLuyToChuc();
+                GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVienToChuc.getMaTaiKhoan(), namHoc);
+                gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChucEntity.getTongSoGio() - gioTichLuyToChuc);
+                gioTichLuyRepository.save(gioTichLuyToChucEntity);
+            }
+            //xóa file quyết định cũ
+            String oldFile = hoatDong.getFileQuyetDinh();
+            if (oldFile != null) {
+                storageService.delete(oldFile);
+            }
             hoatDongRepository.deleteById(maHoatDong);
         } else {
             throw new EntityNotFoundException("hoatdong-notfound");

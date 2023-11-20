@@ -3,7 +3,6 @@ package com.quanly.hoatdongcongdong.controller;
 import com.quanly.hoatdongcongdong.payload.request.HuyHoatDongRequest;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
-import com.quanly.hoatdongcongdong.repository.GioTichLuyRepository;
 import com.quanly.hoatdongcongdong.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,7 @@ import com.quanly.hoatdongcongdong.entity.*;
 
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +44,11 @@ public class DangKyHoatDongController {
     private GiangVienService giangVienService;
     @Autowired
     private ThongBaoService thongBaoService;
-
+    @GetMapping("/hoat-dong-sap-dien-ra")
+    public ResponseEntity<List<HoatDong>> getHoatDongSapDienRa() {
+        List<HoatDong> hoatDongs = dangKyHoatDongRepository.findHoatDongByDangKyChuaDuyetVaDaDienRa();
+        return ResponseEntity.ok(hoatDongs);
+    }
     @GetMapping("/lay-danh-sach")
     public Page<DangKyHoatDong> layDanhSachTatCaDangKyHoatDong(
             @RequestParam(defaultValue = "0") int page,
@@ -56,10 +60,11 @@ public class DangKyHoatDongController {
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String username,
-            @RequestParam(required = false) String year
+            @RequestParam(required = false) String year,
+            @RequestParam(required = false) Long maHoatDong
     ) {
         return dangKyHoatDongService.getDanhSachDangKyHoatDong(page, size,
-                sortBy, sortDir, searchTerm, status, startTime, endTime, year, username);
+                sortBy, sortDir, searchTerm, status, startTime, endTime, year, username, maHoatDong);
     }
 
     @PostMapping("/{maHoatDong}")
@@ -101,15 +106,10 @@ public class DangKyHoatDongController {
     public ResponseEntity<?> approveDangKyHoatDong(
             @PathVariable Long maDangKy) {
         Optional<DangKyHoatDong> dangKyHoatDong = dangKyHoatDongService.findById(maDangKy);
-
+        //kiểm tra đăng ký hoạt động có tồn tại hay không
         if (dangKyHoatDong.isEmpty()) {
             return new ResponseEntity<>(new MessageResponse("hoatdong-notfound"), HttpStatus.NOT_FOUND);
         }
-
-        if (dangKyHoatDong.get().getTrangThaiDangKy() == DangKyHoatDong.TrangThaiDangKy.Da_Duyet) {
-            return new ResponseEntity<>(new MessageResponse("hoatdong-exist"), HttpStatus.OK);
-        }
-        // Call the corresponding service method
         dangKyHoatDongService.approveDangKyHoatDong(dangKyHoatDong.get());
         // Tạo thông báo cho người dùng về việc phê duyệt đăng ký hoạt động
         String tieuDe = "Duyệt đăng ký hoạt động";
@@ -122,6 +122,29 @@ public class DangKyHoatDongController {
         thongBaoService.luuThongBao(thongBao);
 
         return ResponseEntity.ok(new MessageResponse("đã phê duyệt"));
+    }
+    @PutMapping("/duyet-tat-ca-dang-ky/{maHoatDong}")
+    public ResponseEntity<?> approveAllDangKyHoatDongByMaHoatDong(@PathVariable Long maHoatDong) {
+        List<DangKyHoatDong> dangKyHoatDongs = dangKyHoatDongService.findAllByMaHoatDong(maHoatDong);
+
+        if (dangKyHoatDongs.isEmpty()) {
+            return new ResponseEntity<>(new MessageResponse("Không tìm thấy đăng ký nào"), HttpStatus.NOT_FOUND);
+        }
+
+        for (DangKyHoatDong dangKyHoatDong : dangKyHoatDongs) {
+            dangKyHoatDongService.approveDangKyHoatDong(dangKyHoatDong);
+            // Tạo thông báo cho từng giảng viên
+            String tieuDe = "Duyệt đăng ký hoạt động";
+            String nDung = "Yêu cầu đăng ký tham gia hoạt động " +
+                    dangKyHoatDong.getHoatDong().getTenHoatDong() + " của bạn đã được duyệt.";
+            ThongBao thongBao = thongBaoService.taoMoiThongBao(
+                    dangKyHoatDong.getGiangVien().getTaiKhoan(),
+                    tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
+            );
+            thongBaoService.luuThongBao(thongBao);
+        }
+
+        return ResponseEntity.ok(new MessageResponse("Đã phê duyệt tất cả các đăng ký cho hoạt động"));
     }
 
     @PutMapping("/huy-hoat-dong/{maDangKy}")

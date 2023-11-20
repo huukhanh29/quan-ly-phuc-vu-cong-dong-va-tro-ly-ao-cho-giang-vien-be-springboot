@@ -13,6 +13,7 @@ import java.util.Optional;
 
 public interface DangKyHoatDongRepository extends JpaRepository<DangKyHoatDong, Long>, JpaSpecificationExecutor<DangKyHoatDong> {
     List<DangKyHoatDong> findByGiangVien_MaTaiKhoan(Long maTk);
+    List<DangKyHoatDong> findByHoatDong_MaHoatDong(Long maHd);
     boolean existsByHoatDong_MaHoatDong(Long maHoatDong);
     DangKyHoatDong findByGiangVien_TaiKhoan_TenDangNhapAndHoatDong_MaHoatDong(String ten, Long ma);
     boolean existsByGiangVien_MaTaiKhoanAndHoatDong_MaHoatDong(Long maTaiKhoan, Long maHoatDong);
@@ -23,5 +24,7 @@ public interface DangKyHoatDongRepository extends JpaRepository<DangKyHoatDong, 
     List<GiangVien> findGiangViensByHoatDong(@Param("maHoatDong") Long maHoatDong);
     @Query("SELECT dk.hoatDong FROM DangKyHoatDong dk WHERE dk.giangVien.maTaiKhoan = :maTaiKhoan AND dk.trangThaiDangKy = 'Da_Duyet' AND YEAR(dk.hoatDong.thoiGianBatDau) = :nam")
     List<HoatDong> findHoatDongByGiangVienAndYear(@Param("maTaiKhoan") Long maTaiKhoan, @Param("nam") int nam);
+    @Query("SELECT d.hoatDong FROM DangKyHoatDong d WHERE d.trangThaiDangKy = 'Chua_Duyet' AND d.hoatDong.trangThaiHoatDong = 'DA_DIEN_RA'")
+    List<HoatDong> findHoatDongByDangKyChuaDuyetVaDaDienRa();
 
 }

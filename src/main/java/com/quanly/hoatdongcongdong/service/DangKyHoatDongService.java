@@ -48,7 +48,9 @@ public class DangKyHoatDongService {
     public boolean existsByGiangVien_MaTaiKhoanAndHoatDong_MaHoatDong(Long maTaiKhoan, Long maHoatDong) {
         return dangKyHoatDongRepository.existsByGiangVien_MaTaiKhoanAndHoatDong_MaHoatDong(maTaiKhoan, maHoatDong);
     }
-
+    public List<DangKyHoatDong> findAllByMaHoatDong(Long maHoatDong) {
+        return dangKyHoatDongRepository.findByHoatDong_MaHoatDong(maHoatDong);
+    }
     public Page<DangKyHoatDong> getDanhSachDangKyHoatDong(
             int page,
             int size,
@@ -59,7 +61,8 @@ public class DangKyHoatDongService {
             String startTime,
             String endTime,
             String year,
-            String username
+            String username,
+            Long maHoatDong
     ) {
         Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
         Pageable paging = PageRequest.of(page, size, sort);
@@ -75,10 +78,21 @@ public class DangKyHoatDongService {
                 );
             });
         }
+        if (maHoatDong != null) {
+            spec = spec.and((root, criteriaQuery, criteriaBuilder) -> {
+                return criteriaBuilder.equal(root.get("hoatDong").get("maHoatDong"), maHoatDong);
+            });
+        }
         if (!status.isEmpty()) {
             spec = spec.and((root, criteriaQuery, criteriaBuilder) ->
                     criteriaBuilder.equal(root.get("trangThaiDangKy"), DangKyHoatDong.TrangThaiDangKy.valueOf(status)));
+
+//            if (status.equals("Chua_Duyet")) {
+//                spec = spec.and((root, criteriaQuery, criteriaBuilder) ->
+//                        criteriaBuilder.equal(root.get("hoatDong").get("trangThaiHoatDong"), HoatDong.TrangThaiHoatDong.valueOf("DA_DIEN_RA")));
+//            }
         }
+
         if (startTime != null) {
             LocalDateTime startTimes = LocalDate.parse(startTime).atStartOfDay();
             spec = spec.and((root, query, criteriaBuilder) ->
@@ -151,16 +165,6 @@ public class DangKyHoatDongService {
         GiangVien giangVien = dangKyHoatDong.getGiangVien();
         LocalDateTime thoiGianBatDau = dangKyHoatDong.getHoatDong().getThoiGianBatDau();
         String namHoc = String.valueOf(thoiGianBatDau.getYear());
-//        int namKetThuc;
-//
-//        // Determine namKetThuc based on thoiGianBatDau
-//        if (thoiGianBatDau.getMonthValue() >= 7) {
-//            namKetThuc = namBatDau + 1;
-//        } else {
-//            namKetThuc = namBatDau;
-//            namBatDau = namKetThuc - 1;
-//        }
-//        String namHoc = namBatDau + "-" + namKetThuc;
 
         // Update gioTichLuy for the giangVien
         int gioTichLuyThamGia = dangKyHoatDong.getHoatDong().getGioTichLuyThamGia();
@@ -177,23 +181,7 @@ public class DangKyHoatDongService {
         }
         gioTichLuyRepository.save(gioTichLuy);
 
-        // Update gioTichLuyToChuc for each GiangVienToChuc
-        List<GiangVien> giangVienToChucs = dangKyHoatDong.getHoatDong().getGiangVienToChucs();
 
-        for (GiangVien giangVienToChuc : giangVienToChucs) {
-            int gioTichLuyToChuc = dangKyHoatDong.getHoatDong().getGioTichLuyToChuc();
-            GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVienToChuc.getMaTaiKhoan(), nam);
-
-            if (gioTichLuyToChucEntity == null) {
-                gioTichLuyToChucEntity = new GioTichLuy();
-                gioTichLuyToChucEntity.setGiangVien(giangVienToChuc);
-                gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChuc);
-                gioTichLuyToChucEntity.setNam(namHoc);
-            } else {
-                gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChucEntity.getTongSoGio() + gioTichLuyToChuc);
-            }
-            gioTichLuyRepository.save(gioTichLuyToChucEntity);
-        }
     }
 
     public void huyDangKyHoatDong(DangKyHoatDong dangKyHoatDong, HuyHoatDongRequest huyHoatDongRequest) {
