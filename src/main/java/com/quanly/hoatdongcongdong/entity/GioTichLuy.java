@@ -11,16 +11,26 @@ public class GioTichLuy {
     @JoinColumn(name = "maGiangVien")
     private GiangVien giangVien;
     private int tongSoGio;
+    private int gioMienGiam;
     private String nam;
 
     public GioTichLuy() {
     }
 
-    public GioTichLuy(Long maGioTichLuy, GiangVien giangVien, int tongSoGio, String nam) {
+    public GioTichLuy(Long maGioTichLuy, GiangVien giangVien, int tongSoGio, int gioMienGiam, String nam) {
         this.maGioTichLuy = maGioTichLuy;
         this.giangVien = giangVien;
         this.tongSoGio = tongSoGio;
+        this.gioMienGiam = gioMienGiam;
         this.nam = nam;
+    }
+
+    public int getGioMienGiam() {
+        return gioMienGiam;
+    }
+
+    public void setGioMienGiam(int gioMienGiam) {
+        this.gioMienGiam = gioMienGiam;
     }
 
     public Long getMaGioTichLuy() {

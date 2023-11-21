@@ -74,13 +74,18 @@ public class ChucDanhController {
 
         GioTichLuy gioTichLuy = gioTichLuyService.findByGiangVien_MaTaiKhoanAndNam(giangVien.getMaTaiKhoan(), academic);
         int totalHours = 0;
+        int exemptionHours = 0;
         if (gioTichLuy != null) {
             totalHours = gioTichLuy.getTongSoGio();
+            exemptionHours = gioTichLuy.getGioMienGiam();
         }
         ChucDanh chucDanh = giangVien.getChucDanh();
         int requiredHours = chucDanh.getGioBatBuoc();
-
-        int missHours = requiredHours - totalHours;
+        int overtakingHours = totalHours - requiredHours + exemptionHours;
+        if (overtakingHours < 0) {
+            overtakingHours = 0;
+        }
+        int missHours = requiredHours - totalHours - exemptionHours;
         if (missHours < 0) {
             missHours = 0;
         }
@@ -88,6 +93,8 @@ public class ChucDanhController {
         chartData.put("missHours", missHours);
         chartData.put("totalHours", totalHours);
         chartData.put("requiredHours", requiredHours);
+        chartData.put("exemptionHours", exemptionHours);
+        chartData.put("overtakingHours", overtakingHours);
         return chartData;
     }
     @PostMapping("/them")

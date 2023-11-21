@@ -177,6 +177,7 @@ public class DangKyHoatDongService {
             gioTichLuy.setGiangVien(giangVien);
             gioTichLuy.setTongSoGio(gioTichLuyThamGia);
             gioTichLuy.setNam(namHoc);
+            gioTichLuy.setGioMienGiam(0);
         } else {
             gioTichLuy.setTongSoGio(gioTichLuy.getTongSoGio() + gioTichLuyThamGia);
         }

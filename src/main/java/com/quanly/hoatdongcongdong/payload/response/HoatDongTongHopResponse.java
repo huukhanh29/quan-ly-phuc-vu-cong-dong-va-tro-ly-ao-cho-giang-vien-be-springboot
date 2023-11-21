@@ -10,6 +10,33 @@ public class HoatDongTongHopResponse {
     private int gioHk1;
     private int gioHk2;
     private int gioHk3;
+    private int gioVuotMuc;
+    private int gioMienGiam;
+    private int gioThieu;
+
+    public int getGioThieu() {
+        return gioThieu;
+    }
+
+    public void setGioThieu(int gioThieu) {
+        this.gioThieu = gioThieu;
+    }
+
+    public int getGioVuotMuc() {
+        return gioVuotMuc;
+    }
+
+    public void setGioVuotMuc(int gioVuotMuc) {
+        this.gioVuotMuc = gioVuotMuc;
+    }
+
+    public int getGioMienGiam() {
+        return gioMienGiam;
+    }
+
+    public void setGioMienGiam(int gioMienGiam) {
+        this.gioMienGiam = gioMienGiam;
+    }
 
     public int getGioHk1() {
         return gioHk1;

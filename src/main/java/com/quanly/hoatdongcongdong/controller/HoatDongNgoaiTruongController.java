@@ -167,6 +167,7 @@ public class HoatDongNgoaiTruongController {
             gioTichLuy.setGiangVien(hoatDongNgoaiTruong.getGiangVien());
             gioTichLuy.setTongSoGio(gioTichLuyThamGia);
             gioTichLuy.setNam(namHoc);
+            gioTichLuy.setGioMienGiam(0);
             System.out.println(gioTichLuy.getNam());
         } else {
             System.out.println(gioTichLuy.getNam());
@@ -189,7 +190,7 @@ public class HoatDongNgoaiTruongController {
     @GetMapping("/lay-tat-ca")
     public ResponseEntity<?> layTatCaHoatDongNgoaiTruong(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "ngayDangKy") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDir,
             @RequestParam(required = false, defaultValue = "") String searchTerm,

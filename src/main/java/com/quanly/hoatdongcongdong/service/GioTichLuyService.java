@@ -24,7 +24,9 @@ public class GioTichLuyService {
     }
 
 
-
+    public void luuGioTichLuy(GioTichLuy gioTichLuy) {
+        gioTichLuyRepository.save(gioTichLuy);
+    }
     public List<GioTichLuy> findByNam(String nam) {
         return gioTichLuyRepository.findByNam(nam);
     }

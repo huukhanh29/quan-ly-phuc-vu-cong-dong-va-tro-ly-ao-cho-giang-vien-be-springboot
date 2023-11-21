@@ -333,16 +333,30 @@ public class HoatDongService {
 
             GioTichLuy gioTichLuy= gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(maGiangVien, String.valueOf(nam));
             int tongSoGio = 0;
+            int gioMienGiam = 0;
             if (gioTichLuy != null) {
                  tongSoGio = gioTichLuy.getTongSoGio();
+                gioMienGiam = gioTichLuy.getGioMienGiam();
             };
             int gioBatBuoc = giangVien.getChucDanh().getGioBatBuoc();
+            int gioVuotMuc = tongSoGio - gioBatBuoc + gioMienGiam;
+            if (gioVuotMuc < 0) {
+                gioVuotMuc = 0;
+            }
+            int missHours = gioBatBuoc - tongSoGio - gioMienGiam;
+            if (missHours < 0) {
+                missHours = 0;
+            }
             response.setTongSoGio(tongSoGio);
             response.setGioBatBuoc(gioBatBuoc);
+            response.setGioMienGiam(gioMienGiam);
+            response.setGioVuotMuc(gioVuotMuc);
+            response.setGioThieu(missHours);
         }
         response.setGioHk2(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 2, 1).atStartOfDay(), LocalDate.of(nam, 6, 30).atTime(23, 59, 59)));
-        response.setGioHk3(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 7, 1).atStartOfDay(), LocalDate.of(nam, 8, 31).atTime(23, 59, 59)));
+        response.setGioHk3(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 6, 1).atStartOfDay(), LocalDate.of(nam, 8, 31).atTime(23, 59, 59)));
         response.setGioHk1(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 9, 1).atStartOfDay(), LocalDate.of(nam + 1, 1, 31).atTime(23, 59, 59)));
+
 
         return response;
     }

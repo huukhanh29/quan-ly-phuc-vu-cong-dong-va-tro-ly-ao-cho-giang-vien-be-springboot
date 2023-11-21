@@ -1,10 +1,7 @@
 package com.quanly.hoatdongcongdong.controller;
 
 import com.quanly.hoatdongcongdong.entity.*;
-import com.quanly.hoatdongcongdong.payload.request.MatKhauMoiRequest;
-import com.quanly.hoatdongcongdong.payload.request.TaiKhoanMoiRequest;
-import com.quanly.hoatdongcongdong.payload.request.TokenRefreshRequest;
-import com.quanly.hoatdongcongdong.payload.request.TrangThaiTaiKhoanRequest;
+import com.quanly.hoatdongcongdong.payload.request.*;
 import com.quanly.hoatdongcongdong.payload.response.JwtResponse;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.GioTichLuyRepository;
@@ -260,10 +257,19 @@ public class TaiKhoanController {
 
     //lấy danh sách năm đã đăng ký hoạt động của mot giang vien
     @GetMapping("/danh-sach-nam-dang-ky-hoat-dong")
-    public ResponseEntity<?> getAcademicYearsByUser(HttpServletRequest httpServletRequest) {
-        Long maGv = taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
-        List<String> academicYears = gioTichLuyService.findDistinctNamByGiangVien(maGv);
-        return ResponseEntity.ok(academicYears);
+    public ResponseEntity<?> getAcademicYearsByUser(HttpServletRequest httpServletRequest,
+                                                    @RequestParam(required = false) Long maGv) {
+
+       TaiKhoan taiKhoan = taiKhoanService.getCurrentUser(httpServletRequest);
+
+       if(taiKhoan.getQuyen()==TaiKhoan.Quyen.QuanTriVien){
+           List<String> academicYears = gioTichLuyService.findDistinctNamByGiangVien(maGv);
+           return ResponseEntity.ok(academicYears);
+       }else{
+           List<String> academicYears = gioTichLuyService.findDistinctNamByGiangVien(taiKhoan.getMaTaiKhoan());
+           return ResponseEntity.ok(academicYears);
+       }
+
     }
 
     @PostMapping("/dang-xuat")
@@ -325,5 +331,43 @@ public class TaiKhoanController {
             ketQua.add(thongTinGiangVien);
         }
         return ketQua;
+    }
+    @PostMapping("/cap-nhat-gio-mien-giam-cho-giang-vien")
+    public ResponseEntity<?> capNhatGioMienGiam(@RequestBody GioTichLuyRequest request) {
+        try {
+            GioTichLuy gioTichLuy = gioTichLuyService.findByGiangVien_MaTaiKhoanAndNam(request.getMaGiangVien(), request.getNam());
+            Optional<GiangVien> giangVienOptional = giangVienService.findById(request.getMaGiangVien());
+            if (giangVienOptional.isEmpty()) {
+                return new ResponseEntity<>(new MessageResponse("NOT_FOUND"), HttpStatus.NOT_FOUND);
+            }
+            if (gioTichLuy == null) {
+                gioTichLuy = new GioTichLuy();
+                gioTichLuy.setGiangVien(giangVienOptional.get());
+                gioTichLuy.setNam(request.getNam());
+                gioTichLuy.setTongSoGio(0);
+                gioTichLuy.setGioMienGiam(request.getGioMienGiam());
+            } else {
+                gioTichLuy.setGioMienGiam(request.getGioMienGiam());
+            }
+
+            gioTichLuyService.luuGioTichLuy(gioTichLuy);
+            return new ResponseEntity<>(new MessageResponse("thành công"), HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi cập nhật: " + e.getMessage());
+        }
+    }
+    @GetMapping("/lay-gio-tich-luy-cua-giang-vien")
+    public ResponseEntity<?> timKiemGioTichLuy(@RequestParam String nam, @RequestParam Long maGiangVien) {
+        try {
+            GioTichLuy gioTichLuy = gioTichLuyService.findByGiangVien_MaTaiKhoanAndNam(maGiangVien, nam);
+
+            if (gioTichLuy != null) {
+                return ResponseEntity.ok(gioTichLuy);
+            } else {
+                return new ResponseEntity<>(new MessageResponse("not-found"), HttpStatus.OK);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi tìm kiếm: " + e.getMessage());
+        }
     }
 }
