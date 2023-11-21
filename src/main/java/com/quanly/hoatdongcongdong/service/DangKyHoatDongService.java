@@ -73,6 +73,7 @@ public class DangKyHoatDongService {
             spec = spec.and((root, criteriaQuery, criteriaBuilder) -> {
                 String pattern = "%" + searchTerm + "%";
                 return criteriaBuilder.or(
+                        criteriaBuilder.like(root.get("giangVien").get("taiKhoan").get("tenDangNhap"), pattern),
                         criteriaBuilder.like(root.get("giangVien").get("taiKhoan").get("tenDayDu"), pattern),
                         criteriaBuilder.like(root.get("hoatDong").get("tenHoatDong"), pattern)
                 );
