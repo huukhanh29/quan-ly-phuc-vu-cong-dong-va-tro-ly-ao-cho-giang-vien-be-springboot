@@ -288,7 +288,7 @@ public class TaiKhoanController {
         List<GioTichLuy> danhSachGioTichLuyCuaGiangVien = gioTichLuyService.findByNam(nam);
         List<GiangVien> danhSachGiangVien = giangVienService.findAll();
 
-        // Bộ lọc giảng viên theo khoa và trường
+        // Bộ lọc giảng viên theo khoa
         if (khoa != null) {
             danhSachGiangVien = danhSachGiangVien.stream()
                     .filter(giangVien -> giangVien.getKhoa().getMaKhoa().equals(khoa))
@@ -297,11 +297,17 @@ public class TaiKhoanController {
 
         List<GiangVien> giangVienKetQua = new ArrayList<>();
         if (loai.equals("Hoàn thành")) {
-            giangVienKetQua = danhSachGioTichLuyCuaGiangVien.stream()
-                    .filter(gioTichLuy -> gioTichLuy.getTongSoGio() + gioTichLuy.getGioMienGiam() >= gioTichLuy.getGiangVien().getChucDanh().getGioBatBuoc())
-                    .map(GioTichLuy::getGiangVien)
+            giangVienKetQua = danhSachGiangVien.stream()
+                    .filter(giangVien -> {
+                        GioTichLuy gioTichLuyCuaGiangVien = danhSachGioTichLuyCuaGiangVien.stream()
+                                .filter(gioTichLuy -> gioTichLuy.getGiangVien().getMaTaiKhoan().equals(giangVien.getMaTaiKhoan()))
+                                .findFirst()
+                                .orElse(null);
+                        return gioTichLuyCuaGiangVien != null && (gioTichLuyCuaGiangVien.getTongSoGio() + gioTichLuyCuaGiangVien.getGioMienGiam() >= gioTichLuyCuaGiangVien.getGiangVien().getChucDanh().getGioBatBuoc());
+                    })
                     .collect(Collectors.toList());
-        } else if (loai.equals("Chưa hoàn thành")) {
+        }
+        else if (loai.equals("Chưa hoàn thành")) {
             giangVienKetQua = danhSachGiangVien.stream()
                     .filter(giangVien -> {
                         GioTichLuy gioTichLuyCuaGiangVien = danhSachGioTichLuyCuaGiangVien.stream()
