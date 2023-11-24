@@ -184,7 +184,7 @@ public class HoatDongService {
             throw new EntityExistsException("hoatdong-exist");
         }
         HoatDong hoatDong = existingHoatDong.get();
-        // cập nhật giờ tích lu tổ chuc cho giảng viên cũ
+        // cập nhật giờ tích lũy tổ chuc cho giảng viên cũ
         List<GiangVien> dsGiangVienToChucCu = hoatDong.getGiangVienToChucs();
         String namHoc = String.valueOf(hoatDong.getThoiGianBatDau().getYear());
         for (GiangVien giangVienToChuc : dsGiangVienToChucCu) {
@@ -210,7 +210,7 @@ public class HoatDongService {
         hoatDong.setNguoiKyQuyetDinh(hoatDongResponse.getNguoiKyQuyetDinh());
 
         hoatDongRepository.save(hoatDong);
-        // cập nhật giờ tích lu tổ chuc cho giảng viên
+        // cập nhật giờ tích lũy tổ chuc cho giảng viên
         List<GiangVien> dsGiangVienToChucMoi = hoatDong.getGiangVienToChucs();
         String nam = String.valueOf(hoatDong.getThoiGianBatDau().getYear());
         for (GiangVien giangVienToChuc : dsGiangVienToChucMoi) {
@@ -234,7 +234,7 @@ public class HoatDongService {
         Optional<HoatDong> hoatDongOptional = hoatDongRepository.findById(maHoatDong);
         if (hoatDongOptional.isPresent()) {
             HoatDong hoatDong = hoatDongOptional.get();
-            // cập nhật giờ tích lu tổ chuc cho giảng viên
+            // cập nhật trừ giờ tích lũy tổ chuc cho giảng viên
             List<GiangVien> dsGiangVienToChucs = hoatDong.getGiangVienToChucs();
             String namHoc = String.valueOf(hoatDong.getThoiGianBatDau().getYear());
             for (GiangVien giangVienToChuc : dsGiangVienToChucs) {

@@ -298,7 +298,7 @@ public class TaiKhoanController {
         List<GiangVien> giangVienKetQua = new ArrayList<>();
         if (loai.equals("Hoàn thành")) {
             giangVienKetQua = danhSachGioTichLuyCuaGiangVien.stream()
-                    .filter(gioTichLuy -> gioTichLuy.getTongSoGio() >= gioTichLuy.getGiangVien().getChucDanh().getGioBatBuoc())
+                    .filter(gioTichLuy -> gioTichLuy.getTongSoGio() + gioTichLuy.getGioMienGiam() >= gioTichLuy.getGiangVien().getChucDanh().getGioBatBuoc())
                     .map(GioTichLuy::getGiangVien)
                     .collect(Collectors.toList());
         } else if (loai.equals("Chưa hoàn thành")) {
@@ -308,7 +308,7 @@ public class TaiKhoanController {
                                 .filter(gioTichLuy -> gioTichLuy.getGiangVien().getMaTaiKhoan().equals(giangVien.getMaTaiKhoan()))
                                 .findFirst()
                                 .orElse(null);
-                        return gioTichLuyCuaGiangVien == null || gioTichLuyCuaGiangVien.getTongSoGio() < gioTichLuyCuaGiangVien.getGiangVien().getChucDanh().getGioBatBuoc();
+                        return gioTichLuyCuaGiangVien == null || gioTichLuyCuaGiangVien.getTongSoGio() + gioTichLuyCuaGiangVien.getGioMienGiam() < gioTichLuyCuaGiangVien.getGiangVien().getChucDanh().getGioBatBuoc();
                     })
                     .collect(Collectors.toList());
         }
@@ -316,10 +316,12 @@ public class TaiKhoanController {
         for (GiangVien giangVien : giangVienKetQua) {
             Map<String, Object> thongTinGiangVien = new HashMap<>();
             int tongSoGio = 0;
+            int gioMienGiam = 0;
             GioTichLuy gioTichLuyCuaGiangVien =
                     gioTichLuyService.findByGiangVien_MaTaiKhoanAndNam(giangVien.getMaTaiKhoan(), nam);
             if (gioTichLuyCuaGiangVien != null) {
                 tongSoGio = gioTichLuyCuaGiangVien.getTongSoGio();
+                gioMienGiam = gioTichLuyCuaGiangVien.getGioMienGiam();
             }
             thongTinGiangVien.put("hoTen", giangVien.getTaiKhoan().getTenDayDu());
             thongTinGiangVien.put("giangVien", giangVien);
@@ -327,6 +329,7 @@ public class TaiKhoanController {
             thongTinGiangVien.put("email", giangVien.getTaiKhoan().getEmail());
             thongTinGiangVien.put("chucDanh", giangVien.getChucDanh().getTenChucDanh());
             thongTinGiangVien.put("tongSoGio", tongSoGio);
+            thongTinGiangVien.put("gioMienGiam", gioMienGiam);
             thongTinGiangVien.put("soGioBatBuoc", giangVien.getChucDanh().getGioBatBuoc());
             ketQua.add(thongTinGiangVien);
         }

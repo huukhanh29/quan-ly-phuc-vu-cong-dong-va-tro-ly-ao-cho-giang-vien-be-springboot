@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
 import com.quanly.hoatdongcongdong.exception.ResourceNotFoundException;
+
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -42,13 +44,20 @@ public class PhanHoiController {
     @PostMapping("/them-moi")
     public ResponseEntity<?> createPhanHoi(@RequestBody PhanHoiRequest phanHoiRequest,
                                            HttpServletRequest request) {
-        if (phanHoiService.findByNoiDung(phanHoiRequest.getNoiDung()) != null) {
-            return new ResponseEntity<>(new MessageResponse("exist"),
-                    HttpStatus.OK);
-        }
+
+
         // Lấy thông tin người dùng hiện tại
         Optional<SinhVien> sinhVien = sinhVienService.findById(taiKhoanService.getCurrentUser(request).getMaTaiKhoan());
         if(sinhVien.isPresent()){
+            //nếu có sự giống nhau về phản hồi từ 1 người gửi sẽ báo lỗi
+            if (phanHoiService.findByNoiDung(phanHoiRequest.getNoiDung()) != null) {
+                PhanHoi phanHoi = phanHoiService.findByNoiDung(phanHoiRequest.getNoiDung());
+                if(Objects.equals(phanHoi.getSinhVien().getMaTaiKhoan(), sinhVien.get().getMaTaiKhoan())){
+                    return new ResponseEntity<>(new MessageResponse("exist"),
+                            HttpStatus.OK);
+                }
+
+            }
             phanHoiService.createPhanHoi(phanHoiRequest.getNoiDung(), sinhVien.get());
         }else {
             return new ResponseEntity<>(new MessageResponse("sinhvien-notfound"),

@@ -66,7 +66,7 @@ public class DangKyHoatDongController {
         return dangKyHoatDongService.getDanhSachDangKyHoatDong(page, size,
                 sortBy, sortDir, searchTerm, status, startTime, endTime, year, username, maHoatDong);
     }
-
+    //đăng ký hoạt động
     @PostMapping("/{maHoatDong}")
     public ResponseEntity<?> dangKyHoatDong(@PathVariable Long maHoatDong, HttpServletRequest httpServletRequest) {
         // Lấy thông tin người dùng đang đăng nhập
@@ -123,29 +123,7 @@ public class DangKyHoatDongController {
 
         return ResponseEntity.ok(new MessageResponse("đã phê duyệt"));
     }
-    @PutMapping("/duyet-tat-ca-dang-ky/{maHoatDong}")
-    public ResponseEntity<?> approveAllDangKyHoatDongByMaHoatDong(@PathVariable Long maHoatDong) {
-        List<DangKyHoatDong> dangKyHoatDongs = dangKyHoatDongService.findAllByMaHoatDong(maHoatDong);
 
-        if (dangKyHoatDongs.isEmpty()) {
-            return new ResponseEntity<>(new MessageResponse("Không tìm thấy đăng ký nào"), HttpStatus.NOT_FOUND);
-        }
-
-        for (DangKyHoatDong dangKyHoatDong : dangKyHoatDongs) {
-            dangKyHoatDongService.approveDangKyHoatDong(dangKyHoatDong);
-            // Tạo thông báo cho từng giảng viên
-            String tieuDe = "Duyệt đăng ký hoạt động";
-            String nDung = "Yêu cầu đăng ký tham gia hoạt động " +
-                    dangKyHoatDong.getHoatDong().getTenHoatDong() + " của bạn đã được duyệt.";
-            ThongBao thongBao = thongBaoService.taoMoiThongBao(
-                    dangKyHoatDong.getGiangVien().getTaiKhoan(),
-                    tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
-            );
-            thongBaoService.luuThongBao(thongBao);
-        }
-
-        return ResponseEntity.ok(new MessageResponse("Đã phê duyệt tất cả các đăng ký cho hoạt động"));
-    }
 
     @PutMapping("/huy-hoat-dong/{maDangKy}")
     public ResponseEntity<?> huyDangKyHoatDong(
@@ -174,6 +152,29 @@ public class DangKyHoatDongController {
             return new ResponseEntity<>(new MessageResponse("lydo-notempty"), HttpStatus.OK);
         }
         return ResponseEntity.ok(new MessageResponse("đã hủy"));
+    }
+    @PutMapping("/duyet-tat-ca-dang-ky/{maHoatDong}")
+    public ResponseEntity<?> approveAllDangKyHoatDongByMaHoatDong(@PathVariable Long maHoatDong) {
+        List<DangKyHoatDong> dangKyHoatDongs = dangKyHoatDongService.findAllByMaHoatDong(maHoatDong);
+
+        if (dangKyHoatDongs.isEmpty()) {
+            return new ResponseEntity<>(new MessageResponse("Không tìm thấy đăng ký nào"), HttpStatus.NOT_FOUND);
+        }
+
+        for (DangKyHoatDong dangKyHoatDong : dangKyHoatDongs) {
+            dangKyHoatDongService.approveDangKyHoatDong(dangKyHoatDong);
+            // Tạo thông báo cho từng giảng viên
+            String tieuDe = "Duyệt đăng ký hoạt động";
+            String nDung = "Yêu cầu đăng ký tham gia hoạt động " +
+                    dangKyHoatDong.getHoatDong().getTenHoatDong() + " của bạn đã được duyệt.";
+            ThongBao thongBao = thongBaoService.taoMoiThongBao(
+                    dangKyHoatDong.getGiangVien().getTaiKhoan(),
+                    tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
+            );
+            thongBaoService.luuThongBao(thongBao);
+        }
+
+        return ResponseEntity.ok(new MessageResponse("Đã phê duyệt tất cả các đăng ký cho hoạt động"));
     }
     @PostMapping("/kiem-tra/{maHoatDong}")
     public ResponseEntity<?> kiemTraDangKyKhoaHoc(@PathVariable Long maHoatDong, HttpServletRequest httpServletRequest) {

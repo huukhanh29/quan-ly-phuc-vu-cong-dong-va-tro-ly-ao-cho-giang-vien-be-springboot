@@ -48,7 +48,7 @@ public class HoatDongNgoaiTruongController {
     private GioTichLuyRepository gioTichLuyRepository;
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
-
+    //gửi thông tin đăng ký hoạt động ngoài trường
     @PostMapping("/them")
     public ResponseEntity<?> themHoatDongNgoaiTruong(
             @RequestBody HoatDongNgoaiTruongRequest hoatDongNgoaiTruongRequest) {
@@ -253,7 +253,7 @@ public class HoatDongNgoaiTruongController {
             String tieuDe = "Hủy đăng ký hoạt động ngoài trường";
             String nDung = "Xác nhận tham gia hoạt động " +
                     hoatDongNgoaiTruongOptional.get().getTenHoatDong() +
-                    " của bạn đã bị hủy. Vui lòng kiểm tra minh chứng và gửi lại yêu cầu!";
+                    " của bạn đã bị hủy. Vui lòng kiểm tra thông tin, minh chứng và gửi lại yêu cầu!";
             ThongBao thongBao = thongBaoService.taoMoiThongBao(
                     hoatDongNgoaiTruongOptional.get().getGiangVien().getTaiKhoan(),
                     tieuDe, nDung, ThongBao.TrangThai.ChuaDoc

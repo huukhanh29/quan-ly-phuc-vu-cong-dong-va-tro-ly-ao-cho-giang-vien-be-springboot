@@ -133,15 +133,6 @@ public class DangKyHoatDongService {
 
         return dangKyHoatDongRepository.findAll(spec, paging);
     }
-
-    public void dangKyHoatDong(HoatDong hoatDong, GiangVien giangVien) {
-        messagingTemplate.convertAndSendToUser("admin", "/queue/messages", "register-activity");
-        DangKyHoatDong dangKyHoatDong = new DangKyHoatDong();
-        dangKyHoatDong.setGiangVien(giangVien);
-        dangKyHoatDong.setHoatDong(hoatDong);
-        dangKyHoatDong.setTrangThaiDangKy(DangKyHoatDong.TrangThaiDangKy.Chua_Duyet);
-        dangKyHoatDongRepository.save(dangKyHoatDong);
-    }
     public boolean kiemTraDangKyHoatDong(String ten, Long ma) {
         if(dangKyHoatDongRepository.existsByGiangVien_TaiKhoan_TenDangNhapAndHoatDong_MaHoatDong(ten, ma)){
             return true;
@@ -156,6 +147,15 @@ public class DangKyHoatDongService {
         }
         return null;
     }
+    public void dangKyHoatDong(HoatDong hoatDong, GiangVien giangVien) {
+        messagingTemplate.convertAndSendToUser("admin", "/queue/messages", "register-activity");
+        DangKyHoatDong dangKyHoatDong = new DangKyHoatDong();
+        dangKyHoatDong.setGiangVien(giangVien);
+        dangKyHoatDong.setHoatDong(hoatDong);
+        dangKyHoatDong.setTrangThaiDangKy(DangKyHoatDong.TrangThaiDangKy.Chua_Duyet);
+        dangKyHoatDongRepository.save(dangKyHoatDong);
+    }
+
 
     public void approveDangKyHoatDong(DangKyHoatDong dangKyHoatDong) {
         // Thực hiện phê duyệt đăng ký hoạt động
@@ -167,7 +167,7 @@ public class DangKyHoatDongService {
         LocalDateTime thoiGianBatDau = dangKyHoatDong.getHoatDong().getThoiGianBatDau();
         String namHoc = String.valueOf(thoiGianBatDau.getYear());
 
-        // Update gioTichLuy for the giangVien
+        // Cộng giờ tích lũy tham gia cho giảng viên
         int gioTichLuyThamGia = dangKyHoatDong.getHoatDong().getGioTichLuyThamGia();
         String nam = String.valueOf(dangKyHoatDong.getHoatDong().getThoiGianBatDau().getYear());
         GioTichLuy gioTichLuy = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(dangKyHoatDong.getGiangVien().getMaTaiKhoan(), nam);
@@ -187,10 +187,13 @@ public class DangKyHoatDongService {
     }
 
     public void huyDangKyHoatDong(DangKyHoatDong dangKyHoatDong, HuyHoatDongRequest huyHoatDongRequest) {
+        // nếu ở trang thái chưa duyệt tức là việc hủy thực hiện hủy khi không đủ điều kiện tham gia hoạt động
         if (dangKyHoatDong.getTrangThaiDangKy() == DangKyHoatDong.TrangThaiDangKy.Chua_Duyet) {
             dangKyHoatDong.setTrangThaiDangKy(DangKyHoatDong.TrangThaiDangKy.Da_Huy);
             dangKyHoatDong.setLyDoHuy(huyHoatDongRequest.getLyDoHuy());
-        } else if (dangKyHoatDong.getTrangThaiDangKy() == DangKyHoatDong.TrangThaiDangKy.Da_Duyet) {
+        }
+        // nếu là đã duyệt thì là hủy khi đã đăng ký hoạt động  nhưng không có tham gia
+        else if (dangKyHoatDong.getTrangThaiDangKy() == DangKyHoatDong.TrangThaiDangKy.Da_Duyet) {
             dangKyHoatDong.setTrangThaiDangKy(DangKyHoatDong.TrangThaiDangKy.Da_Huy);
             dangKyHoatDong.setLyDoHuy(huyHoatDongRequest.getLyDoHuy());
             String nam = String.valueOf(dangKyHoatDong.getHoatDong().getThoiGianBatDau().getYear());
@@ -204,17 +207,7 @@ public class DangKyHoatDongService {
                     gioTichLuyRepository.save(gioTichLuy);
                 }
             }
-            // Xử lý trừ giờ tích lũy cho giảng viên tổ chức
-            List<GiangVien> giangVienToChucs = dangKyHoatDong.getHoatDong().getGiangVienToChucs();
-            for (GiangVien giangVienToChuc : giangVienToChucs) {
-                int gioTichLuyToChuc = dangKyHoatDong.getHoatDong().getGioTichLuyToChuc();
-                GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVienToChuc.getMaTaiKhoan(), nam);
 
-                if (gioTichLuyToChucEntity != null && gioTichLuyToChucEntity.getTongSoGio() >= gioTichLuyToChuc) {
-                    gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChucEntity.getTongSoGio() - gioTichLuyToChuc);
-                    gioTichLuyRepository.save(gioTichLuyToChucEntity);
-                }
-            }
         }
         messagingTemplate.convertAndSendToUser(dangKyHoatDong.getGiangVien().getTaiKhoan().getTenDangNhap(), "/queue/messages", "destroy-activity");
         dangKyHoatDongRepository.save(dangKyHoatDong);
