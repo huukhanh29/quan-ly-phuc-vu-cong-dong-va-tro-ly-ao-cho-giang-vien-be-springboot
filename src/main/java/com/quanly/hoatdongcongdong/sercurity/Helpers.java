@@ -11,11 +11,40 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.text.Normalizer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
 
 public class Helpers {
+    public static Map<String, Integer> textToFrequencyVector(String text) {
+        Map<String, Integer> wordFreq = new HashMap<>();
+        // Tách từ và đếm tần suất
+        for (String word : text.split("\\s+")) {
+            wordFreq.put(word, wordFreq.getOrDefault(word, 0) + 1);
+        }
+        return wordFreq;
+    }
+    public static double calculateCosineSimilarity(String text1, String text2) {
+
+        Map<String, Integer> vector1 = textToFrequencyVector(text1);
+        Map<String, Integer> vector2 = textToFrequencyVector(text2);
+        Set<String> allWords = new HashSet<>();
+        allWords.addAll(vector1.keySet());
+        allWords.addAll(vector2.keySet());
+
+        double dotProduct = 0;
+        double normA = 0;
+        double normB = 0;
+
+        for (String word : allWords) {
+            int val1 = vector1.getOrDefault(word, 0);
+            int val2 = vector2.getOrDefault(word, 0);
+            dotProduct += val1 * val2;
+            normA += val1 * val1;
+            normB += val2 * val2;
+        }
+
+        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+    }
     public static float calculateSimilarity(String str1, String str2) {
         // Nếu str1 dài hơn str2, đổi chỗ chúng
         if(str1.length() > str2.length()) {
@@ -101,5 +130,4 @@ public class Helpers {
 
         return temp;
     }
-
 }

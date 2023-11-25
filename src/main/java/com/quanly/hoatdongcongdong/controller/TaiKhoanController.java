@@ -353,7 +353,7 @@ public class TaiKhoanController {
                 gioTichLuy = new GioTichLuy();
                 gioTichLuy.setGiangVien(giangVienOptional.get());
                 gioTichLuy.setNam(request.getNam());
-                gioTichLuy.setTongSoGio(0);
+                   gioTichLuy.setTongSoGio(0);
                 gioTichLuy.setGioMienGiam(request.getGioMienGiam());
             } else {
                 gioTichLuy.setGioMienGiam(request.getGioMienGiam());

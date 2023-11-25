@@ -85,7 +85,7 @@ public class HoatDongService {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.or(
                             criteriaBuilder.like(root.get("tenHoatDong"), "%" + searchTerm + "%"),
-                            criteriaBuilder.like(root.get("moTa"), "%" + searchTerm + "%")
+                            criteriaBuilder.like(root.get("soQuyetDinh"), "%" + searchTerm + "%")
                     ));
         }
         if (status != null) {
@@ -353,9 +353,9 @@ public class HoatDongService {
             response.setGioVuotMuc(gioVuotMuc);
             response.setGioThieu(missHours);
         }
-        response.setGioHk2(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 2, 1).atStartOfDay(), LocalDate.of(nam, 6, 30).atTime(23, 59, 59)));
-        response.setGioHk3(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 6, 1).atStartOfDay(), LocalDate.of(nam, 8, 31).atTime(23, 59, 59)));
-        response.setGioHk1(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 9, 1).atStartOfDay(), LocalDate.of(nam + 1, 1, 31).atTime(23, 59, 59)));
+        response.setGioHk2(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 1, 1).atStartOfDay(), LocalDate.of(nam, 5, 31).atTime(23, 59, 59)));
+        response.setGioHk3(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 6, 1).atStartOfDay(), LocalDate.of(nam, 7, 31).atTime(23, 59, 59)));
+        response.setGioHk1(calculateGioForPeriod(maGiangVien, LocalDate.of(nam, 8, 1).atStartOfDay(), LocalDate.of(nam, 12, 31).atTime(23, 59, 59)));
 
 
         return response;
