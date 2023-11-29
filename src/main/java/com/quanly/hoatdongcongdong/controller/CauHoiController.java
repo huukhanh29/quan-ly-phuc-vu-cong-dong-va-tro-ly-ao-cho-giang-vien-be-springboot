@@ -60,7 +60,7 @@ public class CauHoiController {
         List<CauHoi> cauHoiList = cauHoiService.findAllNoPage();
 
         CauHoi bestMatch = null;
-        double maxSimilarity = 0.1;
+        double maxSimilarity = 0.4;
 
         for (CauHoi cauHoi : cauHoiList) {
             String query = cauHoi.getCauHoi().toLowerCase();

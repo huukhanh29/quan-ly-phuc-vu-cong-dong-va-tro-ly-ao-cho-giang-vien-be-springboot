@@ -66,7 +66,7 @@ public class HoatDongNgoaiTruongController {
             hoatDongNgoaiTruong.setThoiGianBatDau(hoatDongNgoaiTruongRequest.getThoiGianBatDau());
             hoatDongNgoaiTruong.setThoiGianKetThuc(hoatDongNgoaiTruongRequest.getThoiGianKetThuc());
             hoatDongNgoaiTruong.setTrangThai(HoatDongNgoaiTruong.TrangThai.Chua_Duyet);
-
+            hoatDongNgoaiTruong.setGioTichLuyThamGia(0);
             hoatDongNgoaiTruongRepository.save(hoatDongNgoaiTruong);
             return ResponseEntity.ok(hoatDongNgoaiTruong);
         } catch (Exception e) {

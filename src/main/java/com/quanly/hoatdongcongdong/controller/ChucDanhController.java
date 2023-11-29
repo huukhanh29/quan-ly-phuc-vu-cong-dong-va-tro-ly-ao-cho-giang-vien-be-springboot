@@ -43,11 +43,11 @@ public class ChucDanhController {
         return ResponseEntity.ok(chucDanhs);
     }
 
-    @PutMapping("/cap-nhat/{maChucDanh}")
+    @PutMapping("/cap-nhat/{maChucDanh}/{maGv}")
     public ResponseEntity<?> updateGiangVien(@PathVariable Long maChucDanh,
-                                             HttpServletRequest httpServletRequest) {
-        Long maTaiKhoan = taiKhoanService.getCurrentUser(httpServletRequest).getMaTaiKhoan();
-        GiangVien giangVien = giangVienService.findById(maTaiKhoan)
+                                             @PathVariable Long maGv) {
+
+        GiangVien giangVien = giangVienService.findById(maGv)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy giảng viên!"));
 
         if (giangVien.getChucDanh() != null) {
