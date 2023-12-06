@@ -139,7 +139,7 @@ public class PhanHoiService {
             Optional<TaiKhoan> taiKhoan = taiKhoanService.findByTenDangNhap(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap());
             String tieuDe = "Trả lời phản hồi";
             String noiDung = "Câu hỏi " + phanHoi.getNoiDung() +
-                    " của bạn đã được phản hồi. Vui lòng hỏi chatbot với từ khóa " + newCauHoi.getCauHoi() + ".";
+                    " của bạn đã được phản hồi. Vui lòng hỏi chatbot với từ khóa \"" + newCauHoi.getCauHoi() + "\".";
             ThongBao thongBao = thongBaoService.taoMoiThongBao(
                     taiKhoan.get(), tieuDe, noiDung, ThongBao.TrangThai.ChuaDoc
             );

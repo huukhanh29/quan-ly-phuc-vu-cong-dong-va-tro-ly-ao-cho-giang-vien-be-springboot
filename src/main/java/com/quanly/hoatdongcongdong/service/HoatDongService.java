@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,7 @@ public class HoatDongService {
     private final GiangVienRepository giangVienRepository;
     private final DangKyHoatDongRepository dangKyHoatDongRepository;
     private final HoatDongNgoaiTruongRepository hoatDongNgoaiTruongRepository;
+
     @Autowired
     public HoatDongService(
             HoatDongRepository hoatDongRepository,
@@ -50,7 +52,7 @@ public class HoatDongService {
         this.loaiHoatDongRepository = loaiHoatDongRepository;
         this.giangVienRepository = giangVienRepository;
         this.dangKyHoatDongRepository = dangKyHoatDongRepository;
-        this.hoatDongNgoaiTruongRepository =hoatDongNgoaiTruongRepository;
+        this.hoatDongNgoaiTruongRepository = hoatDongNgoaiTruongRepository;
     }
 
     public List<Integer> findYears() {
@@ -112,6 +114,7 @@ public class HoatDongService {
 
         return hoatDongRepository.findAll(spec, paging);
     }
+
     @Transactional
     public HoatDong addHoatDong(HoatDongResponse hoatDongResponse) {
 
@@ -164,6 +167,7 @@ public class HoatDongService {
         return hoatDong;
     }
 
+    @Transactional
     public HoatDong updateHoatDong(Long maHoatDong, HoatDongResponse hoatDongResponse) {
 
         // Kiểm tra hoạt động có tồn tại không
@@ -179,10 +183,7 @@ public class HoatDongService {
             new ResponseEntity<>(new MessageResponse("loaihoatdong-notfound"), HttpStatus.OK);
             return null;
         }
-        Optional<HoatDong> existingHoatDong1 = hoatDongRepository.findByTenHoatDong(hoatDongResponse.getTenHoatDong());
-        if (existingHoatDong1.isPresent()) {
-            throw new EntityExistsException("hoatdong-exist");
-        }
+
         HoatDong hoatDong = existingHoatDong.get();
         // cập nhật giờ tích lũy tổ chuc cho giảng viên cũ
         List<GiangVien> dsGiangVienToChucCu = hoatDong.getGiangVienToChucs();
@@ -203,17 +204,26 @@ public class HoatDongService {
         hoatDong.setLoaiHoatDong(loaiHoatDong.get());
 
         List<GiangVien> giangVienToChucs = giangVienRepository.findByTaiKhoan_TenDangNhapIn(hoatDongResponse.getGiangVienToChucs());
-        hoatDong.setGiangVienToChucs(giangVienToChucs);
+
         hoatDong.setTenQuyetDinh(hoatDongResponse.getTenQuyetDinh());
         hoatDong.setSoQuyetDinh(hoatDongResponse.getSoQuyetDinh());
         hoatDong.setCapToChuc(hoatDongResponse.getCapToChuc());
         hoatDong.setNguoiKyQuyetDinh(hoatDongResponse.getNguoiKyQuyetDinh());
 
-        hoatDongRepository.save(hoatDong);
+
         // cập nhật giờ tích lũy tổ chuc cho giảng viên
-        List<GiangVien> dsGiangVienToChucMoi = hoatDong.getGiangVienToChucs();
+        List<GiangVien> dsGiangVienToChucMoi = new ArrayList<>(giangVienRepository.findByTaiKhoan_TenDangNhapIn(hoatDongResponse.getGiangVienToChucs()));
+        StringBuilder gvExistsMessage = new StringBuilder();
         String nam = String.valueOf(hoatDong.getThoiGianBatDau().getYear());
-        for (GiangVien giangVienToChuc : dsGiangVienToChucMoi) {
+        for (Iterator<GiangVien> iterator = dsGiangVienToChucMoi.iterator(); iterator.hasNext(); ) {
+            GiangVien giangVienToChuc = iterator.next();
+
+            DangKyHoatDong dangKyHoatDong = dangKyHoatDongRepository.findByGiangVien_TaiKhoan_TenDangNhapAndHoatDong_MaHoatDong(giangVienToChuc.getTaiKhoan().getTenDangNhap(), hoatDong.getMaHoatDong());
+            if (dangKyHoatDong != null) {
+                iterator.remove(); // Loại bỏ giảng viên ra khỏi danh sách
+                gvExistsMessage.append(giangVienToChuc.getTaiKhoan().getTenDangNhap()).append(", ");
+                continue;
+            }
             int gioTichLuyToChuc = hoatDong.getGioTichLuyToChuc();
             GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVienToChuc.getMaTaiKhoan(), nam);
 
@@ -226,6 +236,12 @@ public class HoatDongService {
                 gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChucEntity.getTongSoGio() + gioTichLuyToChuc);
             }
             gioTichLuyRepository.save(gioTichLuyToChucEntity);
+        }
+        hoatDong.setGiangVienToChucs(giangVienToChucs);
+        hoatDongRepository.save(hoatDong);
+        if (gvExistsMessage.length() > 0) {
+            gvExistsMessage.setLength(gvExistsMessage.length() - 2); // Loại bỏ dấu phẩy và khoảng trắng cuối cùng
+            throw new EntityExistsException("gv-exists: " + gvExistsMessage.toString());
         }
         return hoatDong;
     }
@@ -277,9 +293,11 @@ public class HoatDongService {
     public Long countUpcomingActivities() {
         return hoatDongRepository.countByTrangThaiHoatDong(HoatDong.TrangThaiHoatDong.SAP_DIEN_RA);
     }
+
     public List<HoatDong> layDanhSachHoatDongTocChucCuaGiangVien(Long maTaiKhoan, int nam) {
         return hoatDongRepository.findHoatDongTocChucByGiangVienAndYear(maTaiKhoan, nam);
     }
+
     public HoatDongTongHopResponse getHoatDongInfo(Long maGiangVien, int nam) {
         HoatDongTongHopResponse response = new HoatDongTongHopResponse();
 
@@ -331,13 +349,14 @@ public class HoatDongService {
         GiangVien giangVien = giangVienRepository.findById(maGiangVien).orElse(null);
         if (giangVien != null) {
 
-            GioTichLuy gioTichLuy= gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(maGiangVien, String.valueOf(nam));
+            GioTichLuy gioTichLuy = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(maGiangVien, String.valueOf(nam));
             int tongSoGio = 0;
             int gioMienGiam = 0;
             if (gioTichLuy != null) {
-                 tongSoGio = gioTichLuy.getTongSoGio();
+                tongSoGio = gioTichLuy.getTongSoGio();
                 gioMienGiam = gioTichLuy.getGioMienGiam();
-            };
+            }
+            ;
             int gioBatBuoc = giangVien.getChucDanh().getGioBatBuoc();
             int gioVuotMuc = tongSoGio - gioBatBuoc + gioMienGiam;
             if (gioVuotMuc < 0) {
@@ -360,6 +379,7 @@ public class HoatDongService {
 
         return response;
     }
+
     private int calculateGioForPeriod(Long maGiangVien, LocalDateTime startDate, LocalDateTime endDate) {
         int totalGio = 0;
 

@@ -44,7 +44,7 @@ public class DangKyHoatDongController {
     private GiangVienService giangVienService;
     @Autowired
     private ThongBaoService thongBaoService;
-    @GetMapping("/hoat-dong-sap-dien-ra")
+    @GetMapping("/hoat-dong-da-dien-ra")
     public ResponseEntity<List<HoatDong>> getHoatDongSapDienRa() {
         List<HoatDong> hoatDongs = dangKyHoatDongRepository.findHoatDongByDangKyChuaDuyetVaDaDienRa();
         return ResponseEntity.ok(hoatDongs);

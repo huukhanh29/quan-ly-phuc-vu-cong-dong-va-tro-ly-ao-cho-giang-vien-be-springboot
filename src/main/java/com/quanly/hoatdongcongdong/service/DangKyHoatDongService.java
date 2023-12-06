@@ -187,6 +187,8 @@ public class DangKyHoatDongService {
     }
 
     public void huyDangKyHoatDong(DangKyHoatDong dangKyHoatDong, HuyHoatDongRequest huyHoatDongRequest) {
+        messagingTemplate.convertAndSendToUser(dangKyHoatDong.getGiangVien().getTaiKhoan().getTenDangNhap(), "/queue/messages", "destroy-activity");
+
         // nếu ở trang thái chưa duyệt tức là việc hủy thực hiện hủy khi không đủ điều kiện tham gia hoạt động
         if (dangKyHoatDong.getTrangThaiDangKy() == DangKyHoatDong.TrangThaiDangKy.Chua_Duyet) {
             dangKyHoatDong.setTrangThaiDangKy(DangKyHoatDong.TrangThaiDangKy.Da_Huy);
@@ -209,7 +211,7 @@ public class DangKyHoatDongService {
             }
 
         }
-        messagingTemplate.convertAndSendToUser(dangKyHoatDong.getGiangVien().getTaiKhoan().getTenDangNhap(), "/queue/messages", "destroy-activity");
+
         dangKyHoatDongRepository.save(dangKyHoatDong);
     }
 }
