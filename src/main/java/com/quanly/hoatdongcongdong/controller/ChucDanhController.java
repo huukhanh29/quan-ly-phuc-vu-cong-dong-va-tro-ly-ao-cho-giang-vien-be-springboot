@@ -93,8 +93,8 @@ public class ChucDanhController {
         chartData.put("missHours", missHours);
         chartData.put("totalHours", totalHours);
         chartData.put("requiredHours", requiredHours);
-        chartData.put("exemptionHours", exemptionHours);
-        chartData.put("overtakingHours", overtakingHours);
+        chartData.put("exemptionHours", exemptionHours);//giờ miễn
+        chartData.put("overtakingHours", overtakingHours);//giờ dư
         return chartData;
     }
     @PostMapping("/them")

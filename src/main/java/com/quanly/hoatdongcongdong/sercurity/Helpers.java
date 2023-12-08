@@ -2,11 +2,6 @@ package com.quanly.hoatdongcongdong.sercurity;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.quanly.hoatdongcongdong.entity.TaiKhoan;
-import com.quanly.hoatdongcongdong.repository.TaiKhoanRepository;
-import com.quanly.hoatdongcongdong.sercurity.jwt.JwtUtils;
-import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
