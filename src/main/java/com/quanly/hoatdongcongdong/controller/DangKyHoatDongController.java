@@ -1,6 +1,7 @@
 package com.quanly.hoatdongcongdong.controller;
 
 import com.quanly.hoatdongcongdong.payload.request.HuyHoatDongRequest;
+import com.quanly.hoatdongcongdong.payload.response.GiangVienDTO;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.repository.GiangVienRepository;
 import com.quanly.hoatdongcongdong.service.*;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Page;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/dang-ky-hoat-dong")
@@ -214,13 +216,26 @@ public class DangKyHoatDongController {
     }
     @GetMapping("/giang-vien-tham-gia/{maHoatDong}")
     public ResponseEntity<?> getGiangViensByHoatDong(@PathVariable Long maHoatDong) {
-        Optional<HoatDong> hoatDong = hoatDongRepository.findById(maHoatDong);
-        if(hoatDong == null){
-            return new ResponseEntity<>(new MessageResponse("Không tìm thấy hoatdong với mã " +maHoatDong), HttpStatus.NOT_FOUND);
+        Optional<HoatDong> hoatDongOpt = hoatDongRepository.findById(maHoatDong);
+        if (!hoatDongOpt.isPresent()) {
+            return new ResponseEntity<>(new MessageResponse("Không tìm thấy hoạt động với mã " + maHoatDong), HttpStatus.NOT_FOUND);
         }
-        List<GiangVien> giangVien = dangKyHoatDongRepository.findGiangViensByHoatDong(maHoatDong);
-        return ResponseEntity.ok(giangVien);
+
+        List<DangKyHoatDong> dangKyHoatDongs = dangKyHoatDongRepository.findByHoatDong_MaHoatDong(maHoatDong);
+        List<GiangVienDTO> giangVienDTOs = dangKyHoatDongs.stream().map(dkhd -> {
+            GiangVien gv = dkhd.getGiangVien();
+            GiangVienDTO dto = new GiangVienDTO();
+            dto.setMaTaiKhoan(gv.getMaTaiKhoan());
+            dto.setKhoa(gv.getKhoa());
+            dto.setChucDanh(gv.getChucDanh());
+            dto.setTaiKhoan(gv.getTaiKhoan());
+            dto.setTrangThaiDangKy(dkhd.getTrangThaiDangKy().toString());
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(giangVienDTOs);
     }
+
     //lấy danh sách hoạt động của một giảng viên theo năm
     @GetMapping("/dang-ky")
     public ResponseEntity<List<HoatDong>> getDangKyHoatDongByGiangVienAndYear(
