@@ -5,12 +5,46 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.text.Normalizer;
 import java.util.*;
-
-
+import vn.pipeline.*;
 public class Helpers {
+    private static VnCoreNLP vnCoreNLPPipeline;
+
+    static {
+        try {
+            // Khởi tạo VnCoreNLP với các annotators cần thiết
+            String[] annotators = {"wseg"};
+            vnCoreNLPPipeline = new VnCoreNLP(annotators);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static Map<String, Integer> textToFrequencyVector(String text) {
+        Map<String, Integer> wordFreq = new HashMap<>();
+
+        try {
+            // Sử dụng VnCoreNLP để tách từ
+            Annotation annotation = new Annotation(text);
+            vnCoreNLPPipeline.annotate(annotation);
+
+            // Lặp qua các từ và đếm tần suất
+            for (Sentence sentence : annotation.getSentences()) {
+                for (Word word : sentence.getWords()) {
+                    String wordStr = word.getForm();
+                    wordFreq.put(wordStr, wordFreq.getOrDefault(wordStr, 0) + 1);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return wordFreq;
+    }
+
+    public static Map<String, Integer> textToFrequencyVector1(String text) {
         Map<String, Integer> wordFreq = new HashMap<>();
         // Tách từ và đếm tần suất
         for (String word : text.split("\\s+")) {

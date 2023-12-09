@@ -64,8 +64,8 @@ public class CauHoiController {
 
         for (CauHoi cauHoi : cauHoiList) {
             String query = cauHoi.getCauHoi().toLowerCase();
-            double similarity = calculateCosineSimilarity(createSlug(question), createSlug(query));
-
+            //double similarity = calculateCosineSimilarity(createSlug(question), createSlug(query));
+            double similarity = calculateCosineSimilarity(question, query);
             if (similarity > maxSimilarity) {
                 bestMatch = cauHoi;
                 maxSimilarity = similarity;
@@ -128,7 +128,6 @@ public class CauHoiController {
 
         CauHoi updatedCauHoi = cauHoiService.updateCauHoi(cauHoiId, cauHoiDetails);
         return ResponseEntity.ok(updatedCauHoi);
-
     }
 
     @DeleteMapping("/xoa/{ma}")
