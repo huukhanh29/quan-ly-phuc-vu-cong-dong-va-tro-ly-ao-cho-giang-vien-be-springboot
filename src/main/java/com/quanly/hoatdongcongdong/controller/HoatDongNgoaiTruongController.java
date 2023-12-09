@@ -176,8 +176,8 @@ public class HoatDongNgoaiTruongController {
         gioTichLuyRepository.save(gioTichLuy);
 
         String tieuDe = "Duyệt tham gia hoạt động ngoài trường";
-        String nDung = "Yêu cầu duyệt tham gia hoạt động " +
-                hoatDongNgoaiTruong.getTenHoatDong() + " của bạn đã được duyệt.";
+        String nDung = "Yêu cầu duyệt tham gia hoạt động \"" +
+                hoatDongNgoaiTruong.getTenHoatDong() + "\" của bạn đã được duyệt.";
         ThongBao thongBao = thongBaoService.taoMoiThongBao(
                 hoatDongNgoaiTruong.getGiangVien().getTaiKhoan(),
                 tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
@@ -251,9 +251,9 @@ public class HoatDongNgoaiTruongController {
             messagingTemplate.convertAndSendToUser(hoatDongNgoaiTruongOptional.get().getGiangVien().getTaiKhoan().getTenDangNhap(), "/queue/messages", "destroy-activity");
 
             String tieuDe = "Hủy đăng ký hoạt động ngoài trường";
-            String nDung = "Xác nhận tham gia hoạt động " +
+            String nDung = "Xác nhận tham gia hoạt động \"" +
                     hoatDongNgoaiTruongOptional.get().getTenHoatDong() +
-                    " của bạn đã bị hủy. Vui lòng kiểm tra thông tin, minh chứng và gửi lại yêu cầu!";
+                    "\" của bạn đã bị hủy. Vui lòng kiểm tra thông tin, minh chứng và gửi lại yêu cầu!";
             ThongBao thongBao = thongBaoService.taoMoiThongBao(
                     hoatDongNgoaiTruongOptional.get().getGiangVien().getTaiKhoan(),
                     tieuDe, nDung, ThongBao.TrangThai.ChuaDoc

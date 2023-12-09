@@ -29,6 +29,9 @@ public class ThongBaoService {
     public List<ThongBao> layThongBaoDaDocTheoTaiKhoan(Long maTaiKhoan) {
         return thongBaoRepository.findByTaiKhoan_MaTaiKhoanAndTrangThai(maTaiKhoan, ThongBao.TrangThai.DaDoc);
     }
+    public List<ThongBao> layThongBaoChuaDocTheoTaiKhoan(Long maTaiKhoan) {
+        return thongBaoRepository.findByTaiKhoan_MaTaiKhoanAndTrangThai(maTaiKhoan, ThongBao.TrangThai.ChuaDoc);
+    }
     public ThongBao layThongBaoTheoMaThongBao(Long maThongBao) {
         return thongBaoRepository.findById(maThongBao)
                 .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy thông báo với mã " + maThongBao));

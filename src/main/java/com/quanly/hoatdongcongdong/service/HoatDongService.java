@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class HoatDongService {
@@ -33,12 +35,16 @@ public class HoatDongService {
     @Autowired
     private ChucDanhRepository chucDanhRepository;
     @Autowired
+    private ThongBaoService thongBaoService;
+    @Autowired
     private FilesStorageService storageService;
     private final HoatDongRepository hoatDongRepository;
     private final LoaiHoatDongRepository loaiHoatDongRepository;
     private final GiangVienRepository giangVienRepository;
     private final DangKyHoatDongRepository dangKyHoatDongRepository;
     private final HoatDongNgoaiTruongRepository hoatDongNgoaiTruongRepository;
+    @Autowired
+    private SimpMessageSendingOperations messagingTemplate;
 
     @Autowired
     public HoatDongService(
@@ -245,26 +251,66 @@ public class HoatDongService {
         }
         return hoatDong;
     }
-
+    @Transactional
     public void deleteHoatDongById(Long maHoatDong) {
         Optional<HoatDong> hoatDongOptional = hoatDongRepository.findById(maHoatDong);
+
         if (hoatDongOptional.isPresent()) {
+
             HoatDong hoatDong = hoatDongOptional.get();
-            // cập nhật trừ giờ tích lũy tổ chuc cho giảng viên
-            List<GiangVien> dsGiangVienToChucs = hoatDong.getGiangVienToChucs();
-            String namHoc = String.valueOf(hoatDong.getThoiGianBatDau().getYear());
-            for (GiangVien giangVienToChuc : dsGiangVienToChucs) {
-                int gioTichLuyToChuc = hoatDong.getGioTichLuyToChuc();
-                GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVienToChuc.getMaTaiKhoan(), namHoc);
-                gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChucEntity.getTongSoGio() - gioTichLuyToChuc);
-                gioTichLuyRepository.save(gioTichLuyToChucEntity);
+            List<DangKyHoatDong> dangKyHoatDongList = dangKyHoatDongRepository.findByHoatDong_MaHoatDong(maHoatDong);
+            String tieuDeHoatDongHuy = "Hủy tổ chức hoạt động";
+            String noiDungHoatDongHuy = "Hoạt động \"" + hoatDong.getTenHoatDong() + "\" mà bạn đã đăng ký đã bị hủy tổ chức.";
+
+            for (DangKyHoatDong dangKy : dangKyHoatDongList) {
+                GiangVien giangVienDangKy = dangKy.getGiangVien();
+                messagingTemplate.convertAndSendToUser(giangVienDangKy.getTaiKhoan().getTenDangNhap(), "/queue/messages", "delete-activity");
+
+                ThongBao thongBao = thongBaoService.taoMoiThongBao(
+                        giangVienDangKy.getTaiKhoan(),
+                        tieuDeHoatDongHuy, noiDungHoatDongHuy, ThongBao.TrangThai.ChuaDoc
+                );
+
+                thongBaoService.luuThongBao(thongBao);
             }
-            //xóa file quyết định cũ
-            String oldFile = hoatDong.getFileQuyetDinh();
-            if (oldFile != null) {
-                storageService.delete(oldFile);
+
+            // Kiểm tra xem có đăng ký nào đã được duyệt hay không
+            boolean isApprovedRegistrationExists = dangKyHoatDongList.stream()
+                    .anyMatch(reg -> reg.getTrangThaiDangKy() == DangKyHoatDong.TrangThaiDangKy.Da_Duyet);
+
+            if (isApprovedRegistrationExists) {
+                throw new IllegalStateException("Không thể xóa hoạt động vì có đăng ký đã được duyệt");
+            } else {
+                // Xóa tất cả đăng ký chưa được duyệt
+
+                dangKyHoatDongRepository.deleteByHoatDongAndTrangThaiDangKy(maHoatDong, DangKyHoatDong.TrangThaiDangKy.Chua_Duyet);
+                // cập nhật trừ giờ tích lũy tổ chuc cho giảng viên
+                List<GiangVien> dsGiangVienToChucs = hoatDong.getGiangVienToChucs();
+                String namHoc = String.valueOf(hoatDong.getThoiGianBatDau().getYear());
+                for (GiangVien giangVienToChuc : dsGiangVienToChucs) {
+                    messagingTemplate.convertAndSendToUser(giangVienToChuc.getTaiKhoan().getTenDangNhap(), "/queue/messages", "delete-activity");
+
+                    String tieuDe = "Hủy tổ chức hoạt động";
+                    String nDung = "Hoạt động \"" +
+                            hoatDong.getTenHoatDong() + "\" đã hủy tổ chức.";
+                    ThongBao thongBao = thongBaoService.taoMoiThongBao(
+                            giangVienToChuc.getTaiKhoan(),
+                            tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
+                    );
+                    thongBaoService.luuThongBao(thongBao);
+                    int gioTichLuyToChuc = hoatDong.getGioTichLuyToChuc();
+                    GioTichLuy gioTichLuyToChucEntity = gioTichLuyRepository.findByGiangVien_MaTaiKhoanAndNam(giangVienToChuc.getMaTaiKhoan(), namHoc);
+                    gioTichLuyToChucEntity.setTongSoGio(gioTichLuyToChucEntity.getTongSoGio() - gioTichLuyToChuc);
+                    gioTichLuyRepository.save(gioTichLuyToChucEntity);
+                }
+                //xóa file quyết định cũ
+                String oldFile = hoatDong.getFileQuyetDinh();
+                if (oldFile != null) {
+                    storageService.delete(oldFile);
+                }
+                hoatDongRepository.deleteById(maHoatDong);
             }
-            hoatDongRepository.deleteById(maHoatDong);
+
         } else {
             throw new EntityNotFoundException("hoatdong-notfound");
         }

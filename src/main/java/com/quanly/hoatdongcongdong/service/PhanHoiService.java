@@ -138,8 +138,8 @@ public class PhanHoiService {
             messagingTemplate.convertAndSendToUser(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap(), "/queue/messages", "reply-feedback");
             Optional<TaiKhoan> taiKhoan = taiKhoanService.findByTenDangNhap(phanHoi.getSinhVien().getTaiKhoan().getTenDangNhap());
             String tieuDe = "Trả lời phản hồi";
-            String noiDung = "Câu hỏi " + phanHoi.getNoiDung() +
-                    " của bạn đã được phản hồi. Vui lòng hỏi chatbot với từ khóa \"" + newCauHoi.getCauHoi() + "\".";
+            String noiDung = "Câu hỏi \"" + phanHoi.getNoiDung() +
+                    "\" của bạn đã được phản hồi. Vui lòng hỏi chatbot với từ khóa \"" + newCauHoi.getCauHoi() + "\".";
             ThongBao thongBao = thongBaoService.taoMoiThongBao(
                     taiKhoan.get(), tieuDe, noiDung, ThongBao.TrangThai.ChuaDoc
             );

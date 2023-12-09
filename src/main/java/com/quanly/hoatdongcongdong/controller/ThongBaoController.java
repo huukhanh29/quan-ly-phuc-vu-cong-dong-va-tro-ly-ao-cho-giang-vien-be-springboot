@@ -1,5 +1,6 @@
 package com.quanly.hoatdongcongdong.controller;
 
+import com.quanly.hoatdongcongdong.entity.TaiKhoan;
 import com.quanly.hoatdongcongdong.entity.ThongBao;
 import com.quanly.hoatdongcongdong.payload.response.MessageResponse;
 import com.quanly.hoatdongcongdong.service.TaiKhoanService;
@@ -12,6 +13,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/thong-bao")
@@ -43,6 +45,22 @@ public class ThongBaoController {
         thongBaoService.luuThongBao(thongBao);
         messagingTemplate.convertAndSendToUser(thongBao.getTaiKhoan().getTenDangNhap(), "/queue/messages", "update-status");
         return ResponseEntity.ok(new MessageResponse("đã đọc"));
+    }
+    @PutMapping("/trang-thai-tat-ca/{tenDangNhap}")
+    public ResponseEntity<?> datTrangThaiThongBaoAll(@PathVariable String tenDangNhap) {
+        Optional<TaiKhoan> taiKhoanOpt = taiKhoanService.findByTenDangNhap(tenDangNhap);
+        if (!taiKhoanOpt.isPresent()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Tài khoản không tồn tại"));
+        }
+
+        List<ThongBao> thongBaoList = thongBaoService.layThongBaoChuaDocTheoTaiKhoan(taiKhoanOpt.get().getMaTaiKhoan());
+        for (ThongBao thongBao : thongBaoList) {
+            thongBao.setTrangThai(ThongBao.TrangThai.DaDoc);
+            thongBaoService.luuThongBao(thongBao);
+        }
+
+        messagingTemplate.convertAndSendToUser(tenDangNhap, "/queue/messages", "update-status");
+        return ResponseEntity.ok(new MessageResponse("Tất cả thông báo đã được đánh dấu là đã đọc"));
     }
 
     @DeleteMapping("/xoa/{maThongBao}")

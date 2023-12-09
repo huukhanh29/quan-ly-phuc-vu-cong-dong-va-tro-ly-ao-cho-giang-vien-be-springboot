@@ -3,8 +3,10 @@ package com.quanly.hoatdongcongdong.repository;
 import com.quanly.hoatdongcongdong.entity.DangKyHoatDong;
 import com.quanly.hoatdongcongdong.entity.GiangVien;
 import com.quanly.hoatdongcongdong.entity.HoatDong;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,5 +28,8 @@ public interface DangKyHoatDongRepository extends JpaRepository<DangKyHoatDong, 
     List<HoatDong> findHoatDongByGiangVienAndYear(@Param("maTaiKhoan") Long maTaiKhoan, @Param("nam") int nam);
     @Query("SELECT d.hoatDong FROM DangKyHoatDong d WHERE d.trangThaiDangKy = 'Chua_Duyet' AND d.hoatDong.trangThaiHoatDong = 'DA_DIEN_RA'")
     List<HoatDong> findHoatDongByDangKyChuaDuyetVaDaDienRa();
-
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM DangKyHoatDong d WHERE d.hoatDong.maHoatDong = :maHoatDong AND d.trangThaiDangKy = :trangThai")
+    void deleteByHoatDongAndTrangThaiDangKy(Long maHoatDong, DangKyHoatDong.TrangThaiDangKy trangThai);
 }

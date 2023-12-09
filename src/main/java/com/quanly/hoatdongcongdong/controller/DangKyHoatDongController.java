@@ -113,8 +113,8 @@ public class DangKyHoatDongController {
         dangKyHoatDongService.approveDangKyHoatDong(dangKyHoatDong.get());
         // Tạo thông báo cho người dùng về việc phê duyệt đăng ký hoạt động
         String tieuDe = "Duyệt đăng ký hoạt động";
-        String nDung = "Yêu cầu đăng ký tham gia hoạt động " +
-                dangKyHoatDong.get().getHoatDong().getTenHoatDong() + " của bạn đã được duyệt.";
+        String nDung = "Yêu cầu đăng ký tham gia hoạt động \"" +
+                dangKyHoatDong.get().getHoatDong().getTenHoatDong() + "\" của bạn đã được duyệt.";
         ThongBao thongBao = thongBaoService.taoMoiThongBao(
                 dangKyHoatDong.get().getGiangVien().getTaiKhoan(),
                 tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
@@ -141,8 +141,8 @@ public class DangKyHoatDongController {
         if (!huyHoatDongRequest.getLyDoHuy().equals("")) {
             dangKyHoatDongService.huyDangKyHoatDong(dangKyHoatDong.get(), huyHoatDongRequest);
             String tieuDe = "Hủy đăng ký hoạt động";
-            String nDung = "Xác nhận tham gia hoạt động " +
-                    dangKyHoatDong.get().getHoatDong().getTenHoatDong() + " của bạn đã bị hủy.";
+            String nDung = "Xác nhận tham gia hoạt động \"" +
+                    dangKyHoatDong.get().getHoatDong().getTenHoatDong() + "\" của bạn đã bị hủy.";
             ThongBao thongBao = thongBaoService.taoMoiThongBao(
                     dangKyHoatDong.get().getGiangVien().getTaiKhoan(),
                     tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
@@ -165,8 +165,8 @@ public class DangKyHoatDongController {
             dangKyHoatDongService.approveDangKyHoatDong(dangKyHoatDong);
             // Tạo thông báo cho từng giảng viên
             String tieuDe = "Duyệt đăng ký hoạt động";
-            String nDung = "Yêu cầu đăng ký tham gia hoạt động " +
-                    dangKyHoatDong.getHoatDong().getTenHoatDong() + " của bạn đã được duyệt.";
+            String nDung = "Yêu cầu đăng ký tham gia hoạt động \"" +
+                    dangKyHoatDong.getHoatDong().getTenHoatDong() + "\" của bạn đã được duyệt.";
             ThongBao thongBao = thongBaoService.taoMoiThongBao(
                     dangKyHoatDong.getGiangVien().getTaiKhoan(),
                     tieuDe, nDung, ThongBao.TrangThai.ChuaDoc

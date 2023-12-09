@@ -187,9 +187,10 @@ public class HoatDongController {
 
     @DeleteMapping("/xoa/{maHoatDong}")
     public ResponseEntity<?> deleteHoatDong(@PathVariable Long maHoatDong) {
-        if (dangKyHoatDongService.existsByHoatDong_MaHoatDong(maHoatDong)) {
-            return new ResponseEntity<>(new MessageResponse("cant-delete"), HttpStatus.OK);
+        if (!dangKyHoatDongService.existsByHoatDong_MaHoatDong(maHoatDong)) {
+            return new ResponseEntity<>(new MessageResponse("notfound"), HttpStatus.OK);
         }
+
         hoatDongService.deleteHoatDongById(maHoatDong);
         return ResponseEntity.ok(new MessageResponse("đã xóa"));
     }
