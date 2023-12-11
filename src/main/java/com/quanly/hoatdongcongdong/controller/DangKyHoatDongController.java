@@ -144,7 +144,8 @@ public class DangKyHoatDongController {
             dangKyHoatDongService.huyDangKyHoatDong(dangKyHoatDong.get(), huyHoatDongRequest);
             String tieuDe = "Hủy đăng ký hoạt động";
             String nDung = "Xác nhận tham gia hoạt động \"" +
-                    dangKyHoatDong.get().getHoatDong().getTenHoatDong() + "\" của bạn đã bị hủy.";
+                    dangKyHoatDong.get().getHoatDong().getTenHoatDong() + "\" của bạn đã bị hủy. "
+                    + huyHoatDongRequest.getLyDoHuy();
             ThongBao thongBao = thongBaoService.taoMoiThongBao(
                     dangKyHoatDong.get().getGiangVien().getTaiKhoan(),
                     tieuDe, nDung, ThongBao.TrangThai.ChuaDoc
