@@ -10,7 +10,10 @@ public class GiangVienDTO {
     private TaiKhoan taiKhoan;
     private ChucDanh chucDanh;
     private String trangThaiDangKy;
-
+    private Long tongSo;
+    private Long soGvChuaDuyet;
+    private Long soGvDaDuyet;
+    private Long soGvDaHuy;
     public Long getMaTaiKhoan() {
         return maTaiKhoan;
     }
